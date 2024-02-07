@@ -158,4 +158,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
 *.sqlite3
+noethysweb/db.sqlite3
+
+
