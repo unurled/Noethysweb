@@ -331,8 +331,18 @@ class Liste(Page, crud.Liste):
                 if not hasattr(self, "dict_activites"):
                     self.dict_activites = {activite.pk: activite.nom for activite in Activite.objects.all()}
                     self.dict_groupes = {groupe.pk: groupe.nom for groupe in Groupe.objects.all()}
-                    self.dict_categorie_tarif = {categorie_tarif.pk: categorie_tarif.nom for categorie_tarif in CategorieTarif.objects.all()}
-                idactivite, idgroupe, idcategorie_tarif = valeur.split(";")
-                return "%s (%s) - %s" % (self.dict_activites.get(int(idactivite), "?"), self.dict_groupes.get(int(idgroupe), "?"), self.dict_categorie_tarif.get(int(idcategorie_tarif), "?") )
-
+                    self.dict_categorie_tarif = {categorie_tarif.pk: categorie_tarif.nom for categorie_tarif in
+                                                 CategorieTarif.objects.all()}
+                valeurs = valeur.split(";")
+                idactivite = valeurs[0]
+                idgroupe = valeurs[1]
+                idcategorie_tarif = valeurs[2] if len(valeurs) > 2 else None
+                activite_nom = self.dict_activites.get(int(idactivite), "?")
+                groupe_nom = self.dict_groupes.get(int(idgroupe), "?")
+                categorie_tarif_nom = self.dict_categorie_tarif.get(int(idcategorie_tarif),
+                                                                    "?") if idcategorie_tarif else None
+                if categorie_tarif_nom:
+                    return "%s (%s) - %s" % (activite_nom, groupe_nom, categorie_tarif_nom)
+                else:
+                    return "%s (%s)" % (activite_nom, groupe_nom)
             return valeur
