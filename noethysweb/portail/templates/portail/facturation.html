@@ -116,7 +116,7 @@
     {% if texte_impayes and parametres_portail.paiement_ligne_systeme and paiement_actif %}
         {% embed 'core/box.html' with box_titre=True %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}{% blocktrans %}Payer en ligne{% endblocktrans %}{% endblock %}
+            {% block box_titre %}{% blocktrans %}Paiement par carte bancaire{% endblocktrans %}{% endblock %}
             {% block box_contenu %}
 {% if "payzen" in parametres_portail.paiement_ligne_systeme or "demo" in parametres_portail.paiement_ligne_systeme %}
     <img src="{% static "images/payzen.png" %}" class="pull-right" alt="Logo Payzen">
@@ -126,7 +126,8 @@
     <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYFIP. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
 {% elif "payasso" in parametres_portail.paiement_ligne_systeme %}
     <img src="{% static "images/payasso.png" %}" class="pull-right" alt="Logo PayAsso">
-    <p>{% blocktrans %}Vous pouvez payer en ligne à l'aide de votre carte bancaire. Les transactions effectuées sur ce portail sont sécurisées par la plateforme de paiement en ligne PAYASSO. Cliquez sur le bouton ci-dessous pour sélectionner le montant à régler et accéder au site sécurisé de notre partenaire.{% endblocktrans %}</p>
+    <p>{% blocktrans %} Les transactions sont sécurisées et éffectuées via la plateforme de paiement PayAsso du CIC. Pour votre information, la banque perçoit une commission de 0,50€/paiement + 0,8% du montant (environ 3,70€ pour 400€). Pour éviter ces frais au Mouvement vous pouvez effectuer votre paiement par virement.{% endblocktrans %}</p>
+    <p>{% blocktrans %} Montant minimal de paiement 100€. Si vous souhaitez payer en plusieurs fois, merci de privilégier les chèques et virements.{% endblocktrans %}</p>
 {% endif %}
 
 

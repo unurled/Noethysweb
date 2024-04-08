@@ -20,8 +20,8 @@ class Consulter(Onglet, ConsulterBase):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = _("Caisse")
-        context['box_introduction'] = _("Cliquez sur le bouton Modifier au bas de la page pour modifier une des informations ci-dessous.")
-        context['onglet_actif'] = self.onglet_actif
+        context['box_introduction'] = _("Merci de ne pas tenir compte de cette section.")
+        #context['onglet_actif'] = self.onglet_actif
         return context
 
     def get_object(self):

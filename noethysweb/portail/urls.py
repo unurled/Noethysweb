@@ -10,7 +10,7 @@ from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
-                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales, famille_individu
+                            transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales, famille_individu, famille_parent
 from core.decorators import secure_ajax_portail
 
 
@@ -49,6 +49,7 @@ urlpatterns = [
 
     # Ajouter individu
     path('individu/ajouter/', famille_individu.contact, name='famille_individu'),
+    path('parent/ajouter/', famille_parent.contact, name='famille_parent'),
 
     # Renseignements
     path('renseignements', renseignements.View.as_view(), name='portail_renseignements'),

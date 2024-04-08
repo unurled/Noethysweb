@@ -471,6 +471,7 @@ urlpatterns = [
     path('parametrage/adresses_mail/ajouter', adresses_mail.Ajouter.as_view(), name='adresses_mail_ajouter'),
     path('parametrage/adresses_mail/modifier/<int:pk>', adresses_mail.Modifier.as_view(), name='adresses_mail_modifier'),
     path('parametrage/adresses_mail/supprimer/<int:pk>', adresses_mail.Supprimer.as_view(), name='adresses_mail_supprimer'),
+    path('parametrage/adresses_mail/dupliquer/<int:pk>', adresses_mail.Dupliquer.as_view(), name='adresses_mail_dupliquer'),
 
     # Signatures d'emails
     path('parametrage/signatures_emails/liste', signatures_emails.Liste.as_view(), name='signatures_emails_liste'),

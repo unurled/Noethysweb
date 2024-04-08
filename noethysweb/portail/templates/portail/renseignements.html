@@ -120,7 +120,8 @@
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}{% blocktrans %}Fiches de renseignements{% endblocktrans %}{% endblock %}
         {% block box_outils %}
-            <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un individu" href="{% url 'famille_individu' %}"><i class="fa fa-plus"></i> Ajouter un enfant</a>
+            <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un enfant" href="{% url 'famille_individu' %}"><i class="fa fa-plus"></i> Ajouter un enfant</a>
+            <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un parent" href="{% url 'famille_parent' %}"><i class="fa fa-plus"></i> Ajouter un parent</a>
         {% endblock %}
         {% block card_body_classe %}p-0{% endblock %}
         {% block box_contenu %}

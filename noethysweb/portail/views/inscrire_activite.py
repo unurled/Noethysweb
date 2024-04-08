@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.db.models import Q, Count
 from crispy_forms.utils import render_crispy_form
 from core.views import crud
-from core.models import PortailRenseignement, Piece, TypePiece, Inscription
+from core.models import PortailRenseignement, Piece, TypePiece, Inscription, Individu, Rattachement
 from portail.forms.inscrire_activite import Formulaire, Formulaire_extra
 from portail.views.base import CustomView
 

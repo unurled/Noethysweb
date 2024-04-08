@@ -1,0 +1,7 @@
+cd /d A:
+.\NOETHYS38\Scripts\activate.bat
+cd /d A:\NOETHYS38\NW1294\noethysweb
+python manage.py runserver
+
+
+.\NOETHYS\Scripts\deactivate.bat

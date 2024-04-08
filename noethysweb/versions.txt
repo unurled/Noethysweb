@@ -1,3 +1,10 @@
+Version 1.2.2.9.5 (08/04/2024)
+- Ajout d'un bouton ajout parent possible via le portail
+- Modif du texte pour le paiement CB
+- Filtrage avec uniquement des enfants lors de l'inscription
+- Duplication possible de l'adresse d'expédition
+- Affichage allégé pour les prestations
+
 Version 1.2.2.9.4 (19/02/2024) :
 Correction beugs sur la précédente version
 

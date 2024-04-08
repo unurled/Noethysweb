@@ -4,13 +4,15 @@
 #  Distribué sous licence GNU GPL.
 
 import json
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import AdresseMail
 from parametrage.forms.adresses_mail import Formulaire
 from outils.utils import utils_email
+from copy import deepcopy
+
 
 
 def Envoyer_mail_test(request):
@@ -40,6 +42,7 @@ class Page(crud.Page):
     url_ajouter = "adresses_mail_ajouter"
     url_modifier = "adresses_mail_modifier"
     url_supprimer = "adresses_mail_supprimer"
+    url_dupliquer = "adresses_mail_dupliquer"
     description_liste = "Voici ci-dessous la liste des adresses d'expédition d'emails."
     description_saisie = "Saisissez toutes les informations concernant l'adresse d'expédition à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une adresse d'expédition"
@@ -66,7 +69,7 @@ class Liste(Page, crud.Liste):
     class datatable_class(MyDatatable):
         filtres = ['idadresse', 'actif', 'adresse', 'moteur']
         adresse = columns.TextColumn("Adresse", sources=None, processor='Get_adresse')
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         actif = columns.TextColumn("Etat", sources=["actif"], processor='Get_actif')
 
         class Meta:
@@ -83,6 +86,14 @@ class Liste(Page, crud.Liste):
         def Get_actif(self, instance, *args, **kwargs):
             return "<small class='badge badge-success'>Activée</small>" if instance.actif else "<small class='badge badge-danger'>Désactivée</small>"
 
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse(kwargs["view"].url_modifier, args=[instance.pk])),
+                self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, args=[instance.pk])),
+                self.Create_bouton_dupliquer(url=reverse(kwargs["view"].url_dupliquer, args=[instance.pk])),
+            ]
+            return self.Create_boutons_actions(html)
+
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
@@ -92,3 +103,22 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     pass
+
+class Dupliquer(Page, crud.Dupliquer):
+    def post(self, request, **kwargs):
+        # Récupération de la signature à dupliquer
+        signature = self.model.objects.get(pk=kwargs.get("pk", None))
+
+        # Duplication
+        nouvelle_signature = deepcopy(signature)
+        nouvelle_signature.pk = None
+        nouvelle_signature.adresse = "Copie de %s" % signature.adresse
+        nouvelle_signature.save()
+
+        # Redirection vers l'objet dupliqué
+        if "dupliquer_ouvrir" in request.POST:
+            url = reverse(self.url_modifier, args=[nouvelle_signature.pk,])
+        else:
+            url = None
+
+        return self.Redirection(url=url)
