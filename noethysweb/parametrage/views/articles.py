@@ -1,14 +1,9 @@
-# -*- coding: utf-8 -*-
-#  Copyright (c) 2019-2021 Ivan LUCAS.
-#  Noethysweb, application de gestion multi-activités.
-#  Distribué sous licence GNU GPL.
-
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Article
 from parametrage.forms.articles import Formulaire
-
+from copy import deepcopy
 
 class Page(crud.Page):
     model = Article
@@ -16,6 +11,7 @@ class Page(crud.Page):
     url_ajouter = "articles_ajouter"
     url_modifier = "articles_modifier"
     url_supprimer = "articles_supprimer"
+    url_dupliquer = "articles_dupliquer"
     description_liste = "Voici ci-dessous la liste des articles à afficher sur le portail."
     description_saisie = "Saisissez toutes les informations concernant l'article et cliquez sur le bouton Enregistrer."
     objet_singulier = "un article"
@@ -24,7 +20,6 @@ class Page(crud.Page):
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]
 
-
 class Liste(Page, crud.Liste):
     model = Article
 
@@ -32,7 +27,7 @@ class Liste(Page, crud.Liste):
         return Article.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
 
     def get_context_data(self, **kwargs):
-        context = super(Liste, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['afficher_menu_brothers'] = True
@@ -40,7 +35,7 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idarticle", "titre", "date_debut", "date_fin"]
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         statut = columns.TextColumn("Statut", sources=["statut"], processor='Get_statut')
 
         class Meta:
@@ -59,6 +54,13 @@ class Liste(Page, crud.Liste):
             else:
                 return "<small class='badge badge-danger'>Non publié</small>"
 
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            html = [
+                self.Create_bouton_modifier(url=reverse(kwargs["view"].url_modifier, args=[instance.pk])),
+                self.Create_bouton_supprimer(url=reverse(kwargs["view"].url_supprimer, args=[instance.pk])),
+                self.Create_bouton_dupliquer(url=reverse(kwargs["view"].url_dupliquer, args=[instance.pk])),
+            ]
+            return self.Create_boutons_actions(html)
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
@@ -68,3 +70,23 @@ class Modifier(Page, crud.Modifier):
 
 class Supprimer(Page, crud.Supprimer):
     pass
+
+class Dupliquer(Page, crud.Dupliquer):
+    def post(self, request, **kwargs):
+        # Récupération de l'article à dupliquer
+        article_id = kwargs.get('pk')
+        article = Article.objects.get(pk=article_id)
+
+        # Duplication de l'article
+        nouvel_article = deepcopy(article)
+        nouvel_article.pk = None
+        nouvel_article.titre = "Copie de %s" % article.titre
+        nouvel_article.save()
+
+        # Redirection vers l'article dupliqué
+        if "dupliquer_ouvrir" in request.POST:
+            url = reverse(self.url_modifier, args=[nouvel_article.pk])
+        else:
+            url = reverse(self.url_liste)  # Redirection vers la liste d'articles après la duplication
+
+        return self.Redirection(url=url)
