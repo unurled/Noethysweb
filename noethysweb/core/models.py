@@ -3469,6 +3469,8 @@ class PortailDocument(models.Model):
     document = models.FileField(verbose_name="Document", upload_to=get_uuid_path, help_text="Privilégiez un document au format PDF.")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     type_piece = models.ForeignKey(TypePiece, verbose_name="Type de pièce", related_name="type_piece_document", on_delete=models.PROTECT, blank=True, null=True, help_text="Si ce document correspond à un type de pièce existant, sélectionnez-le dans la liste proposée.")
+    activites = models.ManyToManyField(Activite, verbose_name="Activités", related_name="document_activites", blank=True, help_text="Sélectionnez une ou plusieurs activités dans la liste.")
+    groupes = models.ManyToManyField(Groupe, verbose_name="Groupes", related_name="document_groupes", blank=True, help_text="Sélectionnez un ou plusieurs groupes dans la liste.")
 
     class Meta:
         db_table = 'portail_documents'
