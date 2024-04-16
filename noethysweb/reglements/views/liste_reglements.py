@@ -22,9 +22,6 @@ class Page(crud.Page):
 class Liste(Page, crud.Liste):
     model = Reglement
 
-    def get_queryset(self):
-        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur', 'depot').filter(self.Get_filtres("Q"))
-
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Liste des règlements"

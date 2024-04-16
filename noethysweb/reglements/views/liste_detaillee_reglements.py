@@ -7,7 +7,7 @@ import json
 from django.db.models import Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Reglement, Ventilation, Prestation
+from core.models import Reglement, Ventilation, Prestation, Activite
 from core.utils import utils_preferences
 
 
@@ -20,7 +20,11 @@ class Liste(Page, crud.Liste):
     model = Reglement
 
     def get_queryset(self):
-        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur', 'depot').filter(self.Get_filtres("Q"))
+        activites_autorisees = self.request.user.structures.all()
+
+        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur', 'depot') \
+            .filter(self.Get_filtres("Q")) \
+            .filter(ventilation__prestation__activite__in=Activite.objects.filter(structure__in=activites_autorisees)) \
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -42,6 +46,7 @@ class Liste(Page, crud.Liste):
         depot = columns.TextColumn("Dépôt", sources=['depot__nom'])
         factures = columns.TextColumn("Factures associées", sources=None, processor='Get_factures')
         prestations = columns.TextColumn("Prestations associées", sources=None, processor='Get_prestations')
+        activites = columns.TextColumn("Activités associées", sources=None, processor='Get_activites')
 
         class Meta:
             structure_template = MyDatatable.structure_template
@@ -59,3 +64,8 @@ class Liste(Page, crud.Liste):
         def Get_prestations(self, instance, *args, **kwargs):
             ventilations = Ventilation.objects.values('prestation__label').filter(reglement=instance.pk).annotate(total=Sum("montant"))
             return ", ".join(["%s (%0.2f %s)" % (x["prestation__label"], x["total"], utils_preferences.Get_symbole_monnaie()) for x in ventilations])
+
+        def Get_activites(self, instance, *args, **kwargs):
+            prestations = Ventilation.objects.filter(reglement=instance.pk).values_list('prestation', flat=True)
+            activites = Activite.objects.filter(prestation__in=prestations).distinct()
+            return ", ".join([activite.nom for activite in activites])
