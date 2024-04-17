@@ -6,7 +6,7 @@
 import json, datetime
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Func, F, Value, Subquery
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
@@ -123,10 +123,48 @@ class Liste(Page, crud.Liste):
     template_name = "outils/demandes_portail.html"
 
     def get_queryset(self):
+        # Obtenez les activités autorisées
+        structures_utilisateur = self.request.user.structures.all()
+        activites_autorisees = Activite.objects.filter(structure__in=structures_utilisateur)
+
+        # Obtenez les premières valeurs de la nouvelle valeur pour les lignes où le code est "inscrire_activite" et l'état est "ATTENTE"
+        premiere_valeur = PortailRenseignement.objects.filter(
+            code='inscrire_activite',
+            etat='ATTENTE',
+            idrenseignement=OuterRef('idrenseignement')
+        ).order_by('date').values('nouvelle_valeur')[:1]
+
+        # Obtenez les lignes de PortailRenseignement où le code est "inscrire_activite"
+        portail_renseignement_inscrire_activite = PortailRenseignement.objects.filter(code='inscrire_activite')
+
+        # Maintenant, exécutez une requête pour obtenir les valeurs filtrées
+        resultat = portail_renseignement_inscrire_activite.annotate(
+            premiere_valeur=Subquery(premiere_valeur)
+        ).values('idrenseignement', 'premiere_valeur')
+
+        # Créer un ensemble des IDs des activités autorisées pour une recherche plus rapide
+        activite_ids_autorisees = set(activites_autorisees.values_list('idactivite', flat=True))
+
+        # Décoder les valeurs de premiere_valeur en chaînes de caractères
+        resultat_filtre = set()
+        for entry in resultat:
+            premiere_valeur = entry.get('premiere_valeur')
+            if premiere_valeur is not None:
+                premiere_valeur_strip = premiere_valeur.split(';')[0].strip('"')
+                if premiere_valeur_strip.isdigit() and int(premiere_valeur_strip) in activite_ids_autorisees:
+                    resultat_filtre.add(entry['idrenseignement'])
+
+
         self.afficher_renseignements_attente = utils_parametres.Get(nom="afficher_renseignements_attente", categorie="renseignements_attente", utilisateur=self.request.user, valeur=True)
         conditions = Q()
-        if self.afficher_renseignements_attente:
+        if not self.afficher_renseignements_attente:
             conditions &= Q(etat="ATTENTE")
+            conditions &= Q(code="inscrire_activite")
+            conditions &= Q(idrenseignement__in=resultat_filtre)
+        else:
+            conditions &= ~Q(code="inscrire_activite")
+            conditions |= Q(idrenseignement__in=resultat_filtre)
+
         return PortailRenseignement.objects.select_related("famille", "individu", "traitement_utilisateur").filter(conditions).order_by("date")
 
     def get_context_data(self, **kwargs):
