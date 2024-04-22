@@ -38,9 +38,22 @@ class View(CustomView, TemplateView):
         # Demandes d'inscription en attente de traitement
         demandes = []
         dict_activites = {activite.pk: activite.nom for activite in Activite.objects.all()}
-        for demande in PortailRenseignement.objects.select_related("individu").filter(famille=self.request.user.famille, etat="ATTENTE", code="inscrire_activite").order_by("individu__prenom"):
-            demande.nom_activite = dict_activites.get(int(json.loads(demande.nouvelle_valeur).split(";")[0]), "?")
+        for demande in PortailRenseignement.objects.select_related("individu").filter(famille=self.request.user.famille,
+                                                                                      etat="ATTENTE",
+                                                                                      code="inscrire_activite").order_by("individu__prenom"):
+            try:
+                # Tentative de décodage JSON
+                nouvelle_valeur = demande.nouvelle_valeur
+                nouvelle_valeur_json = json.loads(nouvelle_valeur)
+                activite_id = nouvelle_valeur_json.split(";")[
+                    0]  # En supposant que nouvelle_valeur_json est une chaîne de caractères
+                demande.nom_activite = dict_activites.get(int(activite_id), "?")
+            except (json.JSONDecodeError, ValueError) as e:
+                # Gestion des erreurs de décodage JSON
+                print(f"Erreur lors du décodage JSON pour la demande {demande.idrenseignement}: {e}")
+                demande.nom_activite = "?"  # ou traitez-la d'une manière qui convient à votre application
             demandes.append(demande)
+
         context["demandes_inscriptions_attente"] = demandes
 
         # Vérifie si des activités sont ouvertes à l'inscription

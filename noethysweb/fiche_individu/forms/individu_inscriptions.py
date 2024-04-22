@@ -12,10 +12,11 @@ from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse
+from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse, Tarif, CategorieTarif, Prestation, TarifLigne
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2Widget
 from parametrage.forms import questionnaires
+from django.utils import timezone
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -39,13 +40,13 @@ class Formulaire(FormulaireBase, ModelForm):
         idindividu = kwargs.pop("idindividu", None)
         idfamille = kwargs.pop("idfamille", None)
         idactivite = kwargs.pop("idactivite", None)
-        idgroupe = kwargs.pop("idgroupe", None)
         idcategorie_tarif = kwargs.pop("idcategorie_tarif", None)
+        idgroupe = kwargs.pop("idgroupe", None)
+        self.idtarifs = kwargs.pop("idtarifs", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'individu_inscriptions_form'
         self.helper.form_method = 'post'
-
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
@@ -65,8 +66,32 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields["activite"].initial = idactivite
         if idgroupe:
             self.fields["groupe"].initial = idgroupe
-        if idcategorie_tarif:
-            self.fields["categorie_tarif"].initial = idcategorie_tarif
+
+        # Sélection automatique de la catégorie de tarif en fonction de l'activité sélectionnée
+        if idactivite:
+            activite = Activite.objects.get(pk=idactivite)
+            categories_tarif = CategorieTarif.objects.filter(activite=activite)
+            if categories_tarif.exists():
+                self.fields["categorie_tarif"].queryset = categories_tarif
+                premiere_categorie = categories_tarif.order_by('idcategorie_tarif').first()
+                self.fields["categorie_tarif"].initial = premiere_categorie.pk
+            print(premiere_categorie)
+
+        idtarifs = self.idtarifs
+
+        if idtarifs:
+            # Convertir les identifiants de tarifs en entiers
+            idtarifs_int = [int(id_tarif) for id_tarif in idtarifs.split(',')]
+
+            # Récupérer les descriptions correspondantes depuis la base de données
+            descriptions_tarifs = Tarif.objects.filter(pk__in=idtarifs_int).values_list('description', flat=True)
+
+            # Récupérer les objets Tarif correspondants aux descriptions
+            tarifs_objects = Tarif.objects.filter(description__in=descriptions_tarifs)
+
+            # Pré-sélectionner les options dans le champ "tarifs" avec les objets Tarif récupérés
+            self.fields["tarifs"].initial = tarifs_objects
+            print(descriptions_tarifs)
 
         # Si modification
         nbre_conso = 0
@@ -97,7 +122,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Activité",
                 Field('activite'),
                 Field('groupe'),
-                Field('categorie_tarif'),
+                Field('tarifs'),
             ),
             Fieldset("Paramètres",
                 Field("statut"),
@@ -159,20 +184,112 @@ class Formulaire(FormulaireBase, ModelForm):
         # Enregistrement des réponses du questionnaire
         for key, valeur in self.cleaned_data.items():
             if key.startswith("question_"):
-                QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=int(key.split("_")[1]), defaults={'reponse': valeur})
+                QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=int(key.split("_")[1]),
+                                                              defaults={'reponse': valeur})
+        premiere_categorie_id = self.fields["categorie_tarif"].initial  # Récupérer l'identifiant de la première catégorie de tarif définie dans __init__
+        print(premiere_categorie_id)
+        premiere_categorie = CategorieTarif.objects.get(pk=premiere_categorie_id)  # Récupérer l'objet CategorieTarif correspondant à partir de l'identifiant
+        tarifs_selectionnes = self.cleaned_data.get('tarifs', None)
+        idtarifs_str = ','.join(str(tarif.idtarif) for tarif in tarifs_selectionnes)
+
+        instance.categorie_tarif = premiere_categorie  # Assigner la première catégorie de tarif à l'instance d'inscription
+        instance.save()  # Enregistrer l'instance mise à jour
+        # Récupérer les identifiants des tarifs depuis l'URL
+        if self.request.resolver_match.url_name == 'individu_inscriptions_ajouter':
+            idtarifs = self.idtarifs
+        elif self.request.resolver_match.url_name == 'individu_inscriptions_modifier':
+            idtarifs = idtarifs_str
+        else:
+            idtarifs = None
+
+        # Convertir les identifiants de tarifs en entiers
+        idtarifs_int = [int(id_tarif) for id_tarif in idtarifs.split(',')]
+
+        # Récupérer les objets Tarif correspondants
+        tarifs_objects = Tarif.objects.filter(pk__in=idtarifs_int)
+
+        # Récupérer les descriptions correspondantes depuis la base de données
+        descriptions_tarifs = Tarif.objects.filter(pk__in=idtarifs_int).values_list('description', flat=True)
+
+        # Récupérer les objets Tarif correspondants aux descriptions
+        tarifs_objects = Tarif.objects.filter(description__in=descriptions_tarifs)
+        tarifs_selectionnes = tarifs_objects.filter(pk__in=idtarifs_int)
+
+        # Récupérer les tarifs associés aux prestations existantes pour cette inscription
+        tarifs_prestations_existants = Prestation.objects.filter(
+            individu=instance.individu,
+            famille=instance.famille,
+            activite=instance.activite,
+        ).values_list('tarif', flat=True)
+
+        # Comparer les tarifs sélectionnés avec ceux des prestations existantes
+        # Supprimer les tarifs en trop
+        for tarif_prestation_existant in tarifs_prestations_existants:
+            if tarif_prestation_existant not in tarifs_selectionnes:
+                # Supprimer les prestations associées au tarif
+                Prestation.objects.filter(
+                    tarif=tarif_prestation_existant,
+                    individu=instance.individu,
+                    famille=instance.famille,
+                    activite=instance.activite,
+                ).delete()
+
+        # Créer une prestation pour chaque tarif
+        for tarif in tarifs_selectionnes:
+            if tarif not in tarifs_prestations_existants:
+                tarif_ligne = TarifLigne.objects.get(tarif_id=tarif.pk)
+                montant_unique = tarif_ligne.montant_unique
+                nouvelle_prestation = Prestation.objects.create(
+                    date=timezone.now().date(),
+                    categorie="consommation",
+                    label=tarif.description,
+                    forfait=1,
+                    montant_initial=montant_unique, #fonctionne pas à chercher dans tarifs_lignes
+                    montant=montant_unique, #fonctionne pas a chercher dans tarifs_lignes
+                    quantite=1,
+                    tva=0,
+                    date_valeur=timezone.now().date(),
+                    activite=instance.activite,
+                    categorie_tarif=instance.categorie_tarif,
+                    famille=instance.famille,
+                    individu=instance.individu,
+                    tarif=tarif
+                )
 
         return instance
 
+    def creer_prestation(idactivite, premier_categorie_pk, idfamille, idindividu, idtarif):
+        # Récupérer le tarif et la catégorie de tarif
+        tarif = Tarif.objects.get(pk=idtarif)
+        premier_categorie = CategorieTarif.objects.get(pk=premier_categorie_pk)  # Récupérer l'objet CategorieTarif
+
+        # Créer la prestation
+        prestation = Prestation.objects.create(
+            categorie="consommation",
+            label=tarif.description,
+            montant_initial=tarif.montant_unique,
+            montant=tarif.montant_unique,
+            quantite=1,
+            tva=0,
+            date_valeur=timezone.now().date(),
+            activite_id=idactivite,
+            categorie_tarif_id=premier_categorie.pk,
+            famille_id=idfamille,
+            individu_id=idindividu,
+            tarif_id=idtarif
+        )
+
+        return prestation
 
 EXTRA_SCRIPT = """
 <script>
-
-
-// Actualise la liste des groupes et des catégories de tarifs en fonction de l'activité sélectionnée
+// Actualise la liste des groupes et des tarifs en fonction de l'activité sélectionnée
 function On_change_activite() {
     var idactivite = $("#id_activite").val();
     var idgroupe = $("#id_groupe").val();
-    var idcategorie_tarif = $("#id_categorie_tarif").val();
+    var idtarifs = $("#id_tarifs").val();
+
+    // Requête AJAX pour mettre à jour les groupes
     $.ajax({ 
         type: "POST",
         url: "{% url 'ajax_get_groupes' %}",
@@ -190,30 +307,32 @@ function On_change_activite() {
             };
         }
     });
+
+    // Requête AJAX pour mettre à jour les tarifs
     $.ajax({ 
         type: "POST",
-        url: "{% url 'ajax_get_categories_tarifs' %}",
+        url: "{% url 'ajax_get_tarifs' %}",
         data: {'idactivite': idactivite},
         success: function (data) { 
-            $("#id_categorie_tarif").html(data); 
-            $("#id_categorie_tarif").val(idcategorie_tarif);
+            $("#id_tarifs").html(data); 
+            $("#id_tarifs").val(idtarifs);
             if (data == '') {
-                $("#div_id_categorie_tarif").hide()
+                $("#div_id_tarifs").hide()
             } else {
-                $("#div_id_categorie_tarif").show()
+                $("#div_id_tarifs").show()
             }
-            if ($("#id_categorie_tarif").children('option').length == 2) {
-                $("#id_categorie_tarif").val($("#id_categorie_tarif option:eq(1)").val());
+            if ($("#id_tarifs").children('option').length == 2) {
+                $("#id_tarifs").val($("#id_tarifs option:eq(1)").val());
             };
         }
     });
-};
+};            
 $(document).ready(function() {
     $('#id_activite').change(On_change_activite);
-    On_change_activite.call($('#id_activite').get(0));
+    On_change_activite(); // Appel initial pour mettre à jour les champs au chargement de la page
 });
 
-// Affiche de la date de modification
+// Affichage de la date de modification en fonction de l'action choisie
 function On_change_action() {
     $('#div_id_date_modification').hide();
     if ($("#id_action_conso").val() == 'MODIFIER_DATE') {
@@ -222,9 +341,7 @@ function On_change_action() {
 }
 $(document).ready(function() {
     $('#id_action_conso').on('change', On_change_action);
-    On_change_action.call($('#id_action_conso').get(0));
+    On_change_action(); // Appel initial pour afficher ou masquer la date de modification
 });
-
-
 </script>
 """

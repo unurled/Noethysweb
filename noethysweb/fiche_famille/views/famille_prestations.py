@@ -80,7 +80,7 @@ class Page(Onglet):
     url_modifier = "famille_prestations_modifier"
     url_supprimer = "famille_prestations_supprimer"
     url_supprimer_plusieurs = "famille_prestations_supprimer_plusieurs"
-    description_liste = "Vous pouvez consulter ici les prestations de la famille. Il s'agit généralement de prestations générées automatiquement mais vous pouvez également cliquer sur le bouton Ajouter pour créer une prestation manuelle."
+    description_liste = "Vous pouvez consulter ici les prestations de la famille. Elles sont générées automatiquement. Pour en ajouter ou en modifier une, il faut modifier l'inscription dans la fiche de l'enfant. (raccourci pour accéder à la fiche enfant en bas à gauche de la page)"
     description_saisie = "Saisissez toutes les informations concernant la prestation et cliquez sur le bouton Enregistrer."
     objet_singulier = "une prestation"
     objet_pluriel = "des prestations"
@@ -92,8 +92,6 @@ class Page(Onglet):
             context['box_titre'] = "Prestations"
         context['onglet_actif'] = "prestations"
         context['boutons_liste'] = [
-            {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Ajouter depuis un modèle", "classe": "btn btn-default", "href": reverse_lazy("famille_prestations_selection_modele", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
         ]
         # Ajout l'idfamille à l'URL de suppression groupée
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={'idfamille': self.kwargs.get('idfamille', None), "listepk": "xxx"})

@@ -85,7 +85,6 @@ class Formulaire_options(FormulaireBase, forms.Form):
                 Field("modifier_groupe"),
                 Field("groupe"),
                 Field("modifier_categorie_tarif"),
-                Field("categorie_tarif"),
             ),
             Fieldset("Consommations",
                 # Field("action"),
@@ -105,11 +104,6 @@ class Formulaire_options(FormulaireBase, forms.Form):
         # Groupe
         if self.cleaned_data["modifier_groupe"] and not self.cleaned_data["groupe"]:
             self.add_error('modifier_groupe', "Vous devez renseigner le groupe souhaité")
-            return
-
-        # Catégorie de tarif
-        if self.cleaned_data["modifier_categorie_tarif"] and not self.cleaned_data["categorie_tarif"]:
-            self.add_error('modifier_categorie_tarif', "Vous devez renseigner la catégorie de tarif souhaitée")
             return
 
         # Vérifie qu'une option a été cochée
@@ -162,18 +156,6 @@ function On_change_groupe() {
 $(document).ready(function() {
     $('#id_modifier_groupe').change(On_change_groupe);
     On_change_groupe.call($('#id_modifier_groupe').get(0));
-});
-
-// Catégorie de tarif
-function On_change_categorie_tarif() {
-    $('#div_id_categorie_tarif').hide();
-    if ($(this).prop("checked")) {
-        $('#div_id_categorie_tarif').show();
-    }
-}
-$(document).ready(function() {
-    $('#id_modifier_categorie_tarif').change(On_change_categorie_tarif);
-    On_change_categorie_tarif.call($('#id_modifier_categorie_tarif').get(0));
 });
 
 // Affiche de la date de modification

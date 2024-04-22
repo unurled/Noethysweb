@@ -61,8 +61,19 @@ def Traiter_demande(request=None, demande=None, etat=None):
 
         # Inscription à une activité
         if demande.code == "inscrire_activite":
-            idactivite, idgroupe, idcategorie_tarif = nouvelle_valeur.split(";")
-            redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={"idfamille": demande.famille_id, "idindividu": demande.individu_id, "idactivite": int(idactivite), "idgroupe": int(idgroupe),"idcategorie_tarif": int(idcategorie_tarif) })
+            # Extraire chaque valeur
+            valeurs = nouvelle_valeur.split(";")
+            idactivite = valeurs[0]
+            idgroupe = valeurs[1]
+            idstarifs = json.loads(valeurs[2])
+            # Création de la redirection avec les paramètres requis
+            redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={
+                "idfamille": demande.famille_id,
+                "idindividu": demande.individu_id,
+                "idactivite": int(idactivite),
+                "idgroupe": int(idgroupe),
+                "idstarifs": ','.join(map(str, idstarifs))
+            })
             messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
 
     # Modifie l'état de la demande
@@ -369,18 +380,28 @@ class Liste(Page, crud.Liste):
                 if not hasattr(self, "dict_activites"):
                     self.dict_activites = {activite.pk: activite.nom for activite in Activite.objects.all()}
                     self.dict_groupes = {groupe.pk: groupe.nom for groupe in Groupe.objects.all()}
-                    self.dict_categorie_tarif = {categorie_tarif.pk: categorie_tarif.nom for categorie_tarif in
-                                                 CategorieTarif.objects.all()}
-                valeurs = valeur.split(";")
-                idactivite = valeurs[0]
-                idgroupe = valeurs[1]
-                idcategorie_tarif = valeurs[2] if len(valeurs) > 2 else None
-                activite_nom = self.dict_activites.get(int(idactivite), "?")
-                groupe_nom = self.dict_groupes.get(int(idgroupe), "?")
-                categorie_tarif_nom = self.dict_categorie_tarif.get(int(idcategorie_tarif),
-                                                                    "?") if idcategorie_tarif else None
-                if categorie_tarif_nom:
-                    return "%s (%s) - %s" % (activite_nom, groupe_nom, categorie_tarif_nom)
-                else:
+
+                    # Extraire chaque valeur
+                    valeurs = valeur.split(";")
+
+                    # Première valeur (ID de l'activité)
+                    idactivite = valeurs[0]
+
+                    # Deuxième valeur (ID du groupe)
+                    idgroupe = valeurs[1]
+
+                    # Troisième valeur (liste d'IDs de tarifs)
+                    idstarifs = json.loads(valeurs[2])
+
+                    # Affichage des valeurs
+                    print("ID de l'activité :", idactivite)
+                    print("ID du groupe :", idgroupe)
+                    print("IDs de tarifs :")
+
+                    # Itérer sur les IDs de tarifs
+                    for idtarif in idstarifs:
+                        print("-", idtarif)
+
+                    activite_nom = self.dict_activites.get(int(idactivite), "?")
+                    groupe_nom = self.dict_groupes.get(int(idgroupe), "?")
                     return "%s (%s)" % (activite_nom, groupe_nom)
-            return valeur

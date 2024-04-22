@@ -5,6 +5,7 @@
 
 import logging, json, datetime
 logger = logging.getLogger(__name__)
+from django import forms
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.core.serializers.json import DjangoJSONEncoder
@@ -14,9 +15,10 @@ from django.contrib import messages
 from django.db.models import Q, Count
 from crispy_forms.utils import render_crispy_form
 from core.views import crud
-from core.models import PortailRenseignement, Piece, TypePiece, Inscription, Individu, Rattachement
+from core.models import PortailRenseignement, Piece, TypePiece, Inscription, Individu, Rattachement, NomTarif, Tarif
 from portail.forms.inscrire_activite import Formulaire, Formulaire_extra
 from portail.views.base import CustomView
+from django.forms import formset_factory
 
 
 def Get_form_extra(request):
@@ -53,7 +55,15 @@ def Valid_form(request):
     individu = form.cleaned_data["individu"]
     activite = form.cleaned_data["activite"]
     groupe = form_extra.cleaned_data["groupe"]
-    categorie_tarif = form_extra.cleaned_data["categorie_tarif"]
+    liste_nom_tarif = NomTarif.objects.filter(activite=form.cleaned_data["activite"]).order_by("nom").distinct()
+
+    # Récupération des données des cases à cocher pour les tarifs
+    id_tarifs_selectionnes = []
+    for nom_tarif in liste_nom_tarif:
+        field_name = f"tarifs_{nom_tarif.idnom_tarif}"
+        tarifs_selectionnes = request.POST.getlist(field_name)
+        id_tarifs_selectionnes.extend(tarifs_selectionnes)
+    print(id_tarifs_selectionnes)
 
     if not activite.inscriptions_multiples:
 
@@ -62,9 +72,18 @@ def Valid_form(request):
             return JsonResponse({"erreur": "Cet individu est déjà inscrit à cette activité"}, status=401)
 
         # Vérifie qu'il n'y a pas déjà une demande en attente pour la même activité et le même individu
-        for demande in PortailRenseignement.objects.filter(famille=famille, individu=individu, etat="ATTENTE", code="inscrire_activite"):
-            if int(json.loads(demande.nouvelle_valeur).split(";")[0]) == activite.pk:
-                return JsonResponse({"erreur": "Une demande en attente de traitement existe déjà pour cet individu et cette activité"}, status=401)
+        for demande in PortailRenseignement.objects.filter(famille=famille, individu=individu, etat="ATTENTE",
+                                                           code="inscrire_activite"):
+            try:
+                activite_id = json.loads(demande.nouvelle_valeur).split(";")[0]
+                if int(activite_id) == activite.pk:
+                    return JsonResponse({
+                                            "erreur": "Une demande en attente de traitement existe déjà pour cet individu et cette activité"},
+                                        status=401)
+            except (json.JSONDecodeError, ValueError) as e:
+                # Gérer les erreurs de décodage JSON ou conversion en entier
+                print(f"Erreur lors de la vérification de la demande en attente : {e}")
+                # Continuer le traitement des autres demandes
 
     # Vérifie s'il reste de la place
     if activite.portail_inscriptions_bloquer_si_complet:
@@ -79,8 +98,9 @@ def Valid_form(request):
 
     # Enregistrement de la demande
     demande = form.save()
-    demande.nouvelle_valeur = json.dumps("%d;%d;%d" % (activite.pk, groupe.pk, categorie_tarif.pk ), cls=DjangoJSONEncoder)
+    demande.nouvelle_valeur = json.dumps("%d;%d;%s" % (activite.pk, groupe.pk, json.dumps(id_tarifs_selectionnes)),cls=DjangoJSONEncoder)
     demande.save()
+    print(demande.nouvelle_valeur)
 
     # Enregistrement des pièces
     for nom_champ, valeur in form_extra.cleaned_data.items():

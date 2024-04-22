@@ -36,8 +36,8 @@ urlpatterns = [
 
     path('individus/individus/inscriptions/liste/<int:idfamille>/<int:idindividu>', individu_inscriptions.Liste.as_view(), name='individu_inscriptions_liste'),
     path('individus/individus/inscriptions/ajouter/<int:idfamille>/<int:idindividu>', individu_inscriptions.Ajouter.as_view(), name='individu_inscriptions_ajouter'),
-    path('individus/individus/inscriptions/ajouter/<int:idfamille>/<int:idindividu>/<int:idactivite>/<int:idgroupe>/<int:idcategorie_tarif>', individu_inscriptions.Ajouter.as_view(), name='individu_inscriptions_ajouter'),
-    path('individus/individus/inscriptions/modifier/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Modifier.as_view(), name='individu_inscriptions_modifier'),
+    path('individus/individus/inscriptions/ajouter/<int:idfamille>/<int:idindividu>/<int:idactivite>/<int:idgroupe>/<str:idstarifs>/', individu_inscriptions.Ajouter.as_view(), name='individu_inscriptions_ajouter'),
+    path('individus/individus/inscriptions/modifier/<int:idfamille>/<int:idindividu>/<int:idactivite>/<int:idgroupe>/<str:idtarifs>/<int:pk>',individu_inscriptions.Modifier.as_view(), name='individu_inscriptions_modifier'),
     path('individus/individus/inscriptions/supprimer/<int:idfamille>/<int:idindividu>/<int:pk>', individu_inscriptions.Supprimer.as_view(), name='individu_inscriptions_supprimer'),
     path('individus/individus/inscriptions/appliquer_forfait_date/<int:idfamille>/<int:idindividu>', individu_appliquer_forfait_date.View.as_view(), name='individu_appliquer_forfait_date'),
 
@@ -87,7 +87,7 @@ urlpatterns = [
     path('individus/get_classes', secure_ajax(individu_scolarite.Get_classes), name='ajax_get_classes'),
     path('individus/get_niveaux', secure_ajax(individu_scolarite.Get_niveaux), name='ajax_get_niveaux'),
     path('individus/get_groupes', secure_ajax(individu_inscriptions.Get_groupes), name='ajax_get_groupes'),
-    path('individus/get_categories_tarifs', secure_ajax(individu_inscriptions.Get_categories_tarifs), name='ajax_get_categories_tarifs'),
+    path('individus/get_tarifs', secure_ajax(individu_inscriptions.Get_tarifs), name='ajax_get_tarifs'),
     path('individus/select_medecin', secure_ajax(individu_medical.Select_medecin), name='ajax_select_medecin'),
     path('individus/deselect_medecin', secure_ajax(individu_medical.Deselect_medecin), name='ajax_deselect_medecin'),
     path('individus/get_coords_gps', secure_ajax(individu_coords.Get_coords_gps), name='ajax_get_coords_gps'),

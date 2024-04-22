@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription, Prestation, Groupe, CategorieTarif, Consommation, Ouverture
+from core.models import Inscription, Prestation, Groupe, CategorieTarif, Consommation, Ouverture, Tarif
 from core.utils import utils_dates
 from fiche_individu.forms.individu_inscriptions import Formulaire
 from fiche_individu.views.individu import Onglet
@@ -36,19 +36,19 @@ def Get_groupes(request):
     return HttpResponse(resultat)
 
 
-def Get_categories_tarifs(request):
+def Get_tarifs(request):
     idactivite = request.POST.get('idactivite')
     if idactivite == "":
         resultat = ""
     else:
-        categories_tarifs = CategorieTarif.objects.filter(activite_id=idactivite).order_by('nom')
+        tarifs = Tarif.objects.filter(activite_id=idactivite)
         html = """
         <option value="">---------</option>
-        {% for categorie in categories_tarifs %}
-            <option value="{{ categorie.pk }}">{{ categorie.nom }}</option>
+        {% for tarif in tarifs %}
+            <option value="{{ tarif.pk }}">{{ tarif.description }}</option>
         {% endfor %}
         """
-        context = {'categories_tarifs': categories_tarifs}
+        context = {'tarifs': tarifs}
         resultat = Template(html).render(RequestContext(request, context))
     return HttpResponse(resultat)
 
@@ -83,7 +83,7 @@ class Page(Onglet):
         form_kwargs["idfamille"] = self.Get_idfamille()
         form_kwargs["idactivite"] = self.kwargs.get("idactivite", None)
         form_kwargs["idgroupe"] = self.kwargs.get("idgroupe", None)
-        form_kwargs["idcategorie_tarif"] = self.kwargs.get("idcategorie_tarif", None)
+        form_kwargs["idtarifs"] = self.kwargs.get("idstarifs", None)
         return form_kwargs
 
     def get_success_url(self):
@@ -115,7 +115,7 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_individu/individu_liste.html"
 
     def get_queryset(self):
-        return Inscription.objects.select_related("activite", "groupe", "categorie_tarif", "famille", "activite__structure").filter(Q(individu=self.Get_idindividu()) & self.Get_filtres("Q"))
+        return Inscription.objects.select_related("activite", "groupe", "famille", "activite__structure").filter(Q(individu=self.Get_idindividu()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -124,17 +124,16 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idinscription", 'date_debut', 'date_fin', 'activite', 'groupe', 'categorie_tarif', 'statut']
+        filtres = ["idinscription", 'date_debut', 'date_fin', 'activite', 'groupe', 'statut']
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         activite = columns.TextColumn("Activité", sources=['activite__nom'])
         groupe = columns.TextColumn("Groupe", sources=['groupe__nom'])
-        categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=['categorie_tarif__nom'])
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idinscription", 'date_debut', 'date_fin', 'activite', 'groupe', 'categorie_tarif', 'statut', 'famille']
+            columns = ["idinscription", 'date_debut', 'date_fin', 'activite', 'groupe', 'statut', 'famille']
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -154,17 +153,39 @@ class Liste(Page, crud.Liste):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
             kwargs = view.kwargs
+            kwargs["idfamille"] = instance.famille.pk if instance.famille else None
+            kwargs["idindividu"] = instance.individu.pk if instance.individu else None
             kwargs["pk"] = instance.pk
+
+            # Actions spécifiques pour la modification
             if instance.activite.structure in view.request.user.structures.all():
-                # Affiche les boutons d'action si l'utilisateur est associé à l'activité
-                html = [
-                    self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
-                    self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                modifier_kwargs = kwargs.copy()
+                modifier_kwargs["idactivite"] = instance.activite.pk
+                modifier_kwargs["idgroupe"] = instance.groupe.pk if instance.groupe else None
+                modifier_kwargs["idtarifs"] = ','.join([str(tarif.pk) for tarif in instance.tarifs.all()]) if instance.tarifs.exists() else '1'
+                modifier_url = reverse(view.url_modifier, kwargs=modifier_kwargs)
+
+                # Boutons pour la modification
+                modifier_buttons = [
+                    self.Create_bouton_modifier(url=modifier_url),
                 ]
             else:
                 # Afficher que l'accès est interdit
-                html = ["<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>",]
-            return self.Create_boutons_actions(html)
+                modifier_buttons = [
+                    "<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>", ]
+
+            # Actions spécifiques pour la suppression
+            kwargs_supprimer = kwargs.copy()
+            kwargs_supprimer.pop("idactivite", None)
+            kwargs_supprimer.pop("idgroupe", None)
+            kwargs_supprimer.pop("idtarifs", None)
+            supprimer_url = reverse(view.url_supprimer, kwargs=kwargs_supprimer)
+
+            # Bouton pour la suppression
+            supprimer_button = self.Create_bouton_supprimer(url=supprimer_url)
+
+            # Retourner les boutons correspondants
+            return self.Create_boutons_actions(modifier_buttons + [supprimer_button])
 
 
 
@@ -180,13 +201,6 @@ class Ajouter(Page, crud.Ajouter):
         # Sauvegarde de l'aide
         self.object = form.save()
         messages.add_message(self.request, messages.SUCCESS, "L'inscription a bien été enregistrée")
-
-        # Enregistre un forfait si besoin
-        f = utils_forfaits.Forfaits(request=self.request, famille=self.object.famille_id, activites=[self.object.activite_id], individus=[self.object.individu_id])
-        f.Applique_forfait(mode_inscription=True, selection_activite=self.object.activite_id)
-
-        # Mémorisation dans l'historique
-        self.save_historique(instance=self.object, form=form)
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -252,9 +266,9 @@ class Modifier(Page, crud.Modifier):
                     nouvelles_conso.append(conso)
                 Consommation.objects.bulk_update(nouvelles_conso, ["groupe"], batch_size=50)
 
-            # Changement de la catégorie de tarif
-            if "categorie_tarif" in form.changed_data and consommations:
-                logger.debug("Changement de catégorie de tarif pour les consommations...")
+            # Changement des tarifs
+            if "tarifs" in form.changed_data and consommations: #A MODIFIER
+                logger.debug("Changement des tarifs pour les consommations...")
                 # Enregistre l'inscription modifiée
                 self.object.save()
                 # Recalcule les prestations
@@ -263,7 +277,7 @@ class Modifier(Page, crud.Modifier):
                 grille = Grille_virtuelle(request=self.request, idfamille=form.cleaned_data["famille"].pk, idindividu=form.cleaned_data["individu"].pk,
                                           idactivite=form.cleaned_data["activite"].pk, date_min=min(liste_dates), date_max=max(liste_dates))
                 for conso in consommations:
-                    grille.Modifier(criteres={"idconso": conso.pk}, modifications={"categorie_tarif": form.cleaned_data["categorie_tarif"].pk})
+                    grille.Modifier(criteres={"idconso": conso.pk}, modifications={"tarifs": form.cleaned_data["tarifs"].pk})
                 grille.Enregistrer()
 
         return super(Modifier, self).form_valid(form)

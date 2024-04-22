@@ -22,6 +22,8 @@ from core.data.data_modeles_word import CATEGORIES as CATEGORIES_MODELES_WORD
 from individus.utils.utils_transports import Get_liste_choix_categories
 from core.utils import utils_permissions
 from core.utils import utils_texte, utils_dates
+from django.forms.widgets import CheckboxSelectMultiple
+
 
 CATEGORIES_TRANSPORTS = Get_liste_choix_categories()
 
@@ -1939,7 +1941,8 @@ class Inscription(models.Model):
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
     groupe = models.ForeignKey(Groupe, verbose_name="Groupe", on_delete=models.PROTECT)
-    categorie_tarif = models.ForeignKey(CategorieTarif, verbose_name="Catégorie de tarif", on_delete=models.PROTECT)
+    categorie_tarif = models.ForeignKey(CategorieTarif, verbose_name="Catégorie de tarif", on_delete=models.PROTECT, blank=True, null=True)
+    tarifs = models.ManyToManyField(Tarif, verbose_name="Tarifs", blank=True, default=1)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     statut_choix = [("ok", "Inscription validée"), ("attente", "Inscription en attente"), ("refus", "Inscription refusée")]

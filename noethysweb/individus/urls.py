@@ -14,6 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses
+from fiche_individu.views import individu_inscriptions
 
 urlpatterns = [
 
@@ -35,7 +36,7 @@ urlpatterns = [
     # Inscriptions
     path('individus/inscriptions', inscriptions_liste.Liste.as_view(), name='inscriptions_liste'),
     path('individus/inscriptions/ajouter', inscriptions_liste.Ajouter.as_view(), name='inscriptions_ajouter'),
-    path('individus/inscriptions/modifier/<int:pk>', inscriptions_liste.Modifier.as_view(), name='inscriptions_modifier'),
+    path('individus/inscriptions/modifier/<int:idfamille>/<int:idindividu>',individu_inscriptions.Liste.as_view(), name='inscriptions_modifier'),
     path('individus/inscriptions/supprimer/<int:pk>', inscriptions_liste.Supprimer.as_view(), name='inscriptions_supprimer'),
     path('individus/inscriptions/supprimer_plusieurs/<str:listepk>', inscriptions_liste.Supprimer_plusieurs.as_view(), name='inscriptions_supprimer_plusieurs'),
 

@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription
+from core.models import Inscription, Prestation
 from fiche_individu.forms.individu_inscriptions import Formulaire
 from django.db.models import Q
 
@@ -17,7 +17,7 @@ class Page(crud.Page):
     url_modifier = "inscriptions_modifier"
     url_supprimer = "inscriptions_supprimer"
     url_supprimer_plusieurs = "inscriptions_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste des inscriptions. Vous ne pouvez accéder qu'aux inscriptions associées à vos structures."
+    description_liste = "Voici ci-dessous la liste des inscriptions. Vous ne pouvez accéder qu'aux inscriptions associées à vos structures. ATTENTION ! Supprimer une inscription ne supprime pas les prestations liées !"
     description_saisie = "Saisissez toutes les informations concernant l'inscription à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une inscription"
     objet_pluriel = "des inscriptions"
@@ -75,18 +75,39 @@ class Liste(Page, crud.Liste):
                 return "<i class='fa fa-check-circle-o text-green'></i> Valide"
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
-            """ Inclut l'idindividu dans les boutons d'actions """
+            """Inclut l'idindividu dans les boutons d'actions"""
             view = kwargs["view"]
             # Récupération idindividu et idfamille
             kwargs = view.kwargs
-            # Ajoute l'id de la ligne
+            kwargs["idfamille"] = instance.famille.pk if instance.famille else None
+            kwargs["idindividu"] = instance.individu.pk if instance.individu else None
             kwargs["pk"] = instance.pk
-            html = [
-                self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
-                self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
-                self.Create_bouton(url=reverse("famille_resume", args=[instance.famille_id]), title="Ouvrir la fiche famille", icone="fa-users"),
-            ]
-            return self.Create_boutons_actions(html)
+
+            # Actions spécifiques pour la modification
+            if instance.activite.structure in view.request.user.structures.all():
+                modifier_kwargs = {key: value for key, value in kwargs.items() if key != "pk"}
+                modifier_url = reverse(view.url_modifier, kwargs=modifier_kwargs)
+
+                # Boutons pour la modification
+                modifier_buttons = [
+                    self.Create_bouton_modifier(url=modifier_url),
+                ]
+            else:
+                # Afficher que l'accès est interdit
+                modifier_buttons = [
+                    "<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>", ]
+
+            # Actions spécifiques pour la suppression
+            supprimer_url = reverse(view.url_supprimer,kwargs={"pk": instance.pk})
+            supprimer_button = self.Create_bouton_supprimer(url=supprimer_url)
+
+            # Bouton pour ouvrir la fiche famille
+            ouvrir_famille_url = reverse("famille_resume", args=[instance.famille_id])
+            ouvrir_famille_button = self.Create_bouton(url=ouvrir_famille_url, title="Ouvrir la fiche famille",
+                                                       icone="fa-users")
+
+            # Retourner les boutons correspondants
+            return self.Create_boutons_actions(modifier_buttons + [supprimer_button] + [ouvrir_famille_button])
 
         def Get_ville_individu(self, instance, *args, **kwargs):
             return instance.individu.ville_resid
@@ -103,9 +124,21 @@ class Ajouter(Page, crud.Ajouter):
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire
+pass
 
 class Supprimer(Page, crud.Supprimer):
-    pass
+    def Check_protections(self, objet=None):
+        protections = []
 
+        nbre_prestations_facturees = Prestation.objects.filter(famille=objet.famille, individu=objet.individu, activite=objet.activite, facture__isnull=False).count()
+        if nbre_prestations_facturees:
+            protections.append("Vous ne pouvez pas supprimer cette inscription car %s prestations associées sont déjà facturées." % nbre_prestations_facturees)
+
+        nbre_prestations = Prestation.objects.filter(famille=objet.famille, individu=objet.individu, activite=objet.activite).exclude(forfait=2).count()
+        if nbre_prestations:
+            protections.append("Vous ne pouvez pas supprimer cette inscription car %s prestations sont déjà associées." % nbre_prestations)
+
+        return protections
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+
     pass

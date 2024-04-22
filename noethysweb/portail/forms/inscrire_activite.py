@@ -5,14 +5,14 @@
 
 import datetime
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, CheckboxSelectMultiple, ModelMultipleChoiceField
 from django.db.models import Q
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div
 from crispy_forms.bootstrap import Field
-from core.models import Activite, Rattachement, Groupe, PortailRenseignement, CategorieTarif
+from core.models import Activite, Rattachement, Groupe, PortailRenseignement, CategorieTarif, NomTarif, Tarif
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from individus.utils import utils_pieces_manquantes
@@ -20,8 +20,6 @@ from individus.utils import utils_pieces_manquantes
 
 class Formulaire_extra(FormulaireBase, forms.Form):
     groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True, help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
-    categorie_tarif = forms.ModelChoiceField(label=_("Catégorie de Tarif"), queryset=CategorieTarif.objects.none(), required=True, help_text=_("Sélectionnez le nombre d'enfants inscrits à un camp à pédagogie Flambeaux."))
-
     def __init__(self, *args, **kwargs):
         activite = kwargs.pop("activite", None)
         famille = kwargs.pop("famille", None)
@@ -39,6 +37,24 @@ class Formulaire_extra(FormulaireBase, forms.Form):
 
         self.helper.form_tag = False
 
+        # For each tarif name, add a field for each tarif with a checkbox
+        liste_nom_tarif = NomTarif.objects.filter(activite=activite).order_by("nom").distinct()
+        for nom_tarif in liste_nom_tarif:
+            # Get the associated tarifs for this nom_tarif
+            tarifs = Tarif.objects.filter(nom_tarif=nom_tarif, activite=activite)
+            # Use a ModelMultipleChoiceField with CheckboxSelectMultiple widget
+            field_name = f"tarifs_{nom_tarif.idnom_tarif}"
+            self.fields[field_name] = forms.ModelMultipleChoiceField(
+                label=nom_tarif.nom,
+                queryset=tarifs,
+                widget=forms.CheckboxSelectMultiple(),
+                required=False  # Optional, depending on your requirements
+            )
+
+            # Customize the label for the field
+            self.fields[field_name].widget.choices = [(tarif.pk, tarif.description) for tarif in tarifs if tarif.description]
+
+
         # Recherche des groupes de l'activité
         liste_groupes = Groupe.objects.filter(activite=activite).order_by("nom")
         self.fields["groupe"].queryset = liste_groupes
@@ -47,13 +63,6 @@ class Formulaire_extra(FormulaireBase, forms.Form):
         if len(liste_groupes) == 1:
             self.fields["groupe"].initial = liste_groupes.first()
 
-        # Recherche des catégories de tarif de l'activité
-        liste_categorie_tarif = CategorieTarif.objects.filter(activite=activite).order_by("nom")
-        self.fields["categorie_tarif"].queryset = liste_categorie_tarif
-
-        # S'il n'y a qu'une catégorie de tarif, on le sélectionne par défaut
-        if len(liste_categorie_tarif) == 1:
-            self.fields["categorie_tarif"].initial = liste_categorie_tarif.first()
 
         # Ajout des pièces à fournir
         if activite.portail_inscriptions_imposer_pieces:
@@ -77,7 +86,6 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         labels = {
             "individu": _("Individu"),
-            "categorie_tarif": _("Catégorie de Tarif"),
         }
         help_texts = {
             "individu": _("Sélectionnez le membre de la famille à inscrire."),

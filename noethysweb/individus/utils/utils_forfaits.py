@@ -39,7 +39,7 @@ class Forfaits():
             dict_activites[ouverture.activite_id].ouvertures.append(ouverture)
 
         # Recherche des tarifs
-        dict_tarifs = {tarif.pk: tarif for tarif in Tarif.objects.select_related("nom_tarif").prefetch_related("categories_tarifs", "groupes").filter(activite__in=self.selection_activites, type="FORFAIT", forfait_saisie_manuelle=self.saisie_manuelle, forfait_saisie_auto=self.saisie_auto)}
+        dict_tarifs = {tarif.pk: tarif for tarif in Tarif.objects.select_related("nom_tarif").prefetch_related("groupes").filter(activite__in=self.selection_activites, type="FORFAIT", forfait_saisie_manuelle=self.saisie_manuelle, forfait_saisie_auto=self.saisie_auto)}
 
         # Recherche les combinaisons d'unités
         for combi_tarif in CombiTarif.objects.prefetch_related('unites').filter(tarif__activite__in=self.selection_activites):

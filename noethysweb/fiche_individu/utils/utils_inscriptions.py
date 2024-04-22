@@ -67,6 +67,9 @@ class Inscriptions():
 
                 "{IDCATEGORIETARIF}": inscription.categorie_tarif.pk,
                 "{NOM_CATEGORIE_TARIF}": inscription.categorie_tarif.nom,
+
+                "{IDTARIF}": inscription.tarif_id,
+                "{TARIF_NOM}": inscription.tarif.description,
             }
 
             # Ajoute les informations de base individus et familles
