@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Individu
-        fields = ["civilite", "nom", "prenom"]
+        fields = ["civilite", "nom", "prenom","mail"]
         help_texts = {
             "civilite": "Sélectionnez une civilité dans la liste. S'il s'agit d'un enfant, sélectionnez Fille ou Garçon.",
         }
@@ -86,6 +86,7 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field("civilite"),
                     Field('nom'),
                     Field('prenom'),
+                    Field('mail'),
                     id="saisie_identite",
                 ),
                 Div(
@@ -126,6 +127,11 @@ class Formulaire(FormulaireBase, ModelForm):
             # Prénom
             if self.cleaned_data["civilite"] < 6 and self.cleaned_data["prenom"] in (None, ""):
                 self.add_error("prenom", "Vous devez saisir un prénom")
+                return
+
+            # Prénom
+            if self.cleaned_data["mail"] in (None, ""):
+                self.add_error("mail", "Vous devez saisir un mail")
                 return
 
         # Action RATTACHER

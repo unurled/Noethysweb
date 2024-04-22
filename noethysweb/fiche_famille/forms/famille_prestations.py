@@ -136,7 +136,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('famille', value=idfamille, id="id_famille"),
             Fieldset("Généralités",
                 Field('date'),
-            #    Field('categorie'),
+                Field('categorie'),
                 Field('label'),
                 Field('individu'),
             ),

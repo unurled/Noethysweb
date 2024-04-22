@@ -1432,7 +1432,7 @@ class NomTarif(models.Model):
 class Tarif(models.Model):
     idtarif = models.AutoField(verbose_name="ID", db_column='IDtarif', primary_key=True)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
-    choix_type = [("JOURN", "Prestation journalière"), ("FORFAIT", "Forfait daté"), ("CREDIT", "Forfait crédit"), ("BAREME", "Barême de contrat"), ("EVENEMENT", "Evénement")]
+    choix_type = [("FORFAIT", "Forfait daté")]
     type = models.CharField(verbose_name="Type", max_length=100, choices=choix_type, default="JOURN")
     nom_tarif = models.ForeignKey(NomTarif, verbose_name="Nom de tarif", blank=True, null=True, on_delete=models.CASCADE)
     date_debut = models.DateField(verbose_name="Date de début")
