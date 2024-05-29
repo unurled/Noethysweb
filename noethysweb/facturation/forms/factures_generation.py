@@ -18,6 +18,7 @@ from core.models import LotFactures, PrefixeFacture, Facture, Famille
 from core.forms.base import FormulaireBase
 from core.utils import utils_parametres
 from facturation.widgets import ChampAutomatiqueWidget
+from datetime import date, timedelta
 
 
 def Calc_prochain_numero(prefixe=None):
@@ -77,6 +78,12 @@ class Formulaire(FormulaireBase, forms.Form):
         # Prestations antérieures
         self.fields["prestations_anterieures"].initial = utils_parametres.Get(nom="prestations_anterieures", categorie="generation_factures", utilisateur=self.request.user, valeur=None)
 
+        # Période par défaut: aujourd'hui jusqu'à un an plus tard
+        date_debut = date.today()
+        date_fin = date_debut + timedelta(days=365)
+        periode_initial = f"{date_debut};{date_fin}"
+        self.fields["periode"].initial = periode_initial
+
         # Sélection famille
         if idfamille:
             self.fields["selection_familles"].initial = "FAMILLE"
@@ -107,6 +114,8 @@ class Formulaire(FormulaireBase, forms.Form):
             ),
             HTML(EXTRA_SCRIPT),
         )
+
+
 
     def clean(self):
         # Validation des activités
