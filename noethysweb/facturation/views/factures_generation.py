@@ -66,7 +66,7 @@ def Previsualisation_pdf(request):
     liste_factures = Get_factures(form.cleaned_data, IDfamille=idfamille)
 
     # Récupération du modèle d'impression par défaut
-    modele_impression = ModeleImpression.objects.filter(categorie="facture", defaut=True).first()
+    modele_impression = ModeleImpression.objects.filter(categorie="facture", nom="Impression Standard").first()
     if not modele_impression:
         return JsonResponse({"erreur": "Vous devez au préalable créer un modèle d'impression par défaut depuis le menu Paramétrage > Modèles d'impression"}, status=401)
     dict_options = json.loads(modele_impression.options)
