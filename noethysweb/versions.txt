@@ -1,3 +1,6 @@
+Version 1.2.2.9.13 (29/05/2024)
+- Correction configuration
+
 Version 1.2.2.9.12 (29/05/2024)
 - amélioration génération facture
 
