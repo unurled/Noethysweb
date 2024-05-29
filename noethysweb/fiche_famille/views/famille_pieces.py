@@ -83,7 +83,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idpiece', 'date_debut', 'date_fin', 'nom', "auteur"]
+            columns = ['check', 'idpiece', 'date_debut', 'date_fin', 'nom', "auteur","actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
             }
@@ -105,9 +105,12 @@ class Liste(Page, crud.Liste):
             kwargs = view.kwargs
             # Ajoute l'id de la ligne
             kwargs["pk"] = instance.pk
+            document_url = f'https://camps.flambeaux.org/media/{instance.document}'
             html = [
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
                 self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
+                self.Create_bouton_ouvrir(url=document_url),
+
             ]
             return self.Create_boutons_actions(html)
 

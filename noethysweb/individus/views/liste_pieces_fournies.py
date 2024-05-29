@@ -33,18 +33,24 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["fpresent:famille", "ipresent:individu", "fscolarise:famille", "iscolarise:individu", "idpiece", "date_debut", "date_fin", "famille__nom", "individu__nom", "type_piece__nom"]
-
+        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         check = columns.CheckBoxSelectColumn(label="")
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', "idpiece", "date_debut", "date_fin", "type_piece", "famille", "individu"]
+            columns = ['check', "idpiece", "date_debut", "date_fin", "type_piece", "famille", "individu", "actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ["date_debut"]
 
+        def Get_actions_speciales(self, instance, *args, **kwargs):
+            document_url = f'https://camps.flambeaux.org/media/{instance.document}'
+            html = [
+                self.Create_bouton_ouvrir(url=document_url),
+            ]
+            return self.Create_boutons_actions(html)
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     pass

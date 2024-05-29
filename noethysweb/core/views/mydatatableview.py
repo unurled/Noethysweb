@@ -92,6 +92,9 @@ class MyDatatable(Datatable):
     def Create_bouton_dupliquer(self, url=None, title="Dupliquer"):
         return self.Create_bouton(url=url, title=title, icone="fa-copy")
 
+    def Create_bouton_ouvrir(self, url=None, title="Ouvrir"):
+        return self.Create_bouton(url=url, title=title, icone="fa-eye")
+
     def Create_bouton(self, url=None, title="", icone="fa-copy", args=""):
         return """<a type='button' class='btn btn-default btn-xs' href='%s' title='%s' %s><i class="fa fa-fw %s"></i></a>""" % (url, title, args, icone)
 
