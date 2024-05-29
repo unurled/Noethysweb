@@ -32,6 +32,11 @@ LOGIN_REDIRECT_URL = "accueil"
 AXES_FAILURE_LIMIT = 10
 AXES_COOLOFF_TIME = 1
 AXES_LOCKOUT_URL = '/locked'
+AXES_IPWARE_PROXY_COUNT = 1
+AXES_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',
+    'REMOTE_ADDR'
+]
 
 # CAPTCHA
 CAPTCHA_FONT_SIZE = 30
@@ -241,7 +246,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'complet',
-            'filename': os.path.join(BASE_DIR, 'debug.log'),
+            'filename': os.path.join(BASE_DIR, '..', 'debug.log'),
             'backupCount': 10,
             'maxBytes': 20971520, # 20*1024*1024 bytes (20MB)
         },
