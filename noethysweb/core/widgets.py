@@ -453,7 +453,7 @@ class SelectionActivitesWidget(Widget):
             context.update(attrs)
         context['name'] = name
         context['id'] = attrs.get("id", 0)
-        context['selection'] = {"type": "groupes_activites", "ids": []}
+        context['selection'] = {"type": "activites", "ids": []}
         context.setdefault('afficher_colonne_detail', True)
         if value:
             try:
@@ -465,7 +465,6 @@ class SelectionActivitesWidget(Widget):
                     type_selection, valeurs = value.split(":")
                     context['selection'] = {"type": type_selection, "ids": [int(x) for x in valeurs.split(";")]}
 
-        context['groupes_activites'] = TypeGroupeActivite.objects.filter(structure__in=self.request.user.structures.all()).order_by("nom")
         context['activites'] = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin")
         if context.get("afficher_groupes", False):
             context['groupes'] = {}

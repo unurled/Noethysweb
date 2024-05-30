@@ -60,19 +60,24 @@ def Previsualisation_pdf(request):
     # Récupération des variables
     idfamille = int(request.POST.get("idfamille")) or None
     form = Formulaire(request.POST, request=request)
-    form.is_valid()
+    if not form.is_valid():
+        return JsonResponse({"erreur": "Le formulaire n'est pas valide."}, status=400)
+
+    # Récupérer le modèle d'impression à partir des données du formulaire
+    modelimp = form.cleaned_data.get("modelimp")
+    if not modelimp:
+        return JsonResponse({"erreur": "Aucun modèle d'impression sélectionné."}, status=400)
 
     # Recherche des données des factures
     liste_factures = Get_factures(form.cleaned_data, IDfamille=idfamille)
-
     # Récupération du modèle d'impression par défaut
-    modele_impression = ModeleImpression.objects.filter(categorie="facture", nom="Impression Standard").first()
+    modele_impression = modelimp
     if not modele_impression:
         return JsonResponse({"erreur": "Vous devez au préalable créer un modèle d'impression par défaut depuis le menu Paramétrage > Modèles d'impression"}, status=401)
     dict_options = json.loads(modele_impression.options)
 
     # Génération du PDF
-    impression = utils_impression_facture.Impression(dict_donnees={item["idfamille"]: item for item in liste_factures}, dict_options=dict_options, IDmodele=modele_impression.modele_document_id)
+    impression = utils_impression_facture.Impression(dict_donnees={item["idfamille"]: item for item in liste_factures}, dict_options=dict_options, IDmodele=modelimp.modele_document_id)
     nom_fichier = impression.Get_nom_fichier()
     return JsonResponse({"nom_fichier": nom_fichier})
 
@@ -173,6 +178,7 @@ def Generation_factures(request):
                 prestations=";".join(form.cleaned_data["categories"]),
                 regie=regie,
                 date_limite_paiement=form.cleaned_data["date_limite_paiement"],
+                modelimp=form.cleaned_data["modelimp"],
             )
             liste_factures_generees.append(facture)
             liste_id_factures.append(facture.pk)

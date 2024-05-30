@@ -10,7 +10,7 @@ from crispy_forms.layout import Layout, Hidden, Fieldset
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Facture, LotFactures
+from core.models import Facture, LotFactures, ModeleImpression
 from core.widgets import DatePickerWidget, Select_avec_commandes
 
 
@@ -23,10 +23,11 @@ class Formulaire(FormulaireBase, ModelForm):
     lot = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes(
                       {"donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",
                        "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}))
+    modelimp = forms.ModelChoiceField(queryset=ModeleImpression.objects.all(), label="Modèle d'impression")
 
     class Meta:
         model = Facture
-        fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero", "date_limite_paiement"]
+        fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero", "date_limite_paiement", "modelimp"]
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -49,15 +50,17 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Dates",
                 Field('date_edition'),
-                Field('date_echeance'),
-                Field('date_limite_paiement'),
+               # Field('date_echeance'),
+              #  Field('date_limite_paiement'),
             ),
             Fieldset("Numéro",
-                Field('prefixe'),
+              #Field('prefixe'),
                 Field('numero'),
             ),
             Fieldset("Options",
-                Field('lot'),
-                Field('regie'),
-            ),
+               # Field('lot'),
+               # Field('regie'),
+               Field('modelimp'),
+
+                     ),
         )

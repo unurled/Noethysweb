@@ -34,10 +34,6 @@
 
 <div class="boutons_radios">
     <div class="form-check form-check-inline">
-        <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_groupes_activites_{{ id }}" title="Sélectionner des groupes d'activités" value="groupes_activites" checked>
-        <label class="form-check-label" for="radio_choix_groupes_activites_{{ id }}" >Groupes d'activités</label>
-    </div>
-    <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="choix_activites" id="radio_choix_activites_{{ id }}" title="Sélectionner des activités" value="activites" {% if selection.type == "activites" %}checked{% endif %}>
         <label class="form-check-label" for="radio_choix_activites_{{ id }}">Activités</label>
     </div>

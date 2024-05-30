@@ -14,7 +14,7 @@ from crispy_forms.bootstrap import Field
 from core.forms.select2 import Select2MultipleWidget, Select2Widget
 from core.utils.utils_commandes import Commandes
 from core.widgets import DatePickerWidget, DateRangePickerWidget, Select_avec_commandes, SelectionActivitesWidget, CheckDateWidget
-from core.models import LotFactures, PrefixeFacture, Facture, Famille
+from core.models import LotFactures, PrefixeFacture, Facture, Famille, ModeleImpression
 from core.forms.base import FormulaireBase
 from core.utils import utils_parametres
 from facturation.widgets import ChampAutomatiqueWidget
@@ -52,6 +52,7 @@ class Formulaire(FormulaireBase, forms.Form):
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget(), queryset=Famille.objects.all().order_by("nom"), required=False)
     date_limite_paiement = forms.DateField(label="Date limite paiement en ligne", required=False, widget=DatePickerWidget({"afficher_check": True, "label_checkbox": "Interdire le paiement en ligne après le"}))
+    modelimp = forms.ModelChoiceField(queryset=ModeleImpression.objects.all(), label="Modèle d'impression")
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -106,11 +107,12 @@ class Formulaire(FormulaireBase, forms.Form):
             ),
             Fieldset('Options',
                 Field('categories'),
-                Field('inclure_cotisations_si_conso'),
-                Field('prestations_anterieures'),
-                Field('date_limite_paiement'),
+               # Field('inclure_cotisations_si_conso'),
+               # Field('prestations_anterieures'),
+               # Field('date_limite_paiement'),
                 Field('selection_familles'),
                 Field('famille'),
+                Field('modelimp'),
             ),
             HTML(EXTRA_SCRIPT),
         )

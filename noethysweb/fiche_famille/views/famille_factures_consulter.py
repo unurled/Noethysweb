@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Facture, Prestation
+from core.models import Facture, Prestation, ModeleImpression
 from core.utils import utils_texte
 from fiche_famille.forms.famille_factures import Formulaire
 from fiche_famille.views.famille import Onglet
@@ -85,16 +85,33 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
     template_name = "fiche_famille/famille_edit.html"
 
-    def get_context_data(self, **kwargs):
-        context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_titre'] = "Modifier les caractéristiques de la facture"
-        context['box_introduction'] = "Modifiez les caractéristiques souhaitées et cliquez sur Enregistrer. A utiliser avec précaution."
-        return context
-
     def get_form_kwargs(self, **kwargs):
         form_kwargs = super(Modifier, self).get_form_kwargs(**kwargs)
         form_kwargs["idfamille"] = self.Get_idfamille()
+
+        # Récupérer le texte du modèle d'impression de la facture
+        facture = Facture.objects.get(pk=self.kwargs["pk"])
+        modelimp_text = facture.modelimp
+
+        # Trouver l'ID du modèle d'impression correspondant au texte
+        try:
+            modele_impression = ModeleImpression.objects.get(nom=modelimp_text)
+            modelimp_id = modele_impression.pk
+        except ModeleImpression.DoesNotExist:
+            # Gérer le cas où le modèle d'impression n'est pas trouvé
+            modelimp_id = None
+
+        # Préremplir le champ "modelimp" avec l'ID du modèle d'impression
+        form_kwargs["initial"]["modelimp"] = [modelimp_id] if modelimp_id else None
+
+        print(modelimp_id)
         return form_kwargs
+
+
+    def form_valid(self, form):
+        # Enregistrer les modifications apportées à la facture
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse_lazy(self.url_consulter, kwargs={"idfamille": self.kwargs["idfamille"], "pk": self.kwargs["pk"]})
