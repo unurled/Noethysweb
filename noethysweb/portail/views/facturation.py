@@ -575,19 +575,33 @@ def get_detail_facture(request):
 def imprimer_facture(request):
     """ Imprimer une facture au format PDF """
     idfacture = int(request.POST.get("idfacture", 0))
-    idmodele_impression = int(request.POST.get("idmodele_impression", 0))
+
+    # Trouver la facture correspondante
+    try:
+        facture = Facture.objects.get(pk=idfacture)
+    except Facture.DoesNotExist:
+        return JsonResponse({"error": "La facture spécifiée n'existe pas."}, status=400)
+
+    # Récupérer le texte du champ modelimp de la facture
+    texte_modelimp = facture.modelimp
+
+    # Recherche de l'objet ModeleImpression correspondant au texte donné
+    try:
+        modele_impression = ModeleImpression.objects.get(nom=texte_modelimp)
+    except ModeleImpression.DoesNotExist:
+        return JsonResponse({"error": "Le modèle d'impression spécifié n'existe pas."}, status=400)
 
     # Importation des options d'impression
-    modele_impression = ModeleImpression.objects.get(pk=idmodele_impression)
     dict_options = json.loads(modele_impression.options)
     dict_options["modele"] = modele_impression.modele_document
 
     # Création du PDF
     from facturation.utils import utils_facturation
     facturation = utils_facturation.Facturation()
-    resultat = facturation.Impression(liste_factures=[idfacture,], dict_options=dict_options)
+    resultat = facturation.Impression(liste_factures=[idfacture], dict_options=dict_options)
 
     return JsonResponse({"nom_fichier": resultat["nom_fichier"]})
+
 
 
 class View(CustomView, TemplateView):

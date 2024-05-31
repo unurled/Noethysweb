@@ -108,7 +108,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Fieldset('Options',
                 Field('categories'),
                # Field('inclure_cotisations_si_conso'),
-               # Field('prestations_anterieures'),
+                Field('prestations_anterieures'),
                # Field('date_limite_paiement'),
                 Field('selection_familles'),
                 Field('famille'),

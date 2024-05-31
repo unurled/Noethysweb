@@ -6,7 +6,7 @@
 import json
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from core.models import MessageFacture, ModeleImpression
+from core.models import MessageFacture, ModeleImpression, Facture
 from core.data import data_modeles_emails
 from facturation.forms.factures_options_impression import Formulaire as Form_parametres
 from facturation.forms.factures_choix_modele import Formulaire as Form_modele_document
@@ -16,14 +16,17 @@ from fiche_famille.views.famille import Onglet
 
 def Impression_pdf(request):
     # Récupération des données du formulaire
-    valeurs_form_modele_impression = json.loads(request.POST.get("form_modele_impression"))
     valeurs_form_modele_document = json.loads(request.POST.get("form_modele_document"))
     valeurs_form_parametres = json.loads(request.POST.get("form_parametres"))
     idfacture = int(request.POST.get("idfacture"))
     idfamille = int(request.POST.get("idfamille"))
+    facture = Facture.objects.get(pk=idfacture)
+    modelimp_text = facture.modelimp
 
-    # Récupération du modèle d'impression
-    IDmodele_impression = int(valeurs_form_modele_impression.get("modele_impression", 0))
+    # Trouver l'ID du modèle d'impression correspondant au texte
+    modele_impression = ModeleImpression.objects.get(nom=modelimp_text)
+    IDmodele_impression = modele_impression.pk
+    print(IDmodele_impression)
 
     if IDmodele_impression:
         modele_impression = ModeleImpression.objects.get(pk=IDmodele_impression)
