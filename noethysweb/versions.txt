@@ -1,3 +1,6 @@
+Version 1.2.2.9.17 (31/05/2024)
+- finalisation amélioration facture visu
+
 Version 1.2.2.9.16 (31/05/2024)
 - finalisation amélioration facture
 
