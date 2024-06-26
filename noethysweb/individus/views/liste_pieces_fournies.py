@@ -7,6 +7,8 @@ from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Piece
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 class Page(crud.Page):
@@ -46,10 +48,24 @@ class Liste(Page, crud.Liste):
             ordering = ["date_debut"]
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
-            document_url = f'https://camps.flambeaux.org/media/{instance.document}'
+            document_url = f'/media/{instance.document}'
+
+            # Récupération des informations pertinentes pour le titre du document
+            type_piece = instance.type_piece.nom if instance.type_piece else ""
+            individu = instance.individu.nom if instance.individu else ""
+            famille = instance.famille.nom if instance.famille else ""
+
+            # Construction du titre du document pour le lien de téléchargement
+            titre_document = f"{type_piece} - {individu} - {famille}"
+
+            # Construction du lien de téléchargement avec l'icône et l'attribut download
+            bouton_telecharger = f'<a href="{document_url}" class="btn btn-primary" download="{titre_document}">Télécharger</a>'
+
             html = [
                 self.Create_bouton_ouvrir(url=document_url),
+                bouton_telecharger,
             ]
+
             return self.Create_boutons_actions(html)
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
