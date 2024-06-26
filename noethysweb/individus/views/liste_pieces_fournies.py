@@ -52,11 +52,11 @@ class Liste(Page, crud.Liste):
 
             # Récupération des informations pertinentes pour le titre du document
             type_piece = instance.type_piece.nom if instance.type_piece else ""
-            individu = instance.individu.nom if instance.individu else ""
-            famille = instance.famille.nom if instance.famille else ""
+            individu = instance.individu.prenom if instance.individu else ""
+            famille = instance.individu.nom if instance.famille else ""
 
             # Construction du titre du document pour le lien de téléchargement
-            titre_document = f"{type_piece} - {individu} - {famille}"
+            titre_document = f"{type_piece} - {individu} {famille}"
 
             # Construction du lien de téléchargement avec l'icône et l'attribut download
             bouton_telecharger = f'<a href="{document_url}" class="btn btn-primary" download="{titre_document}">Télécharger</a>'
