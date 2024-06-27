@@ -1,3 +1,6 @@
+Version 1.2.2.9.21 (27/06/2024)
+- modif affichage modèle impression
+
 Version 1.2.2.9.20 (26/06/2024)
 - modif téléchargement
 
