@@ -1,5 +1,7 @@
 Version 1.2.2.9.22 (03/07/2024
 - Intégration SendInBlue/Brevo
+- Modification bouton annulé Impression liste inscrits
+
 Version 1.2.2.9.21 (27/06/2024)
 - modif affichage modèle impression
 

@@ -52,7 +52,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
         # Affichage
         self.helper.layout = Layout(
-            Commandes(annuler_url="{% url 'consommations_toc' %}", enregistrer=False, ajouter=False,
+            Commandes(annuler_url="{% url 'individus_toc' %}", enregistrer=False, ajouter=False,
                 commandes_principales=[
                     HTML("""
                         <div class="btn-group margin-r-5">
