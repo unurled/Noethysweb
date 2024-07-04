@@ -59,10 +59,12 @@ class Liste(Page, crud.Liste):
             titre_document = f"{type_piece} - {individu} {famille}"
 
             # Construction du lien de téléchargement avec l'icône et l'attribut download
-            bouton_telecharger = f'<a href="{document_url}" class="btn btn-primary" download="{titre_document}">Télécharger</a>'
+            bouton_telecharger = f'<a href="{document_url}" class="btn btn-primary" download="{titre_document}"><i class="fa fa-download"></i></a>'
+            bouton_ouvrir = f'<a href="{document_url}" class="btn btn-primary" target="_blank"><i class="fa fa-eye"></i></a>'
+
 
             html = [
-                self.Create_bouton_ouvrir(url=document_url),
+                bouton_ouvrir,
                 bouton_telecharger,
             ]
 
