@@ -13,7 +13,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
-                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses
+                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, telecharger_plusieurs
 from fiche_individu.views import individu_inscriptions
 
 urlpatterns = [
@@ -81,7 +81,7 @@ urlpatterns = [
     path('individus/liste_pieces_manquantes', liste_pieces_manquantes.Liste.as_view(), name='liste_pieces_manquantes'),
     path('individus/liste_pieces_fournies', liste_pieces_fournies.Liste.as_view(), name='liste_pieces_fournies'),
     path('individus/pieces_supprimer_plusieurs/<str:listepk>', liste_pieces_fournies.Supprimer_plusieurs.as_view(), name='pieces_supprimer_plusieurs'),
-    path('individus/pieces_telecharger_plusieurs/<str:listepk>', liste_pieces_fournies.Telecharger_plusieurs.as_view(), name='pieces_telecharger_plusieurs'),
+    path('individus/telecharger-plusieurs', telecharger_plusieurs.Telecharger_plusieurs.as_view(), name='pieces_telecharger_plusieurs'),
 
     # Informations
     path('individus/edition_renseignements', edition_renseignements.Liste.as_view(), name='edition_renseignements'),

@@ -5,16 +5,15 @@
 
 import logging, json
 logger = logging.getLogger(__name__)
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.cache import cache
 from core.views.menu import GetMenuPrincipal
-from core.models import Organisateur, Parametre, Utilisateur, PortailMessage, PortailRenseignement
+from core.models import Organisateur, Parametre, Utilisateur, PortailMessage, PortailRenseignement, Structure, Activite, Famille, Inscription
 from core.utils import utils_parametres
 from noethysweb.version import GetVersion
-
 
 def Memorise_option(request):
     """ Mémorise dans la DB et le cache une option d'interface pour l'utilisateur """
@@ -62,15 +61,6 @@ def Memorise_page_length(request):
     return JsonResponse({"success": True})
 
 
-# def Memorise_structure(request):
-#     """ Mémorise dans la DB la structure actuelle de l'utilisateur """
-#     idstructure = request.POST.get("idstructure")
-#     request.user.structure_actuelle_id = idstructure
-#     request.user.save()
-#     return JsonResponse({"success": True})
-
-
-
 class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequiredMixin):
     """ Implémente les données de la page : menus..."""
     menu_code = ""
@@ -81,7 +71,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
     redirect_field_name = 'accueil'
 
     def test_func(self):
-        # Vérifie que l'user a une permission
+        # Vérifie que l'utilisateur a une permission
         menu_code = getattr(self, "menu_code", None)
         if menu_code and menu_code != "accueil" and not menu_code.endswith("_toc"):
             if not menu_code and hasattr(self, "url_liste"):
@@ -90,7 +80,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
                 logger.debug("Interdiction d'accéder à la page 'core.%s' : Pas de permission." % menu_code)
                 return False
 
-        # Vérifie que l'user est de type "utilisateur"
+        # Vérifie que l'utilisateur est de type "utilisateur"
         if self.request.user.categorie != "utilisateur":
             logger.debug("Interdiction d'accéder à cette page : L'utilisateur n'est pas de type 'utilisateur'.")
             return False
@@ -141,7 +131,7 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         menu_principal = GetMenuPrincipal(organisateur=organisateur, user=self.request.user)
         context['menu_principal'] = menu_principal
 
-        # Si la page est un crud, on récupère l'url de la liste en tant que menu_code
+        # Si la page est un CRUD, on récupère l'URL de la liste en tant que menu_code
         if not self.menu_code and hasattr(self, "url_liste"):
             self.menu_code = self.url_liste
 
@@ -156,16 +146,27 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         context['afficher_menu_brothers'] = False
 
         # Mémorise le fil d'ariane
-        if context['menu_actif'] != None:
+        if context['menu_actif'] is not None:
             context['breadcrumb'] = context['menu_actif'].GetBreadcrumb()
 
         # Messages du portail non lus
         context["liste_messages_non_lus"] = PortailMessage.objects.select_related("famille", "structure").filter(structure__in=self.request.user.structures.all(), utilisateur__isnull=True, date_lecture__isnull=True).order_by("date_creation")
 
-        # Renseignements à traiter
-        renseignements_attente = {validation_auto: nbre for validation_auto, nbre in PortailRenseignement.objects.filter(etat="ATTENTE").values_list("validation_auto").annotate(nbre=Count("pk"))}
-        context["nbre_renseignements_attente_validation"] = renseignements_attente.get(False, 0)
-        context["nbre_renseignements_attente_lecture"] = renseignements_attente.get(True, 0)
+        # Filtrage
+        structures = self.request.user.structures.all()
+        activites = Activite.objects.filter(structure__in=structures)
+        inscriptions = Inscription.objects.filter(activite__in=activites)
+        familles_ids = inscriptions.values_list('famille_id', flat=True).distinct()
+        familles = Famille.objects.filter(idfamille__in=familles_ids)
+
+        context["familles_liees"] = familles
+
+        # Filtrer les renseignements en fonction des familles trouvées
+        renseignements_attente = PortailRenseignement.objects.filter(etat="ATTENTE",famille__in=familles_ids,validation_auto=True).count()
+        renseignements_attente_false = PortailRenseignement.objects.filter(etat="ATTENTE",famille__in=familles_ids,validation_auto=False).count()
+
+        # Préparer les contextes
+        context["nbre_renseignements_attente_validation"] = renseignements_attente
+        context["nbre_renseignements_attente_lecture"] = renseignements_attente_false
 
         return context
-

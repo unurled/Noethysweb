@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-#  Copyright (c) 2019-2021 Ivan LUCAS.
-#  Noethysweb, application de gestion multi-activités.
-#  Distribué sous licence GNU GPL.
+# Copyright (c) 2019-2021 Ivan LUCAS.
+# Noethysweb, application de gestion multi-activités.
+# Distribué sous licence GNU GPL.
 
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
@@ -9,7 +9,12 @@ from core.views import crud
 from core.models import Piece
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-
+import zipfile
+from io import BytesIO
+from django.http import HttpResponse
+from django.views import View
+from django.shortcuts import get_object_or_404
+from core.models import Piece
 
 
 class Page(crud.Page):
@@ -20,8 +25,10 @@ class Page(crud.Page):
     objet_pluriel = "des pièces fournies"
     url_supprimer_plusieurs = "pieces_supprimer_plusieurs"
 
+
 class Liste(Page, crud.Liste):
     template_name = "individus/liste_pieces_fournies.html"
+
     def get_queryset(self):
         return Piece.objects.select_related("famille", "individu", "type_piece").filter(self.Get_filtres("Q"))
 
@@ -30,10 +37,12 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
+        context['show_download_button'] = True
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "ipresent:individu", "fscolarise:famille", "iscolarise:individu", "idpiece", "date_debut", "date_fin", "famille__nom", "individu__nom", "type_piece__nom"]
+        filtres = ["fpresent:famille", "ipresent:individu", "fscolarise:famille", "iscolarise:individu", "idpiece",
+                   "date_debut", "date_fin", "famille__nom", "individu__nom", "type_piece__nom"]
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         check = columns.CheckBoxSelectColumn(label="")
 
@@ -61,7 +70,6 @@ class Liste(Page, crud.Liste):
             bouton_telecharger = f'<a href="{document_url}" class="btn btn-primary" download="{titre_document}"><i class="fa fa-download"></i></a>'
             bouton_ouvrir = f'<a href="{document_url}" class="btn btn-primary" target="_blank"><i class="fa fa-eye"></i></a>'
 
-
             html = [
                 bouton_ouvrir,
                 bouton_telecharger,
@@ -69,7 +77,6 @@ class Liste(Page, crud.Liste):
 
             return self.Create_boutons_actions(html)
 
+
 class Supprimer_plusieurs(Page, crud.Telecharger_plusieurs):
-    pass
-class Telecharger_plusieurs(Page, crud.Telecharger_plusieurs):
     pass

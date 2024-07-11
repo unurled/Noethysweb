@@ -1,7 +1,6 @@
 {% load static %}
 {% load embed %}
 
-
 {% block styles %}
     {{ block.super }}
     {% embed 'core/widgets/datatableview/styles.html' %}
@@ -14,32 +13,32 @@
     {% endembed %}
 {% endblock %}
 
-
 {% block box_contenu %}
-
     {# Boutons de liste #}
     <div class="btn-group">
         {% for bouton in boutons_liste %}
             <a class="{{ bouton.classe }}" href="{{ bouton.href }}"><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</a>
         {% endfor %}
+        {# Ajout du bouton de téléchargement #}
+        {% if show_download_button %}
+            <button type="button" class="btn btn-primary" onclick="telechargerSelection()"><i class="fa fa-download margin-r-5"></i> Télécharger les fichiers sélectionnés</button>
+        {% endif %}
     </div>
 
     {# Filtres de liste #}
     {% if filtres_liste %}
         <ul class="todo-list" style="margin-top: 8px;">
-
-                {% for filtre in filtres_liste %}
-                    <li style="padding: 5px;">
-                        <div class="tools pull-right">
-                            <a type="button" class="btn-xs" title="Modifier ce filtre de liste" onclick="modifier_filtrer({{ filtre.idfiltre }})"><i class="fa fa-pencil"></i></a>
-                            <a type="button" class="btn-xs text-danger" title="Supprimer ce filtre de liste" href="{% url 'ajax_supprimer_filtre_liste' idfiltre=filtre.idfiltre %}"><i class="fa fa-trash-o"></i></a>
-                        </div>
-                        <span class="text text-red">
-                            <i class="fa fa-filter text-red margin-r-5"></i> {{ filtre.label_filtre }}
-                        </span>
-                    </li>
-                {% endfor %}
-
+            {% for filtre in filtres_liste %}
+                <li style="padding: 5px;">
+                    <div class="tools pull-right">
+                        <a type="button" class="btn-xs" title="Modifier ce filtre de liste" onclick="modifier_filtrer({{ filtre.idfiltre }})"><i class="fa fa-pencil"></i></a>
+                        <a type="button" class="btn-xs text-danger" title="Supprimer ce filtre de liste" href="{% url 'ajax_supprimer_filtre_liste' idfiltre=filtre.idfiltre %}"><i class="fa fa-trash-o"></i></a>
+                    </div>
+                    <span class="text text-red">
+                        <i class="fa fa-filter text-red margin-r-5"></i> {{ filtre.label_filtre }}
+                    </span>
+                </li>
+            {% endfor %}
         </ul>
     {% endif %}
 
@@ -69,7 +68,6 @@
     {% endembed %}
 
 <script>
-
     function ajouter_filtre() {
         $.ajax({
             type: "POST",
@@ -89,7 +87,7 @@
                 $("#modal_erreurs").html(data.responseJSON.erreur);
             }
         });
-    };
+    }
 
     function modifier_filtrer(idfiltre) {
         $.ajax({
@@ -109,7 +107,7 @@
                 $("#modal_erreurs").html(data.responseJSON.erreur);
             }
         });
-    };
+    }
 
     function valider_ajout_filtre () {
         var nom_champ = $('#id_champ').val();
@@ -126,11 +124,11 @@
                         valeurs[this.name].push($(this).val())
                     } else {
                         valeurs[this.name] = [$(this).val()];
-                    };
-                };
+                    }
+                }
             } else {
-                if (this.name) {valeurs[this.name] = $(this).val()};
-            };
+                if (this.name) {valeurs[this.name] = $(this).val()}
+            }
         });
         $.ajax({
             type: "POST",
@@ -147,14 +145,14 @@
                 toastr.error(data.responseJSON.erreur);
             }
         })
-    };
+    }
 
     function Actualiser_page_liste() {
         var table = new $.fn.dataTable.Api('.datatable');
         var index_page = table.page();
         table.ajax.reload();
         table.page(index_page).draw('page');
-    };
+    }
 
     function action_bouton_coche(url) {
         var listepk = get_coches();
@@ -163,6 +161,7 @@
             url: url,
             data: {
                 "liste_lignes": JSON.stringify(listepk),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
             },
             datatype: "json",
             success: function (data) {
@@ -175,9 +174,44 @@
         });
     }
 
+    function get_coches() {
+        var selectedFiles = [];
+        $('input[name="files"]:checked').each(function() {
+            selectedFiles.push($(this).val());
+        });
+        return selectedFiles;
+    }
+
+    function telechargerSelection() {
+        var selectedFiles = get_coches();
+        if (selectedFiles.length > 0) {
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': "{% url 'pieces_telecharger_plusieurs' %}",
+                'style': 'display: none;'
+            });
+            var csrfInput = $('<input>', {
+                'type': 'hidden',
+                'name': 'csrfmiddlewaretoken',
+                'value': "{{ csrf_token }}"
+            });
+            form.append(csrfInput);
+            selectedFiles.forEach(function(fileId) {
+                var input = $('<input>', {
+                    'type': 'hidden',
+                    'name': 'files',
+                    'value': fileId
+                });
+                form.append(input);
+            });
+            $('body').append(form);
+            form.submit();
+        } else {
+            alert("Veuillez sélectionner au moins un fichier à télécharger.");
+        }
+    }
 </script>
 {% endblock %}
-
 
 {% block scripts %}
     {{ block.super }}
