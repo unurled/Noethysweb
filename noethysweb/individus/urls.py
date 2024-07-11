@@ -81,6 +81,7 @@ urlpatterns = [
     path('individus/liste_pieces_manquantes', liste_pieces_manquantes.Liste.as_view(), name='liste_pieces_manquantes'),
     path('individus/liste_pieces_fournies', liste_pieces_fournies.Liste.as_view(), name='liste_pieces_fournies'),
     path('individus/pieces_supprimer_plusieurs/<str:listepk>', liste_pieces_fournies.Supprimer_plusieurs.as_view(), name='pieces_supprimer_plusieurs'),
+    path('individus/pieces_telecharger_plusieurs/<str:listepk>', liste_pieces_fournies.Telecharger_plusieurs.as_view(), name='pieces_telecharger_plusieurs'),
 
     # Informations
     path('individus/edition_renseignements', edition_renseignements.Liste.as_view(), name='edition_renseignements'),

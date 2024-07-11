@@ -1,3 +1,7 @@
+Version 1.2.2.9.24 (11/07/2024)
+- Ebauche telechargement en gros
+- Changement parametre import piece
+
 Version 1.2.2.9.23 (04/07/2024)
 - Divers modifs (pièces et structure)
 

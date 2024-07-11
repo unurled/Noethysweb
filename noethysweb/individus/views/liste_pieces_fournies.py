@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 
+
 class Page(crud.Page):
     model = Piece
     url_liste = "liste_pieces_fournies"
@@ -19,10 +20,8 @@ class Page(crud.Page):
     objet_pluriel = "des pièces fournies"
     url_supprimer_plusieurs = "pieces_supprimer_plusieurs"
 
-
 class Liste(Page, crud.Liste):
-    # model = Piece
-
+    template_name = "individus/liste_pieces_fournies.html"
     def get_queryset(self):
         return Piece.objects.select_related("famille", "individu", "type_piece").filter(self.Get_filtres("Q"))
 
@@ -70,5 +69,7 @@ class Liste(Page, crud.Liste):
 
             return self.Create_boutons_actions(html)
 
-class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+class Supprimer_plusieurs(Page, crud.Telecharger_plusieurs):
+    pass
+class Telecharger_plusieurs(Page, crud.Telecharger_plusieurs):
     pass

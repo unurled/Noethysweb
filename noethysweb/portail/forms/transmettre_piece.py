@@ -60,7 +60,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Choix de l'individu
         rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
-        self.fields['choix_individu'].choices = [(None, "La famille")] + [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
+        self.fields['choix_individu'].choices = [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
 
         # Affichage
         self.helper.layout = Layout(

@@ -112,7 +112,7 @@ class Formulaire(FormulaireBase, ModelForm):
         dict_validite = json.dumps(dict_validite)
 
         # Choix de l'individu
-        self.fields['choix_individu'].choices = [(None, "La famille")] + [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
+        self.fields['choix_individu'].choices =[(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
 
         # Date de début
         if self.instance.idpiece == None:

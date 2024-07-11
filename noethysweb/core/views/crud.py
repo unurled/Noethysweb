@@ -13,7 +13,7 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Count, ProtectedError
 from django.contrib.admin.utils import NestedObjects
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
 from core.utils import utils_texte, utils_historique
@@ -483,10 +483,6 @@ class Supprimer(BaseView, DeleteView):
                 objet.ordre = ordre
                 objet.save()
 
-
-
-
-
 class Supprimer_plusieurs(BaseView, CustomView, TemplateView):
     template_name = "core/crud/confirm_delete_in_box.html"
     verbe_action = "Supprimer"
@@ -594,3 +590,67 @@ class Dupliquer(CustomView, TemplateView):
         if url:
             messages.add_message(self.request, messages.INFO, "L'objet dupliqué vient d'être ouvert")
         return HttpResponseRedirect(url if url else self.get_success_url())
+
+class Telecharger_plusieurs(TemplateView):
+    template_name = "core/crud/confirm_download_in_box.html"
+    verbe_action = "Télécharger"
+    nom_action = "Téléchargement"
+    check_protections = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['box_titre'] = f"Télécharger {self.objet_pluriel}"
+        context['box_introduction'] = None
+        context['selection_multiple'] = True
+        context['liste_objets'] = self.get_objets()
+        context['model'] = self.model
+        context['erreurs_protection'] = []
+        context['verbe_action'] = self.verbe_action
+        context['nom_action'] = self.nom_action
+        return context
+
+    def get_objets(self):
+        listepk = [int(id) for id in self.kwargs.get("listepk", "").split(";")]
+        return self.model.objects.filter(pk__in=listepk)
+
+    def post(self, request, **kwargs):
+        objets = self.get_objets()
+
+        if hasattr(self, "Avant_suppression"):
+            if not self.Avant_suppression(objets=objjets):
+                return HttpResponseRedirect(self.get_success_url(), status=303)
+
+        # Crée des liens de téléchargement
+        telechargement_urls = [f'/media/{objet.document}' for objet in objets]
+        script = """
+            <html>
+            <head><title>Téléchargement</title></head>
+            <body>
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    var urls = %s;
+                    urls.forEach(function(url) {
+                        var link = document.createElement('a');
+                        link.href = url;
+                        link.download = url.substring(url.lastIndexOf('/') + 1);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                     // Redirige vers la page de liste immédiatement
+                    window.location.href = "%s";
+                });
+            </script>
+            <p>Téléchargements en cours...</p>
+            </body>
+            </html>
+        """ % (str(telechargement_urls), self.get_success_url())
+
+        # Ajoute un message de succès
+        messages.add_message(self.request, messages.SUCCESS, 'Téléchargements initiés avec succès')
+
+        # Retourne une réponse HTTP avec le script JavaScript
+        return HttpResponse(script)
+
+    def get_success_url(self):
+        return reverse('liste_pieces_fournies')
