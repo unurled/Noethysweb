@@ -72,7 +72,6 @@ class Page(Onglet):
         context['onglet_actif'] = "inscriptions"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-plus"},
-            {"label": "Appliquer un forfait daté", "classe": "btn btn-default", "href": reverse_lazy("individu_appliquer_forfait_date", kwargs={'idindividu': self.Get_idindividu(), 'idfamille': self.kwargs.get('idfamille', None)}), "icone": "fa fa-calendar-plus-o"},
         ]
         return context
 

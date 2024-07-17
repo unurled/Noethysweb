@@ -15,26 +15,33 @@ from django.contrib import messages
 from django.db.models import Q, Count
 from crispy_forms.utils import render_crispy_form
 from core.views import crud
-from core.models import PortailRenseignement, Piece, TypePiece, Inscription, Individu, Rattachement, NomTarif, Tarif
+from core.models import PortailRenseignement, Piece, TypePiece, Inscription, Individu, Rattachement, NomTarif, Tarif, Activite
 from portail.forms.inscrire_activite import Formulaire, Formulaire_extra
 from portail.views.base import CustomView
 from django.forms import formset_factory
 
+def Get_activites_par_structure(request):
+        structure_id = request.POST.get('structure_id')
+        #print(structure_id)
+        activites = Activite.objects.filter(structure=structure_id, visible=True)
+        activites_data = [{'id': activite.idactivite, 'nom': activite.nom} for activite in activites]
+        #print(activites_data)
+        return JsonResponse({'activites': activites_data})
 
 def Get_form_extra(request):
-    """ Retourne un form avec le groupe et les documents """
-    form = Formulaire(request.POST, request=request)
-    if not form.is_valid():
-        return JsonResponse({"form_html": None})
+        """ Retourne un form avec le groupe et les documents """
+        form = Formulaire(request.POST, request=request)
+        if not form.is_valid():
+            return JsonResponse({"form_html": None})
 
-    # Création du contexte
-    context = {}
-    context.update(csrf(request))
+        # Création du contexte
+        context = {}
+        context.update(csrf(request))
 
-    # Rendu du form en html
-    form = Formulaire_extra(request=request, activite=form.cleaned_data["activite"], famille=form.cleaned_data["famille"], individu=form.cleaned_data["individu"])
-    form_html = render_crispy_form(form, context=context)
-    return JsonResponse({"form_html": form_html})
+        # Rendu du form en html
+        form = Formulaire_extra(request=request, activite=form.cleaned_data["activite"], famille=form.cleaned_data["famille"], individu=form.cleaned_data["individu"])
+        form_html = render_crispy_form(form, context=context)
+        return JsonResponse({"form_html": form_html})
 
 
 def Valid_form(request):

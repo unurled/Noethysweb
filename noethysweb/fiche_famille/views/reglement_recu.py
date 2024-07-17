@@ -22,10 +22,9 @@ def Generer_recu(donnees={}):
     infos_famille = reglement.famille.Get_infos()
 
     # Importation du modèle d'impression
-    if donnees["idmodele_impression"]:
-        modele_impression = ModeleImpression.objects.get(pk=donnees["idmodele_impression"])
-        donnees["idmodele"] = modele_impression.modele_document_id
-        donnees.update(json.loads(modele_impression.options))
+    modele_impression = ModeleImpression.objects.get(pk=2)
+    donnees["idmodele"] = modele_impression.modele_document_id
+    donnees.update(json.loads(modele_impression.options))
 
     # Préparation des valeurs de fusion
     dict_donnees = {

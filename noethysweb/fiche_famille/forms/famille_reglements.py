@@ -55,6 +55,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields['payeur'].queryset = Payeur.objects.filter(famille_id=idfamille).order_by("nom")
         self.fields['payeur'].widget.attrs.update({"donnees_extra": {"idfamille": idfamille}, "url_ajax": "ajax_modifier_payeur",
                                                    "textes": {"champ": "Nom du payeur", "ajouter": "Saisir un payeur", "modifier": "Modifier un payeur"}})
+        parent_payeur = Payeur.objects.get(idpayeur=3)
+        self.fields['payeur'].initial = parent_payeur
 
         # Récupération des infos du dernier règlement saisi
         if not self.instance.idreglement:
@@ -101,7 +103,6 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset('Options',
                 Field('observations'),
-                Field('numero_quittancier'),
             ),
             Fieldset('Encaissement',
                 Field('compte'),

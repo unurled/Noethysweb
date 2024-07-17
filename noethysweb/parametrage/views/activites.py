@@ -52,10 +52,11 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         periode = columns.DisplayColumn("Validité", sources="date_fin", processor='Get_validite')
         nbre_inscrits = columns.TextColumn("Inscrits", sources="nbre_inscrits")
+        visible = columns.TextColumn("Visible sur le portail", sources="visible", processor='Format_visible')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits", "actions"]
+            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits", "visible", "actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -80,13 +81,20 @@ class Liste(Page, crud.Liste):
             ]
             return self.Create_boutons_actions(html)
 
+        def Format_visible(self, instance, *args, **kwargs):
+            return "Oui" if instance.visible else "Non"
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
 
     def get_success_url(self):
-        """ Renvoie vers la page résumé de l'activité """
-        messages.add_message(self.request, messages.SUCCESS, 'Ajout enregistré')
+        """ Renvoie vers la page résumé de l'activité et crée une catégorie de tarif liée à l'activité créée """
+        messages.add_message(self.request, messages.SUCCESS, 'Ajout enregistré !')
+        # Crée une nouvelle catégorie de tarif STANDARD
+        categorie_tarif = CategorieTarif.objects.create(
+            nom="STANDARD",
+            activite=self.object
+        )
         return reverse_lazy("activites_resume", kwargs={'idactivite': self.object.idactivite})
 
 
@@ -115,8 +123,8 @@ class Onglet(CustomView):
     #   {"code": "calendrier", "label": "Calendrier", "icone": "fa-calendar", "url": "activites_calendrier"},
     #   {"code": "evenements", "label": "Evénements", "icone": "fa-calendar-times-o", "url": "activites_evenements_liste"},
         {"rubrique": "Tarifs"},
-        {"code": "categories_tarifs", "label": "Catégories de tarifs", "icone": "fa-euro", "url": "activites_categories_tarifs_liste"},
-        {"code": "noms_tarifs", "label": "Noms de tarifs", "icone": "fa-euro", "url": "activites_noms_tarifs_liste"},
+    #    {"code": "categories_tarifs", "label": "Catégories de tarifs", "icone": "fa-euro", "url": "activites_categories_tarifs_liste"},
+        {"code": "noms_tarifs", "label": "Catégories de tarifs", "icone": "fa-euro", "url": "activites_noms_tarifs_liste"},
         {"code": "tarifs", "label": "Tarifs", "icone": "fa-euro", "url": "activites_tarifs_liste"},
         {"rubrique": "Portail"},
         {"code": "portail_parametres", "label": "Paramètres", "icone": "fa-gear", "url": "activites_portail_parametres"},

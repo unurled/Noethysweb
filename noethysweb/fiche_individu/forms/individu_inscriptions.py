@@ -15,13 +15,14 @@ from core.utils.utils_commandes import Commandes
 from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse, Tarif, CategorieTarif, Prestation, TarifLigne
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2Widget
+from core.widgets import Select_many_avec_plus
 from parametrage.forms import questionnaires
 from django.utils import timezone
 
 
 class Formulaire(FormulaireBase, ModelForm):
     activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget(), queryset=Activite.objects.none(), required=True)
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
+    date_debut = forms.DateField(label="Date d'inscription", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
     action_conso = forms.ChoiceField(label="Action", required=False, choices=[
         (None, "------"),
@@ -31,7 +32,7 @@ class Formulaire(FormulaireBase, ModelForm):
         ("MODIFIER_RIEN", "Ne pas modifier les consommations existantes"),
     ])
     date_modification = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Renseignez la date de début d'application de la modification.")
-
+    tarifs = forms.ModelMultipleChoiceField(label="Tarifs", widget=Select_many_avec_plus({"afficher_bouton_ajouter": False, "url_ajax": "ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Ajouter une maladie"}}), queryset=Tarif.objects.all(), required=False, help_text="Cliquez sur le champ ci-dessus.")
     class Meta:
         model = Inscription
         fields = "__all__"
@@ -75,7 +76,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.fields["categorie_tarif"].queryset = categories_tarif
                 premiere_categorie = categories_tarif.order_by('idcategorie_tarif').first()
                 self.fields["categorie_tarif"].initial = premiere_categorie.pk
-            print(premiere_categorie)
+           # print(premiere_categorie)
 
         idtarifs = self.idtarifs
 
@@ -91,7 +92,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
             # Pré-sélectionner les options dans le champ "tarifs" avec les objets Tarif récupérés
             self.fields["tarifs"].initial = tarifs_objects
-            print(descriptions_tarifs)
+           # print(descriptions_tarifs)
 
         # Si modification
         nbre_conso = 0
@@ -117,7 +118,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('famille', value=idfamille) if idfamille else Field("famille"),
             Fieldset("Période de validité",
                 Field("date_debut"),
-                Field("date_fin"),
             ),
             Fieldset("Activité",
                 Field('activite'),
@@ -187,7 +187,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=int(key.split("_")[1]),
                                                               defaults={'reponse': valeur})
         premiere_categorie_id = self.fields["categorie_tarif"].initial  # Récupérer l'identifiant de la première catégorie de tarif définie dans __init__
-        print(premiere_categorie_id)
+       # print(premiere_categorie_id)
         premiere_categorie = CategorieTarif.objects.get(pk=premiere_categorie_id)  # Récupérer l'objet CategorieTarif correspondant à partir de l'identifiant
         tarifs_selectionnes = self.cleaned_data.get('tarifs', None)
         idtarifs_str = ','.join(str(tarif.idtarif) for tarif in tarifs_selectionnes)

@@ -18,15 +18,15 @@ class Page(Onglet):
     url_ajouter = "activites_noms_tarifs_ajouter"
     url_modifier = "activites_noms_tarifs_modifier"
     url_supprimer = "activites_noms_tarifs_supprimer"
-    description_liste = "Vous pouvez saisir ici un nom de tarif pour l'activité."
-    description_saisie = "Saisissez toutes les informations concernant le nom de tarif à saisir et cliquez sur le bouton Enregistrer."
-    objet_singulier = "un nom de tarif"
-    objet_pluriel = "des noms de tarifs"
+    description_liste = "Vous pouvez saisir ici les différentes catégories de tarifs (séjour, transport, soutien,...) pour l'activité."
+    description_saisie = "Saisissez toutes les informations concernant la catégorie de tarifs à saisir et cliquez sur le bouton Enregistrer."
+    objet_singulier = "une catégorie de tarifs"
+    objet_pluriel = "des catégories de tarifs"
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
-        context['box_titre'] = "Noms de tarifs"
+        context['box_titre'] = "Catégories de tarifs"
         context['onglet_actif'] = "noms_tarifs"
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-plus"},

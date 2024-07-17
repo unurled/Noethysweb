@@ -330,6 +330,7 @@ class Structure(models.Model):
     configuration_sms = models.ForeignKey(ConfigurationSMS, verbose_name="Configuration SMS", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une configuration SMS dans la liste. Il est possible de créer de nouvelles configurations depuis le menu Paramétrage > Configurations SMS.")
     messagerie_active = models.BooleanField(verbose_name="Les familles sont autorisées à converser avec cette structure depuis la rubrique Contact du portail.", default=True)
     afficher_coords = models.BooleanField(verbose_name="Afficher les coordonnées de la structure sur le portail.", default=True)
+    visible = models.BooleanField(verbose_name="Visible sur le portail", default=True)
 
     class Meta:
         db_table = 'structures'
@@ -1138,7 +1139,8 @@ class Activite(models.Model):
     site = models.CharField(verbose_name="site internet", max_length=300, blank=True, null=True)
     logo_org = models.BooleanField(verbose_name="Logo identique à celui de l'organisateur", default=True)
     logo = ResizedImageField(verbose_name="Logo", upload_to=get_uuid_path, blank=True, null=True)
-    pay_org = models.BooleanField(verbose_name="Activation paiement par lien externe", default=True)
+    pay_org = models.BooleanField(verbose_name="Activation paiement par lien externe", default=False)
+    visible = models.BooleanField(verbose_name="Visible sur le portail", default=True)
     pay = models.CharField(verbose_name="URL complet de paiement", max_length=200, blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
@@ -1155,10 +1157,10 @@ class Activite(models.Model):
     # psu_tarif_forfait = models.IntegerField(blank=True, null=True)
     # psu_etiquette_rtt = models.IntegerField(blank=True, null=True)
     choix_affichage_inscriptions = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser"), ("PERIODE", "Autoriser sur la période suivante")]
-    portail_inscriptions_affichage = models.CharField(verbose_name="Inscriptions autorisées", max_length=100, choices=choix_affichage_inscriptions, default="JAMAIS")
+    portail_inscriptions_affichage = models.CharField(verbose_name="Inscriptions autorisées", max_length=100, choices=choix_affichage_inscriptions, default="TOUJOURS")
     portail_inscriptions_date_debut = models.DateTimeField(verbose_name="Date de début d'affichage", blank=True, null=True)
     portail_inscriptions_date_fin = models.DateTimeField(verbose_name="Date de fin d'affichage", blank=True, null=True)
-    portail_inscriptions_imposer_pieces = models.BooleanField(verbose_name="Imposer le téléchargement des pièces à fournir", default=False)
+    portail_inscriptions_imposer_pieces = models.BooleanField(verbose_name="Imposer le téléchargement des pièces à fournir", default=True)
     portail_inscriptions_bloquer_si_complet = models.BooleanField(verbose_name="Empêcher l'inscription si activité complète", default=False)
     choix_affichage_reservations = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser")]
     portail_reservations_affichage = models.CharField(verbose_name="Réservations autorisées", max_length=100, choices=choix_affichage_reservations, default="JAMAIS")

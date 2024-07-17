@@ -39,32 +39,36 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idinscription", "famille__nom", "individu__nom", "individu__prenom", "individu__ville_resid", "famille__ville_resid", "date_debut", "date_fin", "activite__nom", "groupe__nom", "statut", "categorie_tarif__nom"]
+        filtres = ["ipresent:individu", "fpresent:famille", "iscolarise:individu", "fscolarise:famille", "idinscription", "famille__nom", "individu__nom", "individu__prenom", "individu__ville_resid", "famille__ville_resid", "date_debut", "date_fin", "activite__nom", "groupe__nom", "statut"]
         check = columns.CheckBoxSelectColumn(label="")
         actions = columns.TextColumn("Actions", sources=None, processor="Get_actions_speciales")
         activite = columns.TextColumn("Activité", sources=["activite__nom"])
         groupe = columns.TextColumn("Groupe", sources=["groupe__nom"])
-        categorie_tarif = columns.TextColumn("Catégorie de tarif", sources=["categorie_tarif__nom"])
         individu = columns.CompoundColumn("Individu", sources=["individu__nom", "individu__prenom"])
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
+        tarif = columns.TextColumn("Tarifs", processor='format_tarif')
         individu_ville = columns.TextColumn("Ville de l'individu", processor="Get_ville_individu")
         famille_ville = columns.TextColumn("Ville de la famille", processor="Get_ville_famille")
         mail_famille = columns.TextColumn("Email famille", processor='Get_mail_famille')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idinscription", "date_debut", "date_fin", "individu", "famille", "activite", "groupe", "categorie_tarif", "individu_ville", "famille_ville", "mail_famille", "statut"]
+            columns = ["check", "idinscription", "date_debut", "individu", "famille", "activite", "groupe", "tarif", "individu_ville", "famille_ville", "mail_famille", "statut"]
             hidden_columns = ["famille_ville", "mail_famille"]
             processors = {
                 "date_debut": helpers.format_date("%d/%m/%Y"),
-                "date_fin": helpers.format_date("%d/%m/%Y"),
                 "statut": "Formate_statut",
             }
             labels = {
-                "date_debut": "Début",
-                "date_fin": "Fin",
+                "date_debut": "Date d'inscription",
             }
             ordering = ["individu"]
+
+        def format_tarif(self, instance, *args, **kwargs):
+            tarifs = instance.tarifs.all()
+            descriptions = [tarif.description for tarif in tarifs]
+            result = ' // '.join(descriptions)
+            return result
 
         def Formate_statut(self, instance, *args, **kwargs):
             if instance.statut == "attente":

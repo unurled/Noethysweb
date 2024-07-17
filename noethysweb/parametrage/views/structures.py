@@ -44,10 +44,12 @@ class Liste(Page, crud.Liste):
         filtres = ['idstructure', 'nom']
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         nbre_activites = columns.TextColumn("Activités associées", sources="nbre_activites")
+        visible = columns.TextColumn("Visible sur le portail", sources="visible", processor='Format_visible')
+
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idstructure', 'nom', 'nbre_activites']
+            columns = ['idstructure', 'nom', 'nbre_activites', 'visible']
             ordering = ['nom']
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
@@ -63,6 +65,8 @@ class Liste(Page, crud.Liste):
                 html = ["<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>",]
             return self.Create_boutons_actions(html)
 
+        def Format_visible(self, instance, *args, **kwargs):
+            return "Oui" if instance.visible else "Non"
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire

@@ -128,18 +128,18 @@ class Formulaire(FormulaireBase, ModelForm):
                     id="bloc_periode"
                 ),
             ),
-            Fieldset("Groupes d'activités",
-                Field("groupes_activites"),
-            ),
+         #   Fieldset("Groupes d'activités",
+         #       Field("groupes_activites"),
+         #   ),
             Fieldset("Inscriptions",
                 Field("type_nbre_inscrits"),
                 Field("nbre_inscrits_max"),
                 Field("inscriptions_multiples"),
             ),
-            Fieldset("Logo",
-                Field("type_logo"),
-                Field("logo"),
-            ),
+          #  Fieldset("Logo",
+          #      Field("type_logo"),
+          #      Field("logo"),
+          #  ),
             Fieldset("Coordonnées",
                 Field("type_coords"),
                 Div(
@@ -147,9 +147,9 @@ class Formulaire(FormulaireBase, ModelForm):
                     Field('cp'),
                     Field('ville'),
                     Field('tel'),
-                    Field('fax'),
-                    Field('mail'),
-                    Field('site'),
+            #        Field('fax'),
+            #        Field('mail'),
+            #        Field('site'),
                     id='bloc_coords',
                 ),
             Fieldset("Paiement CB via un lien externe",
@@ -157,14 +157,14 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("pay"),
             ),
             ),
-            Fieldset("Options",
-                Field("regie"),
-                Field("code_comptable"),
-                Field("code_analytique"),
-                Field("code_produit_local"),
-                Field("service1"),
-                Field("service2"),
-            ),
+           # Fieldset("Options",
+           #     Field("regie"),
+           #     Field("code_comptable"),
+           #     Field("code_analytique"),
+           #     Field("code_produit_local"),
+           #     Field("service1"),
+           #     Field("service2"),
+           # ),
             HTML(EXTRA_SCRIPT),
         )
 
@@ -195,13 +195,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.cleaned_data["nbre_inscrits_max"] = None
 
         # Logo
-        if self.cleaned_data["type_logo"] == "ORGANISATEUR":
             self.cleaned_data["logo_org"] = True
-        else:
-            if self.cleaned_data["logo"] == None:
-                self.add_error('logo', "Vous devez charger un logo")
-                return
-            self.cleaned_data["logo_org"] = False
 
         # Coordonnées
         if self.cleaned_data["type_coords"] == "ORGANISATEUR":

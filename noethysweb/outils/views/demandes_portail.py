@@ -189,6 +189,7 @@ class Liste(Page, crud.Liste):
         context['boutons_coches'] = json.dumps([
             {"id": "bouton_tout_valider", "action": "tout_valider()", "title": "Tout valider les demandes cochées", "label": "<i class='fa fa-check margin-r-5'></i>Tout valider"},
         ])
+        #Intéressant pour les boutons
         return context
 
     class datatable_class(MyDatatable):
@@ -379,29 +380,28 @@ class Liste(Page, crud.Liste):
             if instance.code == "inscrire_activite":
                 if not hasattr(self, "dict_activites"):
                     self.dict_activites = {activite.pk: activite.nom for activite in Activite.objects.all()}
+                if not hasattr(self, "dict_groupes"):
                     self.dict_groupes = {groupe.pk: groupe.nom for groupe in Groupe.objects.all()}
+                if not hasattr(self, "dict_tarifs"):
+                    self.dict_tarifs = {tarif.pk: tarif.nom for tarif in CategorieTarif.objects.all()}
 
-                    # Extraire chaque valeur
-                    valeurs = valeur.split(";")
+                # Extraire chaque valeur
+                valeurs = valeur.split(";")
 
-                    # Première valeur (ID de l'activité)
-                    idactivite = valeurs[0]
+                # Première valeur (ID de l'activité)
+                idactivite = valeurs[0] if len(valeurs) > 0 else None
 
-                    # Deuxième valeur (ID du groupe)
-                    idgroupe = valeurs[1]
+                # Deuxième valeur (ID du groupe)
+                idgroupe = valeurs[1] if len(valeurs) > 1 else None
 
-                    # Troisième valeur (liste d'IDs de tarifs)
-                    idstarifs = json.loads(valeurs[2])
+                # Troisième valeur (liste d'IDs de tarifs)
+                idstarifs = json.loads(valeurs[2]) if len(valeurs) > 2 else []
 
-                    # Affichage des valeurs
-                    print("ID de l'activité :", idactivite)
-                    print("ID du groupe :", idgroupe)
-                    print("IDs de tarifs :")
+                # Récupérer les noms correspondants
+                activite_nom = self.dict_activites.get(int(idactivite), "?") if idactivite else "?"
+                groupe_nom = self.dict_groupes.get(int(idgroupe), "?") if idgroupe else "?"
+                tarifs_noms = ", ".join([self.dict_tarifs.get(int(idtarif), "?") for idtarif in idstarifs])
 
-                    # Itérer sur les IDs de tarifs
-                    for idtarif in idstarifs:
-                        print("-", idtarif)
+                return f"{activite_nom} ({groupe_nom})"
 
-                    activite_nom = self.dict_activites.get(int(idactivite), "?")
-                    groupe_nom = self.dict_groupes.get(int(idgroupe), "?")
-                    return "%s (%s)" % (activite_nom, groupe_nom)
+            return str(valeur)

@@ -57,14 +57,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>Ajouter un nouvel individu</h1>
+        <h1>Ajouter un nouvel enfant</h1>
         <form method="post">
             {% csrf_token %}
             <label for="id_nom">Nom :</label>
             {{ form.nom }}
             <label for="id_prenom">Prénom :</label>
             {{ form.prenom }}
-            <button type="submit">Ajouter un individu</button>
+            <button type="submit">Ajouter un enfant</button>
         </form>
     </div>
 </body>

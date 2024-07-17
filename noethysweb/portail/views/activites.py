@@ -57,6 +57,6 @@ class View(CustomView, TemplateView):
         context["demandes_inscriptions_attente"] = demandes
 
         # Vérifie si des activités sont ouvertes à l'inscription
-        context["activites_ouvertes_inscription"] = Activite.objects.filter((Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))).exists()
+        context["activites_ouvertes_inscription"] = Activite.objects.filter((Q(visible=True) & Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))).exists()
 
         return context

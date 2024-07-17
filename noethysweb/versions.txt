@@ -1,3 +1,17 @@
+Version 1.2.2.9.26 (17/07/2024)
+- Amélioration affichage historique
+- Amélioration affichage pièces
+- Amélioration affichage liste inscriptions
+- Amélioration affichage modifier inscription
+- Bouton télécharger dans la fiche famille pour les pièces
+- Changement texte ajout individu & parent
+- Filtrage pièces en fonction du user
+- Résolution problème reçu sur le portail
+- Clean parametre activité
+- Ajout field Visible pour afficher ou non l'activité sur le portail pour les inscriptions
+- Ajout field Visible pour afficher ou non la structure sur le portail pour les inscriptions
+- Intégration de la structure lors de l'inscription à une activité sur le portail
+
 Version 1.2.2.9.25 (11/07/2024)
 - Téléchargement en gros des pièces OK
 - Modif Nb historique

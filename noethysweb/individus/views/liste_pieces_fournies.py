@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Piece
+from core.models import Piece, Activite, Inscription
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import zipfile
@@ -15,6 +15,7 @@ from django.http import HttpResponse
 from django.views import View
 from django.shortcuts import get_object_or_404
 from core.models import Piece
+from django.db.models import Q
 
 
 class Page(crud.Page):
@@ -30,7 +31,19 @@ class Liste(Page, crud.Liste):
     template_name = "individus/liste_pieces_fournies.html"
 
     def get_queryset(self):
-        return Piece.objects.select_related("famille", "individu", "type_piece").filter(self.Get_filtres("Q"))
+        # Récupérez les structures auxquelles l'utilisateur a accès
+        structures_utilisateur = self.request.user.structures.all()
+
+        # Récupérez les activités associées à ces structures
+        activites_utilisateur = Activite.objects.filter(structure__in=structures_utilisateur)
+
+        # Récupérez les familles ayant des inscriptions à ces activités
+        familles_avec_inscription = Inscription.objects.filter(activite__in=activites_utilisateur).values_list(
+            'famille', flat=True).distinct()
+
+        # Filtrer les pièces basées sur ces familles
+        return Piece.objects.select_related("famille", "individu", "type_piece") \
+            .filter(famille__in=familles_avec_inscription)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -52,14 +65,20 @@ class Liste(Page, crud.Liste):
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
+                'type_piece': 'format_type_piece',
             }
             ordering = ["date_debut"]
+
+        def format_type_piece(self, instance, *args, **kwargs):
+            result = instance.type_piece.nom if instance.type_piece else instance.titre
+           #print(f"Formatted type_piece for instance {instance.idpiece}: {result}")
+            return result
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             document_url = f'/media/{instance.document}'
 
             # Récupération des informations pertinentes pour le titre du document
-            type_piece = instance.type_piece.nom if instance.type_piece else ""
+            type_piece = instance.type_piece.nom if instance.type_piece else instance.titre
             individu = instance.individu.prenom if instance.individu else ""
             famille = instance.individu.nom if instance.famille else ""
 
