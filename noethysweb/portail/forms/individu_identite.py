@@ -19,7 +19,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Individu
-        fields = ["civilite", "nom", "nom_jfille", "prenom", "date_naiss", "cp_naiss", "ville_naiss", "type_sieste"]
+        fields = ["civilite", "nom", "nom_jfille", "prenom", "date_naiss", "cp_naiss", "ville_naiss", "type_sieste", "statut"]
         widgets = {
             'cp_naiss': CodePostal(attrs={"id_ville": "id_ville_naiss"}),
             'ville_naiss': Ville(attrs={"id_codepostal": "id_cp_naiss"}),
@@ -52,6 +52,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Champs affichables
         self.liste_champs_possibles = [
             {"titre": _("Etat-civil"), "champs": ["civilite", "nom", "prenom"]},
+            {"titre": _("Statut dans le Mouvement"), "champs": ["statut"]},
             {"titre": _("Naissance"), "champs": ["date_naiss", "cp_naiss", "ville_naiss"]},
             {"titre": _("Divers"), "champs": ["type_sieste"]},
         ]

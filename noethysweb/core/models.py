@@ -131,7 +131,7 @@ DICT_COLONNES_TARIFS = {
     "ajustement": {"label": "Majoration/Déduction", "largeur": 75, "editeur": "decimal4", "infobulle": "Montant à majorer ou à déduire sur le tarif"},
 }
 
-CATEGORIES_RATTACHEMENT = [(1, "Représentant"), (2, "Enfant"), (3, "Contact")]
+CATEGORIES_RATTACHEMENT = [(1, "Adulte"), (2, "Enfant"), (3, "Contact")]
 
 LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("individu", "Individu"),
@@ -1144,7 +1144,8 @@ class Activite(models.Model):
     pay = models.CharField(verbose_name="URL complet de paiement", max_length=200, blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début", blank=True, null=True)
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    # public = models.CharField(blank=True, null=True)
+    public_liste = [(0, "Parents"), (1, "Chef/taine"), (2, "Chef/taine de groupe - Directeur/trice"), (3, "Délégué(e) Local"), (4, "Ami(e)"), (5, "Jeunes"), (6, "Tous les adultes sauf les parents")]
+    public = models.IntegerField(verbose_name=_("Public destinataire"), choices=public_liste, blank=False, null=False, default=5)
     vaccins_obligatoires = models.BooleanField(verbose_name="Vaccinations obligatoires", default=False)
     assurance_obligatoire = models.BooleanField(verbose_name="Assurance obligatoire", default=False)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
@@ -1183,7 +1184,7 @@ class Activite(models.Model):
     reattribution_adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez l'adresse d'expédition d'emails qui sera utilisée pour envoyer une notification de réattribution de places à la famille.")
     reattribution_delai = models.IntegerField(verbose_name="Délai de réattribution", blank=True, null=True, choices=[(1, "1 jour"), (2, "2 jours"), (3, "3 jours"), (4, "4 jours"), (5, "5 jours"), (7, "1 semaine"), (14, "2 semaines")], default=2, help_text="Sélectionnez le nombre de jours jusqu'auquel il est possible de réattribuer des places.")
     reattribution_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution.")
-
+    num_decla= models.CharField(verbose_name="Numéro de déclaration de l'activité", max_length=200, blank=True, null=True)
     class Meta:
         db_table = 'activites'
         verbose_name = "activité"
@@ -1659,6 +1660,8 @@ class Individu(models.Model):
     type_garde_choix = [(1, "Mère"), (2, "Père"), (3, "Garde alternée"), (4, "Autre personne")]
     type_garde = models.IntegerField(verbose_name=_("Type de garde"), choices=type_garde_choix, blank=True, null=True)
     info_garde = models.TextField(verbose_name=_("Information sur la garde"), blank=True, null=True)
+    resp_flbx_liste = [(0, "Parent"), (1, "Chef/taine"), (2, "Chef/taine de groupe - Directeur/trice"), (3, "Délégué(e) Local"), (4, "Ami(e)"), (5, "Jeunes")]
+    statut = models.IntegerField(verbose_name=_("Statut"), choices=resp_flbx_liste, blank=True, null=True, default=0)
 
     class Meta:
         db_table = 'individus'

@@ -103,6 +103,13 @@ def Valid_form(request):
         if groupe.nbre_inscrits_max and places_prises["total_groupe"] >= groupe.nbre_inscrits_max:
             return JsonResponse({"erreur": "Ce groupe est déjà complet"}, status=401)
 
+    if activite.public == 5 and individu.statut != 5:
+        return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
+
+    if activite.public in [1, 2, 3, 4, 6] and individu.statut not in [1, 2, 3, 4]:
+        return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
+
+
     # Enregistrement de la demande
     demande = form.save()
     demande.nouvelle_valeur = json.dumps("%d;%d;%s" % (activite.pk, groupe.pk, json.dumps(id_tarifs_selectionnes)),cls=DjangoJSONEncoder)

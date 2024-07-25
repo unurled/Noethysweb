@@ -52,7 +52,7 @@ def Generer_recu(donnees={}):
         }
 
     if donnees["afficher_prestations"]:
-        prestations = Ventilation.objects.values('prestation', 'prestation__date', 'prestation__label', 'prestation__activite__nom', 'prestation__individu__nom', 'prestation__individu__prenom').filter(reglement_id=donnees["idreglement"]).annotate(total=Sum("montant"))
+        prestations = Ventilation.objects.values('prestation', 'prestation__date', 'prestation__label', 'prestation__activite__nom', 'prestation__activite__date_debut', 'prestation__activite__date_fin', 'prestation__activite__num_decla',  'prestation__individu__nom', 'prestation__individu__prenom').filter(reglement_id=donnees["idreglement"]).annotate(total=Sum("montant"))
         dict_donnees["prestations"] = prestations
 
     # Récupération des infos de base individus et familles

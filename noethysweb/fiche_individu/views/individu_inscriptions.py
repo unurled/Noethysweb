@@ -200,7 +200,7 @@ class Ajouter(Page, crud.Ajouter):
         # Sauvegarde de l'aide
         self.object = form.save()
         messages.add_message(self.request, messages.SUCCESS, "L'inscription a bien été enregistrée")
-
+        messages.add_message(self.request, messages.SUCCESS, "L'émail de confirmation de l'inscription a bien été envoyé.")
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -278,7 +278,6 @@ class Modifier(Page, crud.Modifier):
                 for conso in consommations:
                     grille.Modifier(criteres={"idconso": conso.pk}, modifications={"tarifs": form.cleaned_data["tarifs"].pk})
                 grille.Enregistrer()
-
         return super(Modifier, self).form_valid(form)
 
 

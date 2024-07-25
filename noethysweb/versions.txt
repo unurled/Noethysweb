@@ -1,3 +1,14 @@
+Version 1.2.2.9.28 (23/07/2024)
+- Ajout multiple pièces
+- Envoi mail de confirmation d'inscription
+- résolution beug reçus
+- Ajout statut à individu et modif depuis utilisateur et portail
+- Ajout procédure pour convertir les jeunes avec le statuts 5 en fonction de la catégorie 2
+- Ajout statut lors de la création d'un enfant/parent
+- Ajout statut dans les demandes du portail
+- Modif du tableau pour les reçus de règlement
+- Ajout du champ num_decla dans Activite
+
 Version 1.2.2.9.27 (18/07/2024)
 - Ajout migration de la version 1.2.2.9.26
 

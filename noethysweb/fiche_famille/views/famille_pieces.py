@@ -14,6 +14,8 @@ from django.views.generic.base import RedirectView
 from django.contrib import messages
 from individus.utils import utils_pieces_manquantes
 from django.db.models import Q
+from django.shortcuts import render, redirect
+
 
 
 class Page(Onglet):
@@ -131,7 +133,33 @@ class Liste(Page, crud.Liste):
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
     template_name = "fiche_famille/famille_edit.html"
+    def form_valid(self, form):
+        # Appel de la méthode parent pour la validation
+        response = super().form_valid(form)
 
+        # Gestion des fichiers téléchargés
+        documents = {
+            'document1': form.cleaned_data.get('document1'),
+            'document2': form.cleaned_data.get('document2'),
+            'document3': form.cleaned_data.get('document3'),
+            'document4': form.cleaned_data.get('document4'),
+        }
+
+        for field_name, file in documents.items():
+            if file:
+                Piece.objects.create(
+                    titre=form.cleaned_data.get('titre'),
+                    document=file,
+                    famille=form.cleaned_data.get('famille'),
+                    individu=form.cleaned_data.get('individu'),
+                    type_piece=form.cleaned_data.get('type_piece'),
+                    date_debut=form.cleaned_data.get('date_debut'),
+                    date_fin=form.cleaned_data.get('date_fin'),
+                    auteur=self.request.user
+                )
+
+        messages.success(self.request, "Les pièces ont été ajoutées avec succès.")
+        return redirect(self.get_success_url())
 
 class Modifier(Page, crud.Modifier):
     form_class = Formulaire

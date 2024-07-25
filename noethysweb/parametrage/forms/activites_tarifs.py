@@ -209,6 +209,13 @@ class Formulaire(FormulaireBase, ModelForm):
         # Définit l'activité associée
         activite = Activite.objects.get(pk=idactivite)
 
+        # Configurer le queryset dynamiquement
+        self.fields['categories_tarifs'].queryset = CategorieTarif.objects.all().filter(activite=activite)
+
+        # Définir les valeurs initiales
+        initial_categories = CategorieTarif.objects.first()
+        self.fields['categories_tarifs'].initial = [initial_categories] if initial_categories else []
+
         # Si c'est un tarif associé à un événement
         if idevenement:
             evenement = Evenement.objects.get(pk=idevenement)
@@ -220,9 +227,7 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields['type'].disabled = True
 
         # Filtrage pour l'activité
-        self.fields['categories_tarifs'].queryset = CategorieTarif.objects.all().filter(activite=activite)
         self.fields['groupes'].queryset = Groupe.objects.all().filter(activite=activite)
-        # self.fields['nom_tarif'].queryset = NomTarif.objects.all().filter(activite=activite)
 
         # Label perso
         if self.instance.label_prestation in ("NOM_TARIF", "nom_tarif", None, ""):

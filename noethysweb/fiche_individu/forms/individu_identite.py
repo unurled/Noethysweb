@@ -25,7 +25,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Individu
         fields = ["civilite", "nom", "nom_jfille", "prenom", "deces", "annee_deces", "date_naiss",
-                  "cp_naiss", "ville_naiss", "type_sieste", "memo", "photo", "situation_familiale", "type_garde", "info_garde"]
+                  "cp_naiss", "ville_naiss", "type_sieste", "memo", "photo", "situation_familiale", "type_garde", "info_garde", "statut"]
         widgets = {
             'memo': forms.Textarea(attrs={'rows': 3}),
             'info_garde': forms.Textarea(attrs={'rows': 3}),
@@ -72,6 +72,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("prenom"),
                 Field("deces"),
                 Field("annee_deces"),
+            ),
+            Fieldset("Etat-civil",
+                Field("statut"),
             ),
             Fieldset("Naissance",
                 Field("date_naiss"),

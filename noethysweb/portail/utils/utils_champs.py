@@ -24,10 +24,10 @@ class Champ():
 
 LISTE_CHAMPS = [
 
-    Champ(page="famille_caisse", code="caisse", label="Caisse d'allocation", famille="MODIFIABLE"),
-    Champ(page="famille_caisse", code="num_allocataire", label="N° allocataire", famille="MODIFIABLE"),
-    Champ(page="famille_caisse", code="allocataire", label="Nom de l'allocataire", famille="MODIFIABLE"),
-    Champ(page="famille_caisse", code="autorisation_cafpro", label="Autorisation CAFPRO", famille="MODIFIABLE"),
+    Champ(page="famille_caisse", code="caisse", label="Caisse d'allocation", famille="MASQUER"),
+    Champ(page="famille_caisse", code="num_allocataire", label="N° allocataire", famille="MASQUER"),
+    Champ(page="famille_caisse", code="allocataire", label="Nom de l'allocataire", famille="MASQUER"),
+    Champ(page="famille_caisse", code="autorisation_cafpro", label="Autorisation CAFPRO", famille="MASQUER"),
 
     Champ(page="famille_questionnaire", code="questionnaire", label="Questionnaire", famille="MODIFIABLE"),
 
@@ -39,6 +39,7 @@ LISTE_CHAMPS = [
     Champ(page="individu_identite", code="nom", label="Nom de famille", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),
     Champ(page="individu_identite", code="civilite", label="Civilité", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),
     Champ(page="individu_identite", code="prenom", label="Prénom", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),
+    Champ(page="individu_identite", code="statut", label="Statut", representant="MODIFIABLE", enfant="MASQUER", contact="MASQUER"),
     Champ(page="individu_identite", code="date_naiss", label="Date de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),
     Champ(page="individu_identite", code="cp_naiss", label="CP naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),
     Champ(page="individu_identite", code="ville_naiss", label="Ville de naissance", representant="MODIFIABLE", enfant="MODIFIABLE", contact="MODIFIABLE"),

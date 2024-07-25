@@ -12,12 +12,20 @@ from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse, Tarif, CategorieTarif, Prestation, TarifLigne
+from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse, Tarif, CategorieTarif, Prestation, TarifLigne, AdresseMail, Utilisateur
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2Widget
 from core.widgets import Select_many_avec_plus
 from parametrage.forms import questionnaires
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.utils.html import strip_tags
+from core.utils import utils_portail
+from portail.utils import utils_secquest
+from django.core import mail as djangomail
+from django.core.mail import EmailMultiAlternatives
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -32,7 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
         ("MODIFIER_RIEN", "Ne pas modifier les consommations existantes"),
     ])
     date_modification = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Renseignez la date de début d'application de la modification.")
-    tarifs = forms.ModelMultipleChoiceField(label="Tarifs", widget=Select_many_avec_plus({"afficher_bouton_ajouter": False, "url_ajax": "ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Ajouter une maladie"}}), queryset=Tarif.objects.all(), required=False, help_text="Cliquez sur le champ ci-dessus.")
+    tarifs = forms.ModelMultipleChoiceField(label="Tarifs", widget=Select_many_avec_plus({"afficher_bouton_ajouter": False, "url_ajax": "ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Ajouter une maladie"}}), queryset=Tarif.objects.all(), required=True, help_text="Cliquez sur le champ ci-dessus.")
     class Meta:
         model = Inscription
         fields = "__all__"
@@ -179,6 +187,7 @@ class Formulaire(FormulaireBase, ModelForm):
         return self.cleaned_data
 
     def save(self):
+        is_new_instance = self.instance.pk is None
         instance = super(Formulaire, self).save()
 
         # Enregistrement des réponses du questionnaire
@@ -186,10 +195,18 @@ class Formulaire(FormulaireBase, ModelForm):
             if key.startswith("question_"):
                 QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=int(key.split("_")[1]),
                                                               defaults={'reponse': valeur})
-        premiere_categorie_id = self.fields["categorie_tarif"].initial  # Récupérer l'identifiant de la première catégorie de tarif définie dans __init__
-       # print(premiere_categorie_id)
+        premiere_categorie_id = self.fields["categorie_tarif"].initial
+        if not premiere_categorie_id:
+            premiere_categorie = CategorieTarif.objects.filter(activite=instance.activite).order_by('idcategorie_tarif').first()
+            if premiere_categorie:
+                premiere_categorie_id = premiere_categorie.pk
+            else:
+                raise ValueError("Aucune catégorie de tarif trouvée pour l'activité sélectionnée.")
+        #print(premiere_categorie_id)
         premiere_categorie = CategorieTarif.objects.get(pk=premiere_categorie_id)  # Récupérer l'objet CategorieTarif correspondant à partir de l'identifiant
+        #print(premiere_categorie)
         tarifs_selectionnes = self.cleaned_data.get('tarifs', None)
+        #print(tarifs_selectionnes)
         idtarifs_str = ','.join(str(tarif.idtarif) for tarif in tarifs_selectionnes)
 
         instance.categorie_tarif = premiere_categorie  # Assigner la première catégorie de tarif à l'instance d'inscription
@@ -202,8 +219,10 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             idtarifs = None
 
-        # Convertir les identifiants de tarifs en entiers
-        idtarifs_int = [int(id_tarif) for id_tarif in idtarifs.split(',')]
+        if ',' in idtarifs_str:
+            idtarifs_int = [int(id_tarif) for id_tarif in idtarifs_str.split(',')]
+        else:
+            idtarifs_int = [int(idtarifs_str)]
 
         # Récupérer les objets Tarif correspondants
         tarifs_objects = Tarif.objects.filter(pk__in=idtarifs_int)
@@ -255,12 +274,83 @@ class Formulaire(FormulaireBase, ModelForm):
                     individu=instance.individu,
                     tarif=tarif
                 )
-
+        if is_new_instance:
+            self.envoyer_email_confirmation(instance)
         return instance
+
+    def envoyer_email_confirmation(self, inscription):
+        # Importation de l'adresse d'expédition d'emails
+        print("demarrage email")
+        idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
+        adresse_exp = None
+        if idadresse_exp:
+            adresse_exp = AdresseMail.objects.get(pk=idadresse_exp, actif=True)
+        if not adresse_exp:
+            logger.debug("Erreur : Pas d'adresse d'expédition paramétrée pour l'envoi du mail.")
+            return _("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
+
+        # Backend CONSOLE (Par défaut)
+        backend = 'django.core.mail.backends.console.EmailBackend'
+        backend_kwargs = {}
+
+        # Backend SMTP
+        if adresse_exp.moteur == "smtp":
+            backend = 'django.core.mail.backends.smtp.EmailBackend'
+            backend_kwargs = {"host": adresse_exp.hote, "port": adresse_exp.port, "username": adresse_exp.utilisateur,
+                              "password": adresse_exp.motdepasse, "use_tls": adresse_exp.use_tls}
+
+        # Backend MAILJET
+        if adresse_exp.moteur == "mailjet":
+            backend = 'anymail.backends.mailjet.EmailBackend'
+            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key"), "secret_key": adresse_exp.Get_parametre("api_secret"), }
+
+        # Backend BREVO
+        if adresse_exp.moteur == "brevo":
+            backend = 'anymail.backends.sendinblue.EmailBackend'
+            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key"), }
+
+        # Création de la connexion
+        connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
+        try:
+            connection.open()
+        except Exception as err:
+            logger.debug("Erreur : Connexion impossible au serveur de messagerie : %s." % err)
+            return "Connexion impossible au serveur de messagerie : %s" % err
+
+        # Création du message
+        objet = "Confirmation d'inscription"
+        body = f"""
+Bonjour,
+        
+La demande d'inscription de {inscription.individu.prenom} à l'activité {inscription.activite.nom} vient d'être validée par le directeur !
+Vous pouvez dès a présent vous rendre sur Sacadoc pour compléter le dossier d'inscirption et accéder à toutes les informations concernant l'activité. -> www.camps.flambeaux.org
+        
+Cordialement,
+L'équipe de Sacadoc
+        """
+
+        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[inscription.famille.mail], connection=connection)
+
+        # Envoie le mail
+        try:
+            resultat = message.send()
+        except Exception as err:
+            logger.debug("Erreur : Envoi du mail de reset impossible : %s." % err)
+            resultat = err
+
+        if resultat == 1:
+            logger.debug("Email de confirmation envoyé.")
+            return ("L'émail de confirmation a été envoyé à la famille")
+        if resultat == 0:
+            logger.debug("Email de confirmation non envoyé.")
+            return ("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
+
+        connection.close()
 
     def creer_prestation(idactivite, premier_categorie_pk, idfamille, idindividu, idtarif):
         # Récupérer le tarif et la catégorie de tarif
         tarif = Tarif.objects.get(pk=idtarif)
+        print(premier_categorie_pk)
         premier_categorie = CategorieTarif.objects.get(pk=premier_categorie_pk)  # Récupérer l'objet CategorieTarif
 
         # Créer la prestation
@@ -278,7 +368,6 @@ class Formulaire(FormulaireBase, ModelForm):
             individu_id=idindividu,
             tarif_id=idtarif
         )
-
         return prestation
 
 EXTRA_SCRIPT = """

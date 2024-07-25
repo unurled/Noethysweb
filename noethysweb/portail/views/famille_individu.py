@@ -29,6 +29,7 @@ class IndividuForm(forms.ModelForm):
     def save_individu(self, famille):
         # Sauvegarde de l'objet Individu en base de données
         individu = super().save(commit=False)
+        individu.statut = "5"
         individu.save()
 
         categorie = "2"

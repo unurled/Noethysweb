@@ -196,7 +196,7 @@ class Liste(Page, crud.Liste):
         filtres = ['idrenseignement', 'famille__nom', 'individu__nom', 'categorie']
         check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
-        individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom"], processor='Formate_individu')
+        individu = columns.TextColumn("Individu", sources=["individu__nom", "individu__prenom", "individu__statut"], processor='Formate_individu')
         code = columns.TextColumn("Donnée", sources=['code'], processor='Formate_code')
         ancienne_valeur = columns.TextColumn("Ancienne valeur", sources=None, processor='Formate_ancienne_valeur')
         nouvelle_valeur = columns.TextColumn("Nouvelle valeur", sources=None, processor='Formate_nouvelle_valeur')
@@ -247,7 +247,22 @@ class Liste(Page, crud.Liste):
             return ""
 
         def Formate_individu(self, instance, **kwargs):
-            return instance.individu.Get_nom() if instance.individu else ""
+            statut_mapping = {
+                0: "Parent",
+                1: "Chef/taine",
+                2: "Chef/taine de groupe - Directeur/trice",
+                3: "Délégué(e) Local",
+                4: "Ami(e)",
+                5: "Jeunes"
+            }
+            statut_code = instance.individu.statut
+            statut = statut_mapping.get(statut_code, "Statut inconnu")
+            # Retourner le nom, prénom et statut
+            if instance.individu:
+                nom_prenom = instance.individu.Get_nom()
+                return f"{nom_prenom} ({statut})"
+            else:
+                return ""
 
         def Formate_etat(self, instance, **kwargs):
             if instance.validation_auto:

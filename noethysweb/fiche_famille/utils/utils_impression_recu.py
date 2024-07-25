@@ -90,21 +90,25 @@ class Impression(utils_impression.Impression):
             self.story.append(Paragraph(u"<i>%s</i>" % textePrestations, paraStyleIntro))
             self.story.append(Spacer(0, 20))
 
-            dataTableau = [("Date", "Activité", "Individu", "Intitulé", "Part utilisée")]
+            dataTableau = [("Date", "Activité", "Numéro de déclaration", "Individu","Intitulé", "Montant")]
             largeur_temp = self.taille_cadre[2] - 50 - 50
-            largeursColonnes = [50, largeur_temp/3+5, largeur_temp/3-10, largeur_temp/3+5, 50]
+            largeursColonnes = [50, largeur_temp/3+3, largeur_temp/3-10, largeur_temp/3+3, largeur_temp/3+3, 50]
 
             paraStyle = ParagraphStyle(name="detail", fontName="Helvetica", fontSize=7, leading=7, spaceBefore=0, spaceAfter=0, )
 
             for prestation in prestations:
                 date = utils_dates.ConvertDateToFR(prestation["prestation__date"])
-                activite = prestation["prestation__activite__nom"] or ""
                 individu = ("%s %s" % (prestation["prestation__individu__nom"], prestation["prestation__individu__prenom"] or "")) if prestation["prestation__individu__nom"] else ""
                 label = prestation["prestation__label"]
                 ventilation = prestation["total"]
+                num_decla = prestation["prestation__activite__num_decla"] or ""
+                activite = ("%s du %s au %s" % (prestation["prestation__activite__nom"], prestation["prestation__activite__date_debut"], prestation["prestation__activite__date_fin"]))
                 dataTableau.append((
-                    Paragraph(u"<para align='center'>%s</para>" % date, paraStyle), Paragraph(activite, paraStyle),
-                    Paragraph(individu, paraStyle), Paragraph(label, paraStyle),
+                    Paragraph(u"<para align='center'>%s</para>" % date, paraStyle),
+                    Paragraph(activite, paraStyle),
+                    Paragraph(num_decla, paraStyle),
+                    Paragraph(individu, paraStyle),
+                    Paragraph(label, paraStyle),
                     Paragraph(u"<para align='right'>%.2f %s</para>" % (ventilation, utils_preferences.Get_symbole_monnaie()), paraStyle),))
 
             style = TableStyle([

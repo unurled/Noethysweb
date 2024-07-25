@@ -29,7 +29,11 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False)
     date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
-
+    document = forms.FileField(label="Document 1", required=True)
+    document1 = forms.FileField(label="Document 2", required=False)
+    document2 = forms.FileField(label="Document 3", required=False)
+    document3 = forms.FileField(label="Document 4", required=False)
+    document4 = forms.FileField(label="Document 5", required=False)
     class Meta:
         model = Piece
         fields = "__all__"
@@ -51,6 +55,12 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2 col-form-label'
         self.helper.field_class = 'col-md-10'
+
+        if self.instance.pk:  # Modify only if instance exists
+            self.fields['document1'].widget = forms.HiddenInput()
+            self.fields['document2'].widget = forms.HiddenInput()
+            self.fields['document3'].widget = forms.HiddenInput()
+            self.fields['document4'].widget = forms.HiddenInput()
 
         # Définit la famille associée
         famille = Famille.objects.get(pk=idfamille)
@@ -145,8 +155,13 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('date_fin'),
             ),
             Fieldset("Document numérisé",
-                Field('document'),
-            ),
+                     Field('document'),
+                     Field('document1'),
+                     Field('document2'),
+                     Field('document3'),
+                     Field('document4'),
+
+                     ),
             Fieldset("Divers",
                 Field('observations'),
             ),
@@ -259,6 +274,41 @@ function On_change_piece() {
 $(document).ready(function() {
     $('#id_pieces_fournir').change(On_change_piece);
     $('#id_pieces_toutes').change(On_change_piece);
+});
+
+// Fonction pour gérer l'affichage des champs de documents
+function On_change_document(event) {
+    // Cacher tous les champs de documents
+    $('#div_id_document1').hide();
+    $('#div_id_document2').hide();
+    $('#div_id_document3').hide();
+    $('#div_id_document4').hide();
+
+    // Afficher les champs en fonction des documents présents
+    if ($('#id_document').val() !== '') {
+        $('#div_id_document1').show();
+        if ($('#id_document1').val() !== '') {
+            $('#div_id_document2').show();
+            if ($('#id_document2').val() !== '') {
+                $('#div_id_document3').show();
+                if ($('#id_document3').val() !== '') {
+                    $('#div_id_document4').show();
+                }
+            }
+        }
+    }
+}
+
+// Appel initial pour mettre à jour l'affichage des champs de documents
+$(document).ready(function() {
+    On_change_document();
+
+    // Ajouter un événement de changement pour chaque champ de document
+    $('#id_document').change(On_change_document);
+    $('#id_document1').change(On_change_document);
+    $('#id_document2').change(On_change_document);
+    $('#id_document3').change(On_change_document);
+    $('#id_document4').change(On_change_document);
 });
 
 </script>

@@ -24,11 +24,12 @@ class View(CustomView, TemplateView):
 class IndividuForm(forms.ModelForm):
     class Meta:
         model = Individu
-        fields = ['prenom', 'nom']
+        fields = ['prenom', 'nom','statut']
 
     def save_individu(self, famille):
         # Sauvegarde de l'objet Individu en base de données
         individu = super().save(commit=False)
+        individu.statut = "0"
         individu.save()
 
         categorie = "1"

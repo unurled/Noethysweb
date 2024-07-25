@@ -21,10 +21,10 @@ class Formulaire(FormulaireBase, ModelForm):
     nom = forms.CharField(label="Nom*", required=False, help_text="Saisissez le nom de famille en majuscules. Ex : DUPOND.")
     prenom = forms.CharField(label="Prénom*", required=False, help_text="Saisissez le prénom en minuscules avec la première lettre en majuscule. Ex : Kévin.")
     individu = forms.ModelChoiceField(label="Individu*", widget=Select2Widget(), queryset=Individu.objects.all().order_by("nom", "prenom"), required=False)
-
+    statut = forms.ChoiceField(choices=Individu.resp_flbx_liste, required=True)
     class Meta:
         model = Individu
-        fields = ["civilite", "nom", "prenom","mail"]
+        fields = ["civilite", "nom", "prenom","mail","statut"]
         help_texts = {
             "civilite": "Sélectionnez une civilité dans la liste. S'il s'agit d'un enfant, sélectionnez Fille ou Garçon.",
         }
@@ -80,6 +80,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Catégorie",
                 InlineRadios('categorie'),
                 Field('titulaire'),
+                Field('statut')
             ),
             Fieldset("Identité",
                 Div(
@@ -129,11 +130,14 @@ class Formulaire(FormulaireBase, ModelForm):
                 self.add_error("prenom", "Vous devez saisir un prénom")
                 return
 
-            # Prénom
-            if self.cleaned_data["mail"] in (None, ""):
-                self.add_error("mail", "Vous devez saisir un mail")
-                return
+            # Mail
+            if self.cleaned_data["categorie"] in ('1'):
+                if self.cleaned_data["mail"] in (None, ""):
+                    self.add_error("mail", "Vous devez saisir un mail")
+                    return
 
+            if self.cleaned_data["categorie"] in ('2'):
+                self.cleaned_data["statut"] = "5"
         # Action RATTACHER
         if self.cleaned_data["action"] == "RATTACHER":
 
@@ -195,8 +199,14 @@ $(document).ready(function() {
 // Catégorie
 function On_change_categorie() {
     $('#div_id_titulaire').hide();
+    $('#div_id_statut').hide();
+    $('#div_id_mail').hide();
     if ($(this).prop("checked") && this.value == 1) {
         $('#div_id_titulaire').show();
+        $('#div_id_statut').show();
+        $('#div_id_mail').show();
+
+
     }
 }
 $(document).ready(function() {

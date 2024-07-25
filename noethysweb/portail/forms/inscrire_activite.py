@@ -107,7 +107,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Individu (avec filtrage de la catégorie 2)
         rattachements = Rattachement.objects.select_related("individu").filter(
-            famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).filter(categorie=2).order_by("categorie")
+            famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
 
         self.fields["individu"].choices = [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement
                                            in rattachements]

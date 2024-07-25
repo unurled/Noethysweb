@@ -46,7 +46,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Activite
         fields = ["pay", "nom", "abrege", "pay_org", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo", "code_produit_local", "service1", "service2",
-                  "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure"]
+                  "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure", "public", "num_decla"]
         widgets = {
             'tel': Telephone(),
             'fax': Telephone(),
@@ -119,6 +119,8 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("nom"),
                 Field("abrege"),
                 Field("structure"),
+                Field("public"),
+                Field("num_decla"),
             ),
             Fieldset("Durée de validité",
                 Field("validite_type"),
@@ -210,7 +212,7 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             self.cleaned_data["pay_org"] = False
             self.cleaned_data["pay"] = ""
-    
+
         print(f"Value of 'type_pay': {self.cleaned_data['type_pay']}")
         print(f"Value of 'pay' after assignment: {self.cleaned_data['pay']}")
         print(f"Value of 'type_pay' after assignment: {self.cleaned_data['type_pay']}")

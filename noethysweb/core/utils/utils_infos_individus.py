@@ -589,14 +589,14 @@ class Informations():
             code = "INSCRIPTION_%d_" % index
             self.dictIndividus[inscription.individu_id][code + "ACTIVITE"] = inscription.activite.nom
             self.dictIndividus[inscription.individu_id][code + "GROUPE"] = inscription.groupe.nom
-            self.dictIndividus[inscription.individu_id][code + "CATEGORIE_TARIF"] = inscription.categorie_tarif.nom
+           # self.dictIndividus[inscription.individu_id][code + "CATEGORIE_TARIF"] = inscription.categorie_tarif.nom
             self.dictIndividus[inscription.individu_id][code + "NOM_TITULAIRES"] = inscription.famille.nom
             self.dictIndividus[inscription.individu_id][code + "PARTI"] = "Oui" if (inscription.date_fin and inscription.date_fin < datetime.date.today()) else "Non"
             self.dictIndividus[inscription.individu_id][code + "DATE_INSCRIPTION"] = utils_dates.ConvertDateToFR(inscription.date_debut)
 
             # Mémorise l'inscription au format liste
             self.dictIndividus[inscription.individu_id]["inscriptions"]["liste"].append(
-                {"index": index, "activite": inscription.activite.nom, "groupe": inscription.groupe.nom, "categorie_tarif": inscription.categorie_tarif.nom,
+                {"index": index, "activite": inscription.activite.nom, "groupe": inscription.groupe.nom,
                  "nomTitulaires": inscription.famille.nom, "parti": "Oui" if (inscription.date_fin and inscription.date_fin < datetime.date.today()) else "Non",
                  "date_inscription": utils_dates.ConvertDateToFR(inscription.date_debut)})
 
