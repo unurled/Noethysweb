@@ -131,6 +131,7 @@ MIDDLEWARE = [
     'csp.middleware.CSPMiddleware',
     'axes.middleware.AxesMiddleware',
     'noethysweb.middleware.CustomMiddleware',
+    'noethysweb.middleware.UserInHeaderMiddleware',
 ]
 
 ROOT_URLCONF = 'noethysweb.urls'

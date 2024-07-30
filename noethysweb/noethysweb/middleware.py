@@ -22,3 +22,14 @@ class CustomMiddleware:
             return HttpResponseRedirect(url_change_password)
 
         return response
+
+
+class UserInHeaderMiddleware:
+    """Ajout du header X-User contenant l'utilisateur connecté pour le rendre disponible dans les logs."""
+    def __init__(self, get_response):
+        self.get_response = get_response
+    def __call__(self, request):
+        response = self.get_response(request)
+        if request.user.is_authenticated:
+            response["X-User"] = request.user.username
+        return response

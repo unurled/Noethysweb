@@ -82,7 +82,7 @@ class Formulaire_extra(FormulaireBase, forms.Form):
 class Formulaire(FormulaireBase, ModelForm):
     activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True, help_text=_("Sélectionnez l'activité souhaitée dans la liste."))
     structure = forms.ModelChoiceField(label=_("Structures"), queryset=Structure.objects.none(), required=True, help_text=_("Sélectionnez la structure souhaitée dans la liste."))
-    print(structure)
+
     class Meta:
         model = PortailRenseignement
         fields = "__all__"
@@ -168,7 +168,7 @@ EXTRA_SCRIPT = """
                     });
                 }
                 On_change_activite();
-                
+
             },
             error: function() {
                 console.error("Erreur lors de la récupération des activités.");
@@ -183,7 +183,7 @@ EXTRA_SCRIPT = """
             type: "POST",
             url: "{% url 'portail_ajax_inscrire_get_form_extra' %}",
             data: $("#portail_inscrire_activite_form").serialize(),
-        success: function (data) { 
+        success: function (data) {
             $("#form_extra").html(data['form_html']);
         }
 
