@@ -21,8 +21,11 @@ def Generer_recu(donnees={}):
     reglement = Reglement.objects.get(pk=donnees["idreglement"])
     infos_famille = reglement.famille.Get_infos()
 
-    # Importation du modèle d'impression
-    modele_impression = ModeleImpression.objects.get(pk=2)
+    # Importation du modèle d'impression depuis le règlement
+    modele_impression = Reglement.objects.get(pk=donnees["idreglement"]).modelimp
+    if not modele_impression:
+        return {"erreur": "Modèle d'impression non associé au règlement"}
+
     donnees["idmodele"] = modele_impression.modele_document_id
     donnees.update(json.loads(modele_impression.options))
 
@@ -81,7 +84,6 @@ def Generer_recu(donnees={}):
 
 def Impression_pdf(request):
     # Récupération des données du formulaire
-    idmodele_impression = int(request.POST.get("idmodele_impression"))
     date_edition = request.POST.get("date_edition")
     numero = request.POST.get("numero")
     idreglement = int(request.POST.get("idreglement"))
@@ -97,7 +99,7 @@ def Impression_pdf(request):
     if not date_edition: return JsonResponse({"erreur": "Vous devez saisir une date d'édition"}, status=401)
 
     # Génération du reçu
-    resultat = Generer_recu(donnees={"idmodele_impression": idmodele_impression, "idreglement": idreglement, "date_edition": date_edition, "numero": numero, "idmodele": idmodele, "idfamille": idfamille,
+    resultat = Generer_recu(donnees={"idreglement": idreglement, "date_edition": date_edition, "numero": numero, "idmodele": idmodele, "idfamille": idfamille,
                                       "signataire": signataire, "intro": intro, "afficher_prestations": afficher_prestations})
     return JsonResponse(resultat)
 

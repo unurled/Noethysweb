@@ -10,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, ButtonHolder, Div
 from crispy_forms.bootstrap import Field, StrictButton, PrependedText, InlineField
 from core.utils.utils_commandes import Commandes
-from core.models import Famille, Reglement, ModeReglement, Emetteur, Payeur, CompteBancaire
+from core.models import Famille, Reglement, ModeReglement, Emetteur, Payeur, CompteBancaire, ModeleImpression
 from core.widgets import DatePickerWidget, Select_avec_commandes
 from fiche_famille.widgets import Selection_emetteur, Selection_mode_reglement, Saisie_ventilation
 from core.utils import utils_preferences, utils_dates
@@ -28,7 +28,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Reglement
-        fields = ["famille", "date", "mode", "emetteur", "payeur", "observations", "date_differe", "numero_quittancier", "montant", "numero_piece", "compte", ]
+        fields = ["famille", "date", "mode", "emetteur", "payeur", "observations", "date_differe", "numero_quittancier", "montant", "numero_piece", "compte", "modelimp"]
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -40,6 +40,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        self.fields['modelimp'].queryset = ModeleImpression.objects.filter(categorie='reglement')
 
         # Date
         if not self.instance.idreglement:
@@ -103,7 +105,9 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset('Options',
                 Field('observations'),
-            ),
+                     Field('modelimp'),
+
+                     ),
             Fieldset('Encaissement',
                 Field('compte'),
                 Field('date_differe'),

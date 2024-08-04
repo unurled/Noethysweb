@@ -19,7 +19,6 @@ TEXTE_INTRO_DEFAUT = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour l
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget(), choices=[], required=True, help_text="Vous pouvez créer un modèle d'impression depuis le menu Paramétrage > Modèles d'impression.")
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
@@ -42,13 +41,6 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-3'
         self.helper.field_class = 'col-md-9'
-
-        # Modèle impression
-        # Charge les modèles disponibles
-        self.fields["modele_impression"].choices = [(0, "Aucun")] + [(modele.pk, modele.nom) for modele in ModeleImpression.objects.filter(categorie="reglement").order_by("nom")]
-        modele_defaut = ModeleImpression.objects.filter(categorie="reglement", defaut=True)
-        if modele_defaut:
-            self.fields["modele_impression"].initial = modele_defaut.first().pk
 
         # Utilisateur
         self.fields["utilisateur"].initial = self.request.user
@@ -85,7 +77,6 @@ class Formulaire(FormulaireBase, ModelForm):
                 ]),
             Hidden('famille', value=idfamille),
             Hidden('reglement', value=idreglement),
-            Field("modele_impression"),
             Field("date_edition"),
             Field("numero"),
             Field("modele"),
@@ -113,7 +104,6 @@ function impression_pdf(email=false) {
         type: "POST",
         url: "{% url 'ajax_recu_impression_pdf' %}",
         data: {
-            idmodele_impression: $("#id_modele_impression").val(),
             idreglement: $("input:hidden[name='reglement']").val(),
             date_edition: $("#id_date_edition").val(),
             numero: $("#id_numero").val(),
