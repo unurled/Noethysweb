@@ -1,4 +1,5 @@
 {% extends "core/base_login.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block titre_contenu %}
@@ -39,5 +40,9 @@
         <button name="login" id="login" class="btn btn-block btn-primary login-btn mb-4" type="submit">Se connecter</button>
 
     </form>
+
+    {# Mot de passe oublié #}
+    <a class="forgot-password-link" href="{% url 'reset_password' %}">{% blocktrans %}Mot de passe oublié ?{% endblocktrans %}</a>
+
 
 {% endblock contenu_page %}

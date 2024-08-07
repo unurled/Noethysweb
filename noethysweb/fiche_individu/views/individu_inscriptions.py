@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Inscription, Prestation, Groupe, CategorieTarif, Consommation, Ouverture, Tarif
+from core.models import Inscription, Prestation, Groupe, CategorieTarif, Consommation, Ouverture, Tarif, Facture
 from core.utils import utils_dates
 from fiche_individu.forms.individu_inscriptions import Formulaire
 from fiche_individu.views.individu import Onglet
@@ -59,7 +59,7 @@ class Page(Onglet):
     url_ajouter = "individu_inscriptions_ajouter"
     url_modifier = "individu_inscriptions_modifier"
     url_supprimer = "individu_inscriptions_supprimer"
-    description_liste = "Saisissez ici les inscriptions de l'individu."
+    description_liste = "Cette page permet de gérer les inscriptions de l'individu. Si une inscription n'est pas modifiable, il faut d'abord supprimer la facture qui est liée. Dans ce cas, un bouton permet d'y accéder directement."
     description_saisie = "Saisissez toutes les informations concernant l'inscription et cliquez sur le bouton Enregistrer."
     objet_singulier = "une inscription"
     objet_pluriel = "des inscriptions"
@@ -148,6 +148,9 @@ class Liste(Page, crud.Liste):
             else:
                 return "<i class='fa fa-check-circle-o text-green'></i> Valide"
 
+        from django.urls import reverse
+        from core.models import Facture  # Assurez-vous que ce modèle est importé correctement
+
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idindividu dans les boutons d'actions """
             view = kwargs["view"]
@@ -156,36 +159,68 @@ class Liste(Page, crud.Liste):
             kwargs["idindividu"] = instance.individu.pk if instance.individu else None
             kwargs["pk"] = instance.pk
 
-            # Actions spécifiques pour la modification
-            if instance.activite.structure in view.request.user.structures.all():
-                modifier_kwargs = kwargs.copy()
-                modifier_kwargs["idactivite"] = instance.activite.pk
-                modifier_kwargs["idgroupe"] = instance.groupe.pk if instance.groupe else None
-                modifier_kwargs["idtarifs"] = ','.join([str(tarif.pk) for tarif in instance.tarifs.all()]) if instance.tarifs.exists() else '1'
-                modifier_url = reverse(view.url_modifier, kwargs=modifier_kwargs)
+            # Définir les conditions
+            user_can_modify = instance.activite.structure in view.request.user.structures.all()
+            nbre_prestations_facturees = Prestation.objects.filter(
+                famille=instance.famille,
+                individu=instance.individu,
+                activite=instance.activite,
+                facture__isnull=False
+            ).count()
 
-                # Boutons pour la modification
-                modifier_buttons = [
-                    self.Create_bouton_modifier(url=modifier_url),
-                ]
+            # Vérifie si une facture existe
+            facture = Facture.objects.filter(
+                individus=instance.individu.idindividu,
+                activites=instance.activite.idactivite
+            ).first()
+
+            # Définir les boutons
+            modifier_buttons = []
+            facture_button = ""
+            modif_buttons = ""
+
+            if user_can_modify:
+                if nbre_prestations_facturees > 0:
+                    modif_buttons = "<a href='#' class='text-red'><i class='fa fa-pencil-alt margin-r-5'></i></a>"
+
+                    if facture:
+                        facture_url = reverse('famille_factures_liste', kwargs={'idfamille': instance.famille.pk})
+                        modif_buttons = (
+                            f"<a href='#' class='text-red'>"
+                            "<i class='fa fa-pencil'></i>"
+                            "</a>"
+                        )
+
+                        facture_button = (
+                            f"<a href='{facture_url}' class='btn btn-default btn-xs'>"
+                            "<i class='fa fa-file-pdf-o'></i>"
+                            "</a>"
+                        )
+                else:
+                    # Bouton pour la modification
+                    modifier_kwargs = kwargs.copy()
+                    modifier_kwargs["idactivite"] = instance.activite.pk
+                    modifier_kwargs["idgroupe"] = instance.groupe.pk if instance.groupe else None
+                    modifier_kwargs["idtarifs"] = ','.join(
+                        [str(tarif.pk) for tarif in instance.tarifs.all()]) if instance.tarifs.exists() else '1'
+                    modifier_url = reverse(view.url_modifier, kwargs=modifier_kwargs)
+                    modifier_buttons.append(self.Create_bouton_modifier(url=modifier_url))
             else:
                 # Afficher que l'accès est interdit
-                modifier_buttons = [
-                    "<span class='text-red'><i class='fa fa-minus-circle margin-r-5' title='Accès non autorisé'></i>Accès interdit</span>", ]
+                modifier_buttons.append(
+                    "<span class='text-red'><i class='fa fa-pencil-alt margin-r-5' title='Accès interdit'></i><i class='fa fa-ban' title='Accès interdit'></i> Accès interdit</span>"
+                )
 
-            # Actions spécifiques pour la suppression
+            # Définir le bouton pour la suppression
             kwargs_supprimer = kwargs.copy()
             kwargs_supprimer.pop("idactivite", None)
             kwargs_supprimer.pop("idgroupe", None)
             kwargs_supprimer.pop("idtarifs", None)
             supprimer_url = reverse(view.url_supprimer, kwargs=kwargs_supprimer)
-
-            # Bouton pour la suppression
             supprimer_button = self.Create_bouton_supprimer(url=supprimer_url)
 
             # Retourner les boutons correspondants
-            return self.Create_boutons_actions(modifier_buttons + [supprimer_button])
-
+            return self.Create_boutons_actions(modifier_buttons + [modif_buttons, facture_button, supprimer_button])
 
 
 class Ajouter(Page, crud.Ajouter):

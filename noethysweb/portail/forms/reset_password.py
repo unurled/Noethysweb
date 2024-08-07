@@ -33,9 +33,19 @@ class MySetPasswordForm(SetPasswordForm):
         self.fields['new_password2'].widget.attrs['title'] = _("Saisissez le nouveau mot de passe une nouvelle fois")
         self.fields['new_password2'].widget.attrs['placeholder'] = _("Saisissez le nouveau mot de passe une nouvelle fois")
 
-        # Question
+        user = kwargs['user']
         if kwargs["user"].famille.internet_secquest:
             self.fields["secquest"] = utils_secquest.Generation_field_secquest(famille=kwargs["user"].famille)
+        elif user.categorie == "utilisateur":
+            self.fields["secquest"].required = False
+
+    def clean_secquest(self):
+        secquest = self.cleaned_data.get("secquest")
+        user = self.user
+
+        if user.categorie == "utilisateur" and secquest != "CV":
+            raise ValidationError(_("La réponse à la question de sécurité est incorrecte."))
+        return secquest
 
 
 class MyPasswordResetForm(PasswordResetForm):
@@ -81,10 +91,19 @@ class MyPasswordResetForm(PasswordResetForm):
         logger.debug("Demande de reset du password : %s %s." % (identifiant, email))
 
         # Recherche l'utilisateur
-        utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="famille").first()
-        if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail != email:
+        utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True).first()
+        if not utilisateur:
             logger.debug("Erreur : Pas de compte actif existant.")
-            return _("Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email.")
+            return _("Il n'existe pas de compte actif correspondant à cet identifiant.")
+
+        if utilisateur.categorie == "famille":
+            if not utilisateur.famille.mail or utilisateur.famille.mail != email:
+                logger.debug("Erreur : Adresse email non valide pour la famille.")
+                return _("Adresse email non valide pour la famille.")
+        else:
+            if utilisateur.email != email:
+                logger.debug("Erreur : Adresse email non valide pour l'utilisateur.")
+                return _("Adresse email non valide pour l'utilisateur.")
 
         if not domain_override:
             current_site = get_current_site(request)
@@ -92,8 +111,9 @@ class MyPasswordResetForm(PasswordResetForm):
             domain = current_site.domain
         else:
             site_name = domain = domain_override
+
         context = {
-            'email': utilisateur,
+            'email': utilisateur.email if utilisateur.categorie == "utilisateur" else utilisateur.famille.mail,
             'domain': domain,
             'site_name': site_name,
             'uid': urlsafe_base64_encode(force_bytes(utilisateur.pk)),
@@ -112,25 +132,20 @@ class MyPasswordResetForm(PasswordResetForm):
             logger.debug("Erreur : Pas d'adresse d'expédition paramétrée pour l'envoi du mail.")
             return _("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
 
-        # Backend CONSOLE (Par défaut)
+        # Configuration du backend d'envoi
         backend = 'django.core.mail.backends.console.EmailBackend'
         backend_kwargs = {}
-
-        # Backend SMTP
         if adresse_exp.moteur == "smtp":
             backend = 'django.core.mail.backends.smtp.EmailBackend'
             backend_kwargs = {"host": adresse_exp.hote, "port": adresse_exp.port, "username": adresse_exp.utilisateur,
                               "password": adresse_exp.motdepasse, "use_tls": adresse_exp.use_tls}
-
-        # Backend MAILJET
-        if adresse_exp.moteur == "mailjet":
+        elif adresse_exp.moteur == "mailjet":
             backend = 'anymail.backends.mailjet.EmailBackend'
-            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key"), "secret_key": adresse_exp.Get_parametre("api_secret"), }
-
-        # Backend BREVO
-        if adresse_exp.moteur == "brevo":
+            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key"),
+                              "secret_key": adresse_exp.Get_parametre("api_secret")}
+        elif adresse_exp.moteur == "brevo":
             backend = 'anymail.backends.sendinblue.EmailBackend'
-            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key"), }
+            backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key")}
 
         # Création de la connexion
         connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
@@ -138,14 +153,15 @@ class MyPasswordResetForm(PasswordResetForm):
             connection.open()
         except Exception as err:
             logger.debug("Erreur : Connexion impossible au serveur de messagerie : %s." % err)
-            return "Connexion impossible au serveur de messagerie : %s" % err
+            return _("Connexion impossible au serveur de messagerie : %s" % err)
 
         # Création du message
-        objet = loader.render_to_string(subject_template_name, context)
-        objet = ''.join(objet.splitlines())
+        objet = loader.render_to_string(subject_template_name, context).strip()
         body = loader.render_to_string(email_template_name, context)
 
-        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[utilisateur.famille.mail], connection=connection)
+        to_email = utilisateur.email if utilisateur.categorie == "utilisateur" else utilisateur.famille.mail
+        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[to_email],
+                                         connection=connection)
 
         if html_email_template_name is not None:
             html_email = loader.render_to_string(html_email_template_name, context)
@@ -160,13 +176,14 @@ class MyPasswordResetForm(PasswordResetForm):
 
         if resultat == 1:
             logger.debug("Message de reset password envoyé.")
-        if resultat == 0:
+        elif resultat == 0:
             logger.debug("Message de reset password non envoyé.")
             return _("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
 
         connection.close()
 
-        # Génération du secquest
-        utils_secquest.Generation_secquest(famille=utilisateur.famille)
+        # Génération du secquest pour la famille
+        if utilisateur.categorie == "famille":
+            utils_secquest.Generation_secquest(famille=utilisateur.famille)
 
         return resultat

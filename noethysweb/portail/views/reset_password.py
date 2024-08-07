@@ -47,9 +47,16 @@ class MyPasswordResetConfirmView(ClassCommuneLogin, auth_views.PasswordResetConf
     form_class = MySetPasswordForm
 
     def form_valid(self, form):
-        # Vérification de la secquest
-        if "secquest" in form.cleaned_data:
-            if not utils_secquest.Check_secquest(famille=self.user.famille, reponse=form.cleaned_data["secquest"]):
+        user = self.user
+        # Vérification de la secquest pour les familles
+        if hasattr(user, 'famille') and "secquest" in form.cleaned_data:
+            if not utils_secquest.Check_secquest(famille=user.famille, reponse=form.cleaned_data["secquest"]):
+                form.add_error(None, "La réponse à la question est erronée")
+                return self.render_to_response(self.get_context_data(form=form))
+
+        # Vérification de la secquest pour les utilisateurs
+        if user.categorie == "utilisateur" and "secquest" in form.cleaned_data:
+            if form.cleaned_data["secquest"] != "CV":
                 form.add_error(None, "La réponse à la question est erronée")
                 return self.render_to_response(self.get_context_data(form=form))
 
@@ -58,3 +65,9 @@ class MyPasswordResetConfirmView(ClassCommuneLogin, auth_views.PasswordResetConf
 
 class MyPasswordResetCompleteView(ClassCommuneLogin, auth_views.PasswordResetCompleteView):
     template_name = "portail/password_reset_complete.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['user_category'] = getattr(user, 'categorie', None)
+        return context

@@ -24,6 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
     validite_date_debut = forms.DateField(label="Date de début*", required=False, widget=DatePickerWidget())
     validite_date_fin = forms.DateField(label="Date de fin*", required=False, widget=DatePickerWidget())
 
+
     # Groupes d'activités
     groupes_activites = forms.ModelMultipleChoiceField(label="Groupes d'activités", widget=Select2MultipleWidget(), queryset=TypeGroupeActivite.objects.all(), required=False)
 
@@ -46,7 +47,7 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Activite
         fields = ["pay", "nom", "abrege", "pay_org", "coords_org", "rue", "cp", "ville", "tel", "fax", "mail", "site", "logo_org", "logo", "code_produit_local", "service1", "service2",
-                  "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure", "public", "num_decla"]
+                  "date_debut", "date_fin", "groupes_activites", "nbre_inscrits_max", "inscriptions_multiples", "regie", "code_comptable", "code_analytique", "structure", "public", "num_decla", "image"]
         widgets = {
             'tel': Telephone(),
             'fax': Telephone(),
@@ -121,6 +122,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("structure"),
                 Field("public"),
                 Field("num_decla"),
+                Field("image"),
             ),
             Fieldset("Durée de validité",
                 Field("validite_type"),

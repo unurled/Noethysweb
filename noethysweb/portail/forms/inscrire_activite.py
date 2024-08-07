@@ -5,12 +5,12 @@
 
 import datetime
 from django import forms
-from django.forms import ModelForm, CheckboxSelectMultiple, ModelMultipleChoiceField
+from django.forms import ModelForm, CheckboxSelectMultiple, ModelMultipleChoiceField, HiddenInput
 from django.db.models import Q
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, HTML, Div
+from crispy_forms.layout import Layout, Hidden, HTML, Div, Field
 from crispy_forms.bootstrap import Field
 from core.models import Activite, Rattachement, Groupe, PortailRenseignement, CategorieTarif, NomTarif, Tarif, Structure
 from core.utils.utils_commandes import Commandes
@@ -20,9 +20,10 @@ from individus.utils import utils_pieces_manquantes
 
 class Formulaire_extra(FormulaireBase, forms.Form):
     groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True, help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
+    image_url = forms.CharField(widget=HiddenInput(), required=False)  # Champ caché pour l'URL de l'image
 
     def __init__(self, *args, **kwargs):
-        structure= kwargs.pop("structure", None)
+        structure = kwargs.pop("structure", None)
         activite = kwargs.pop("activite", None)
         famille = kwargs.pop("famille", None)
         individu = kwargs.pop("individu", None)
@@ -31,53 +32,81 @@ class Formulaire_extra(FormulaireBase, forms.Form):
         self.helper.form_id = 'portail_inscrire_activite_extra_form'
         self.helper.form_method = 'post'
         self.helper.attrs = {'enctype': 'multipart/form-data'}
-
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2 col-form-label'
         self.helper.field_class = 'col-md-10'
         self.helper.use_custom_control = False
-
         self.helper.form_tag = False
 
-        # For each tarif name, add a field for each tarif with a checkbox
+        # Initialisation de self.helper.layout avec un Layout vide
+        self.helper.layout = Layout()
+
+        # Pour chaque tarif, ajoute un champ avec une case à cocher
         liste_nom_tarif = NomTarif.objects.filter(activite=activite).order_by("nom").distinct()
         for nom_tarif in liste_nom_tarif:
-            # Get the associated tarifs for this nom_tarif
             tarifs = Tarif.objects.filter(nom_tarif=nom_tarif, activite=activite)
-            # Use a ModelMultipleChoiceField with CheckboxSelectMultiple widget
             field_name = f"tarifs_{nom_tarif.idnom_tarif}"
             self.fields[field_name] = forms.ModelMultipleChoiceField(
                 label=nom_tarif.nom,
                 queryset=tarifs,
                 widget=forms.CheckboxSelectMultiple(),
-                required=False  # Optional, depending on your requirements
+                required=False
             )
+            self.fields[field_name].widget.choices = [(tarif.pk, tarif.description) for tarif in tarifs if
+                                                      tarif.description]
 
-            # Customize the label for the field
-            self.fields[field_name].widget.choices = [(tarif.pk, tarif.description) for tarif in tarifs if tarif.description]
-
-
-        # Recherche des groupes de l'activité
         liste_groupes = Groupe.objects.filter(activite=activite).order_by("nom")
         self.fields["groupe"].queryset = liste_groupes
-
-        # S'il n'y a qu'un groupe dans l'activité, on le sélectionne par défaut
         if len(liste_groupes) == 1:
             self.fields["groupe"].initial = liste_groupes.first()
 
+        # Mise à jour de l'URL de l'image
+        image_url = activite.image.url if activite and activite.image else None
+        if image_url:
+            self.helper.layout.append(
+                HTML(
+                    f'<div id="image-container" style="text-align: center; margin-bottom: 20px;">'
+                    f'<img src="{image_url}" alt="Image de l\'activité" style="max-width: 100%; height: auto; width: auto; max-height: 600px; border: 2px solid #ddd; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">'
+                    f'</div>'
+                )
+            )
 
-        # Ajout des pièces à fournir
+        # Ajout des autres champs
+        self.helper.layout.append(Field("groupe"))
+        self.helper.layout.extend([
+            Field(f"tarifs_{nom_tarif.idnom_tarif}")
+            for nom_tarif in liste_nom_tarif
+        ])
+
+        # Ajout des pièces à fournir si nécessaire
         if activite.portail_inscriptions_imposer_pieces:
-            pieces_necessaires = utils_pieces_manquantes.Get_liste_pieces_necessaires(activite=activite, famille=famille, individu=individu)
-            for piece_necessaire in pieces_necessaires:
-                if not piece_necessaire["valide"]:
-                    nom_field = "document_%d" % piece_necessaire["type_piece"].pk
-                    help_text = """Vous devez joindre ce document au format au pdf, jpg ou png. """
-                    if piece_necessaire["document"]:
-                        url_document_a_telecharger = piece_necessaire["document"].document.url
-                        help_text += """Vous pouvez télécharger le document à compléter en cliquant sur le lien suivant : <a href='%s' target="_blank" title="Télécharger le document"><i class="fa fa-download margin-r-5"></i>Télécharger le document</a>.""" % url_document_a_telecharger
-                    self.fields[nom_field] = forms.FileField(label=piece_necessaire["type_piece"].nom, help_text=help_text, required=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])])
-                    self.helper.layout.append(nom_field)
+            pieces_necessaires = utils_pieces_manquantes.Get_liste_pieces_necessaires(activite=activite,
+                                                                                      famille=famille,
+                                                                                      individu=individu)
+
+            # Vérifiez si toutes les pièces sont valides
+            pieces_valides = [piece for piece in pieces_necessaires if piece["valide"]]
+
+            if not pieces_necessaires:
+                self.helper.layout.append(HTML("<p>Aucune pièce justificative n'est requise pour cette activité.</p>"))
+            elif not pieces_valides:
+                self.helper.layout.append(
+                    HTML("<p>Toutes les pièces justificatives sont déjà fournies et validées.</p>"))
+            else:
+                for piece_necessaire in pieces_necessaires:
+                    if not piece_necessaire["valide"]:
+                        nom_field = f"document_{piece_necessaire['type_piece'].pk}"
+                        help_text = """Vous devez joindre ce document au format pdf, jpg ou png. """
+                        if piece_necessaire["document"]:
+                            url_document_a_telecharger = piece_necessaire["document"].document.url
+                            help_text += f"""Vous pouvez télécharger le document à compléter en cliquant sur le lien suivant : <a href='{url_document_a_telecharger}' target="_blank" title="Télécharger le document"><i class="fa fa-download margin-r-5"></i>Télécharger le document</a>."""
+                        self.fields[nom_field] = forms.FileField(
+                            label=piece_necessaire["type_piece"].nom,
+                            help_text=help_text,
+                            required=True,
+                            validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])]
+                        )
+                        self.helper.layout.append(Field(nom_field))
 
 class Formulaire(FormulaireBase, ModelForm):
     activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True, help_text=_("Sélectionnez l'activité souhaitée dans la liste."))
@@ -145,7 +174,7 @@ EXTRA_SCRIPT = """
     function On_change_structure() {
         var idstructure = $("#id_structure").val(); // Récupère l'ID de la structure sélectionnée
         if (!idstructure) {
-            $("#id_activite").empty().append(new Option("Sélectionnez une structure découvrir les activités", ""));
+            $("#id_activite").empty().append(new Option("Sélectionnez une structure pour découvrir les activités", ""));
             return;
         }
         $.ajax({

@@ -1184,7 +1184,8 @@ class Activite(models.Model):
     reattribution_adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez l'adresse d'expédition d'emails qui sera utilisée pour envoyer une notification de réattribution de places à la famille.")
     reattribution_delai = models.IntegerField(verbose_name="Délai de réattribution", blank=True, null=True, choices=[(1, "1 jour"), (2, "2 jours"), (3, "3 jours"), (4, "4 jours"), (5, "5 jours"), (7, "1 semaine"), (14, "2 semaines")], default=2, help_text="Sélectionnez le nombre de jours jusqu'auquel il est possible de réattribuer des places.")
     reattribution_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution.")
-    num_decla= models.CharField(verbose_name="Numéro de déclaration de l'activité", max_length=200, blank=True, null=True)
+    num_decla = models.CharField(verbose_name="Numéro de déclaration de l'activité", max_length=200, blank=True, null=True)
+    image = models.ImageField(verbose_name="Image de l'activité", upload_to='activite_images/', blank=True, null=True)
     class Meta:
         db_table = 'activites'
         verbose_name = "activité"

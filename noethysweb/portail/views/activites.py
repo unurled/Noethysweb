@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from core.models import Inscription, PortailRenseignement, Activite
 from portail.views.base import CustomView
+from portail.utils import utils_approbations
 
 
 class View(CustomView, TemplateView):
@@ -19,6 +20,10 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = _("Activités")
+
+        approbations_requises = utils_approbations.Get_approbations_requises(famille=self.request.user.famille)
+        context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
+        print(approbations_requises)
 
         # Importation des inscriptions
         conditions = Q(famille=self.request.user.famille) & Q(statut="ok") & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today())) & Q(individu__deces=False)

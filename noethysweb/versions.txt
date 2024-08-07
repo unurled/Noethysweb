@@ -1,3 +1,10 @@
+Version 1.2.2.9.31 (07/08/2024)
+- Ajout mot de passe oublié utilisateur
+- Blocage modif inscription si facture liée
+- Ajout field "image" dans activite et donc la posiblité de mettre une image dans le process d'inscription
+- Modif inscription possible que si renseignements complets
+
+
 Version 1.2.2.9.30 (04/08/2024)
 - intégration du Modelimp lors de la création du règlement côté USER et PORTAIL
 

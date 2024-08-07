@@ -13,10 +13,10 @@
                                 {% blocktrans %}J'ai lu et j'accepte les conditions décrites dans le document{% endblocktrans %} '{{ unite_consentement.type_consentement.nom }}'.
                             {% endif %}
                             {% if rattachement %}
-                                {% blocktrans %}Je certifie exact les renseignements de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}.
+                                {% blocktrans %}Je certifie exact et complet les renseignements de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}.
                             {% endif %}
                             {% if famille %}
-                                {% blocktrans %}Je certifie exact les renseignements de la fiche famille.{% endblocktrans %}
+                                {% blocktrans %}Je certifie exact et complet les renseignements de la fiche famille.{% endblocktrans %}
                             {% endif %}
                         </label>
                         {% if unite_consentement %}
