@@ -11,6 +11,7 @@ from core.views.base import CustomView
 from core.utils import utils_dates, utils_infos_individus
 from core.models import Activite, Prestation, Ventilation, TarifLigne
 from facturation.forms.synthese_prestations import Formulaire
+from datetime import datetime
 
 
 class View(CustomView, TemplateView):
@@ -28,8 +29,11 @@ class View(CustomView, TemplateView):
         form = Formulaire(request.POST, request=self.request)
         if form.is_valid() == False:
             return self.render_to_response(self.get_context_data(form_parametres=form))
-
         liste_colonnes, liste_lignes = self.Get_resultats(parametres=form.cleaned_data)
+        masquer_solde_superieur_zero = form.cleaned_data.get('masquer_solde_superieur_zero', False)
+        if masquer_solde_superieur_zero:
+            liste_lignes = [ligne for ligne in liste_lignes if ligne.get('col2', 0) > 0]
+
         context = {
             "form_parametres": form,
             "liste_colonnes": liste_colonnes,
@@ -39,8 +43,9 @@ class View(CustomView, TemplateView):
         return self.render_to_response(self.get_context_data(**context))
 
     def Get_resultats(self, parametres={}):
-        date_debut = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[0])
-        date_fin = utils_dates.ConvertDateENGtoDate(parametres["periode"].split(";")[1])
+        date_debut = utils_dates.ConvertDateENGtoDate("01/01/2020")
+        date_fin = datetime.today().strftime('%d/%m/%Y')
+        date_fin = utils_dates.ConvertDateENGtoDate(date_fin)
         param_activites = json.loads(parametres["activites"])
         conditions_periode = Q(date__gte=date_debut) & Q(date__lte=date_fin)
         if param_activites["type"] == "groupes_activites":
@@ -65,16 +70,6 @@ class View(CustomView, TemplateView):
         # Importation des prestations
         conditions_ventilations = Q(prestation__date__gte=date_debut) & Q(prestation__date__lte=date_fin) & (Q(prestation__activite__in=liste_activites) | Q(prestation__activite__isnull=True))
 
-        if parametres["filtre_reglements_saisis"]:
-            date_debut_saisie = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_saisis"].split(";")[0])
-            date_fin_saisie = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_saisis"].split(";")[1])
-            conditions_ventilations &= (Q(reglement__depot__date__gte=date_debut_saisie) & Q(reglement__depot__date__lte=date_fin_saisie))
-
-        if parametres["filtre_reglements_deposes"]:
-            date_debut_depot = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_deposes"].split(";")[0])
-            date_fin_depot = utils_dates.ConvertDateENGtoDate(parametres["filtre_reglements_deposes"].split(";")[1])
-            conditions_ventilations &= (Q(reglement__date__gte=date_debut_depot) & Q(reglement__date__lte=date_fin_depot))
-
         # Récupèration de la ventilation des prestations de la période
         dictVentilation = {}
         ventilations = Ventilation.objects.select_related('prestation', 'reglement', 'reglement_depot').values('prestation').filter(conditions_ventilations).annotate(total=Sum("montant"))
@@ -82,21 +77,13 @@ class View(CustomView, TemplateView):
             dictVentilation[ventilation["prestation"]] = ventilation["total"]
 
         # Récupération de toutes les prestations de la période
-        conditions_prestations = conditions_periode & condition_activites & Q(categorie__in=parametres["donnees"])
+        donnes = ["cotisation", "consommation", "location", "autre"]
+        conditions_prestations = conditions_periode & condition_activites & Q(categorie__in=donnes)
         if "facturee" in mode_affichage:
             conditions_prestations &= Q(facture__isnull=False)
         if "nonfacturee" in mode_affichage:
             conditions_prestations &= Q(facture__isnull=True)
         prestations = Prestation.objects.select_related('activite', 'categorie_tarif', 'famille', 'individu').filter(conditions_prestations).distinct()
-
-        # Récupération des tranches de QF
-        liste_tranches = []
-        lignes_tarifs = TarifLigne.objects.filter(condition_activites, qf_min__isnull=False, qf_max__isnull=False)
-        for ligne_tarif in lignes_tarifs:
-            tranche = ligne_tarif.qf_min, ligne_tarif.qf_max
-            if tranche not in liste_tranches:
-                liste_tranches.append(tranche)
-        liste_tranches.sort()
 
         # Regroupement
         dictPrestations = {}
@@ -251,7 +238,7 @@ class View(CustomView, TemplateView):
 
             # Total
             if key1 not in dictPrestations:
-                dictPrestations[key1] = {"label": key1_label, "tri": key1_tri, "nbre": 0, "facture": Decimal(0), "regle": Decimal(0), "impaye": Decimal(0), "regroupements": {}}
+                dictPrestations[key1] = {"label": key1_label, "tri": key1_tri, "nbre": 0, "facture": Decimal(0), "regle": Decimal(0), "solde": Decimal(0), "impaye": Decimal(0), "regroupements": {}}
             dictPrestations[key1]["nbre"] += 1
             dictPrestations[key1]["facture"] += prestation.montant
 
@@ -275,7 +262,7 @@ class View(CustomView, TemplateView):
                 dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["regle"] += dictVentilation[prestation.pk]
 
             # Calcule les impayés
-            dictPrestations[key1]["impaye"] = dictPrestations[key1]["regle"] - dictPrestations[key1]["facture"]
+            dictPrestations[key1]["impaye"] = dictPrestations[key1]["facture"] - dictPrestations[key1]["regle"]
             dictPrestations[key1]["regroupements"][regroupement]["impaye"] = dictPrestations[key1]["regroupements"][regroupement]["regle"] - dictPrestations[key1]["regroupements"][regroupement]["facture"]
             dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["impaye"] = dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["regle"] - dictPrestations[key1]["regroupements"][regroupement]["key2"][key2]["facture"]
 
@@ -289,7 +276,7 @@ class View(CustomView, TemplateView):
         liste_colonnes.append("Prestations")
         for regroupement in listeRegroupements:
             liste_colonnes.append(dictLabelsRegroupements[regroupement])
-        liste_colonnes.append("Total")
+        liste_colonnes.append("Solde à payer")
 
         mode_affichage = mode_affichage.split("_")[0]
 
@@ -323,8 +310,8 @@ class View(CustomView, TemplateView):
 
 
             # Colonne Total
-            valeur = dictPrestations[key1][mode_affichage]
-            ligne[dictColonnes["total"]] = float(valeur)
+            solde = dictPrestations[key1]["impaye"]
+            ligne[dictColonnes["total"]] = float(solde)
 
             liste_lignes.append(ligne)
 
@@ -348,16 +335,25 @@ class View(CustomView, TemplateView):
                 for regroupement in listeRegroupements:
                     if regroupement in dictPrestations[key1]["regroupements"]:
                         if key2 in dictPrestations[key1]["regroupements"][regroupement]["key2"]:
-                            valeur = dictPrestations[key1]["regroupements"][regroupement]["key2"][key2][mode_affichage]
-                            totalLigne += valeur
-                            if key_ligne2 != "":
-                                ligne[dictColonnes[regroupement]] = float(valeur)
+                            # Valeur pour key2
+                            facture_key2 = dictPrestations[key1]["regroupements"][regroupement]["key2"][key2].get(
+                                "facture", Decimal(0))
+                            regle_key2 = dictPrestations[key1]["regroupements"][regroupement]["key2"][key2].get("regle",
+                                                                                                                Decimal(
+                                                                                                                    0))
+                            impaye_key2 = facture_key2 - regle_key2
+                            totalLigne += impaye_key2
 
-                # Colonne Total
+                            if key_ligne2 != "":
+                                ligne[dictColonnes[regroupement]] = float(impaye_key2)
+
                 if key_ligne2 != "":
                     ligne[dictColonnes["total"]] = float(totalLigne)
+                    ligne[dictColonnes[regroupement]] = float(facture_key2)
+                    print(liste_colonnes)
 
                 liste_lignes.append(ligne)
+                print(liste_lignes)
 
             id_regroupement += 1
 

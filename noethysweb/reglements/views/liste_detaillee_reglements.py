@@ -4,68 +4,80 @@
 #  Distribué sous licence GNU GPL.
 
 import json
+from django.views.generic import TemplateView
 from django.db.models import Sum
-from core.views.mydatatableview import MyDatatable, columns, helpers
-from core.views import crud
-from core.models import Reglement, Ventilation, Prestation, Activite
-from core.utils import utils_preferences
+from core.views.base import CustomView
+from core.models import Reglement, Activite, ModeReglement
+from reglements.forms.liste_detaillee_reglements import Formulaire
+from core.utils import utils_dates
 
 
-class Page(crud.Page):
-    model = Reglement
+class View(CustomView, TemplateView):
     menu_code = "liste_detaillee_reglements"
-
-
-class Liste(Page, crud.Liste):
-    model = Reglement
-
-    def get_queryset(self):
-        activites_autorisees = self.request.user.structures.all()
-
-        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur', 'depot') \
-            .filter(self.Get_filtres("Q")) \
-            .filter(ventilation__prestation__activite__in=Activite.objects.filter(structure__in=activites_autorisees)) \
+    template_name = "reglements/liste_detaillee_reglements.html"
 
     def get_context_data(self, **kwargs):
-        context = super(Liste, self).get_context_data(**kwargs)
-        context['page_titre'] = "Liste détaillée des règlements"
-        context['box_titre'] = "Liste détaillée des règlements des familles"
-        context['box_introduction'] = "Voici ci-dessous la liste détaillée des règlements des familles."
-        context['impression_introduction'] = ""
-        context['impression_conclusion'] = ""
-        context["totaux"] = json.dumps(["montant"])
+        context = super(View, self).get_context_data(**kwargs)
+        context['page_titre'] = "Liste détaillée des prestations"
+        context['form_parametres'] = Formulaire(request=self.request)
         return context
 
-    class datatable_class(MyDatatable):
-        filtres = ["fpresent:famille", "fscolarise:famille", "idreglement", "date", "mode__label", "emetteur__nom", "numero_piece", "famille__nom", "payeur__nom", "montant", "depot__nom"]
+    def post(self, request, **kwargs):
+        form = Formulaire(request.POST, request=self.request)
+        if not form.is_valid():
+            return self.render_to_response(self.get_context_data(form_parametres=form))
 
-        mode = columns.TextColumn("Mode", sources=['mode__label'])
-        emetteur = columns.CompoundColumn("Emetteur", sources=['emetteur__nom'])
-        famille = columns.TextColumn("Famille", sources=['famille__nom'])
-        payeur = columns.TextColumn("Payeur", sources=['payeur__nom'])
-        depot = columns.TextColumn("Dépôt", sources=['depot__nom'])
-        factures = columns.TextColumn("Factures associées", sources=None, processor='Get_factures')
-        prestations = columns.TextColumn("Prestations associées", sources=None, processor='Get_prestations')
-        activites = columns.TextColumn("Activités associées", sources=None, processor='Get_activites')
+        # Obtenir les résultats
+        liste_lignes = self.Get_resultats(parametres=form.cleaned_data)
+        afficher_colonne_objet = any(ligne.get('objet') for ligne in liste_lignes)
 
-        class Meta:
-            structure_template = MyDatatable.structure_template
-            columns = ["idreglement", "date", "mode", "emetteur", "numero_piece", "famille", "payeur", "montant", "depot", "factures", "prestations"]
-            processors = {
-                'date': helpers.format_date('%d/%m/%Y'),
-            }
-            ordering = ["date"]
-            footer = True
+        context = {
+            "form_parametres": form,
+            "liste_lignes": json.dumps(liste_lignes),
+            "titre": "Synthèse des prestations",
+            "afficher_colonne_objet": afficher_colonne_objet
 
-        def Get_factures(self, instance, *args, **kwargs):
-            factures = Prestation.objects.values('facture__numero').filter(ventilation__reglement=instance.pk, facture__isnull=False).annotate(total=Sum("montant"))
-            return ", ".join(["n°%s (%0.2f %s)" % (x["facture__numero"], x["total"], utils_preferences.Get_symbole_monnaie()) for x in factures])
+        }
+        return self.render_to_response(self.get_context_data(**context))
 
-        def Get_prestations(self, instance, *args, **kwargs):
-            ventilations = Ventilation.objects.values('prestation__label').filter(reglement=instance.pk).annotate(total=Sum("montant"))
-            return ", ".join(["%s (%0.2f %s)" % (x["prestation__label"], x["total"], utils_preferences.Get_symbole_monnaie()) for x in ventilations])
+    def Get_resultats(self, parametres={}):
+        activite_id = parametres.get("activite")
+        mode_regl = parametres.get("mode_regl")
+        export_compta = parametres.get("export")
 
-        def Get_activites(self, instance, *args, **kwargs):
-            prestations = Ventilation.objects.filter(reglement=instance.pk).values_list('prestation', flat=True)
-            activites = Activite.objects.filter(prestation__in=prestations).distinct()
-            return ", ".join([activite.nom for activite in activites])
+        # Filtrer et trier les règlements
+        query = Reglement.objects.select_related("famille", "mode", "emetteur", "payeur")
+        if activite_id:
+            query = query.filter(ventilation__prestation__activite=activite_id)
+        if mode_regl:
+            query = query.filter(mode=mode_regl)
+        if export_compta:
+            mode_ids = [1, 5, 2, 6]
+            query = query.filter(mode__in=mode_ids)
+            reglements = query.order_by('-date').distinct()
+            liste_lignes = [
+                {
+                    "date": utils_dates.ConvertDateToFR(reglement.date),
+                    "montant": float(reglement.montant),
+                    "objet": f"Pension - {reglement.famille.nom} - {reglement.mode.label}",
+                }
+                for reglement in reglements
+            ]
+            return liste_lignes
+
+        else:
+            reglements = query.order_by('-date').distinct()
+            liste_lignes = [
+                {
+                    "idreglement": reglement.pk,
+                    "date": utils_dates.ConvertDateToFR(reglement.date),
+                    "mode": reglement.mode.label,
+                    "emetteur": reglement.emetteur.nom if reglement.emetteur else "",
+                    "numero_piece": reglement.numero_piece,
+                    "famille": reglement.famille.nom,
+                    "payeur": reglement.payeur.nom,
+                    "montant": float(reglement.montant),
+                }
+                for reglement in reglements
+            ]
+            return liste_lignes

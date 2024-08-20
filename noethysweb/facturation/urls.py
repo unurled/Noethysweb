@@ -75,8 +75,7 @@ urlpatterns = [
     path('facturation/liste_tarifs', liste_tarifs.View.as_view(), name='liste_tarifs'),
 
     # Prestations
-    path('facturation/liste_prestations', liste_prestations.Liste.as_view(), name='liste_prestations'),
-    path('facturation/prestations_supprimer_plusieurs/<str:listepk>', liste_prestations.Supprimer_plusieurs.as_view(), name='prestations_supprimer_plusieurs'),
+    path('facturation/liste_prestations', liste_prestations.View.as_view(), name='liste_prestations'),
     path('facturation/liste_deductions', liste_deductions.Liste.as_view(), name='liste_deductions'),
     path('facturation/liste_soldes', liste_soldes.View.as_view(), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),

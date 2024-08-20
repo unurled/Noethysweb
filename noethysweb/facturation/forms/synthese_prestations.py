@@ -16,13 +16,10 @@ from core.forms.base import FormulaireBase
 
 def Get_regroupements():
     liste_regroupements = [
+        ("famille", "Famille"), ("individu", "Individu"),
+        ("label_prestation", "Nom de la prestation"), ("activite", "Activité"),
         ("jour", "Jour"), ("mois", "Mois"), ("annee", "Année"),
-        ("label_prestation", "Label de la prestation"), ("activite", "Activité"),
-        ("categorie_tarif", "Catégorie de tarif"), ("famille", "Famille"), ("individu", "Individu"),
-        ("ville_residence", "Ville de résidence"), ("secteur", "Secteur géographique"), ("age", "Age"),
-        ("ville_naissance", "Ville de naissance"), ("nom_ecole", "Ecole"), ("nom_classe", "Classe"),
-        ("nom_niveau_scolaire", "Niveau scolaire"), ("regime", "Régime social"), ("caisse", "Caisse d'allocations"),
-        ("qf_tarifs", "Quotient familial - Tranches tarifs"), ("qf_100", "Quotient familial - Tranches de 100"), ]
+]
 
     # Intégration des questionnaires
     q = utils_questionnaires.Questionnaires()
@@ -38,6 +35,7 @@ def Get_regroupements():
 def Get_modes():
     liste_modes = [
         ("nbre", "Nombre de prestations"), ("facture", "Montant des prestations"),
+        ("solde_facture", "Solde de la facture"),
         ("regle", "Montant des prestations réglées"), ("impaye", "Montant des prestations impayées"),
         ("nbre_facturees", "Nombre de prestations facturées"),
         ("facture_facturees", "Montant des prestations facturées"),
@@ -51,15 +49,13 @@ def Get_modes():
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
-    donnees = forms.MultipleChoiceField(label="Type de prestation", required=True, widget=Select2MultipleWidget(), choices=[("cotisation", "Cotisations"), ("consommation", "Consommations"), ("location", "Locations"), ("autre", "Autres")], initial=["cotisation", "consommation", "location", "autre"])
-    filtre_reglements_saisis = forms.CharField(label="Règlements saisis sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
-    filtre_reglements_deposes = forms.CharField(label="Règlements déposés sur une période", required=False, widget=DateRangePickerWidget(attrs={"afficher_check": True}))
-    donnee_ligne = forms.ChoiceField(label="Ligne", choices=Get_regroupements(), initial="activite", required=False)
-    donnee_colonne = forms.ChoiceField(label="Colonne", choices=Get_regroupements(), initial="mois", required=False)
-    donnee_detail = forms.ChoiceField(label="Ligne de détail", choices=Get_regroupements(), initial="label_prestation", required=False)
-    donnee_case = forms.ChoiceField(label="Case", choices=Get_modes(), initial="facture", required=False)
+    donnee_ligne = forms.ChoiceField(label="Ligne", choices=Get_regroupements(), initial="famille", required=False)
+    donnee_colonne = forms.ChoiceField(label="Colonne", choices=Get_regroupements(), initial="activite", required=False)
+    #donnee_detail = forms.ChoiceField(label="Ligne de détail", choices=Get_regroupements(), initial="label_prestation", required=False)
+    donnee_case = forms.CharField(widget=forms.HiddenInput(), initial="facture")
+    donnee_detail = forms.CharField(widget=forms.HiddenInput(), initial="label_prestation")
+    masquer_solde_superieur_zero = forms.BooleanField(required=False,label="Afficher uniquement les familles avec un solde à payer")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -69,19 +65,15 @@ class Formulaire(FormulaireBase, forms.Form):
 
         self.helper.layout = Layout(
             Fieldset("Données",
-                Field('periode'),
                 Field('activites'),
             ),
             Fieldset("Affichage",
-                Field('donnee_ligne'),
+                     Field('masquer_solde_superieur_zero'),
+
+                     Field('donnee_ligne'),
                 Field('donnee_colonne'),
                 Field('donnee_detail'),
                 Field('donnee_case'),
-            ),
-            Fieldset("Filtres",
-                Field('donnees'),
-                Field('filtre_reglements_saisis'),
-                Field('filtre_reglements_deposes'),
             ),
         )
 
