@@ -34,11 +34,14 @@ class View(CustomView, TemplateView):
             return self.render_to_response(self.get_context_data(form_parametres=form))
         context = {
             "form": form,
-            "resultat": self.Executer(commande=form.cleaned_data["commande"])
+            "resultat": self.Executer(
+                commande=form.cleaned_data["commande"],
+                activite=form.cleaned_data["activite"],
+                structure=form.cleaned_data["structure"])
         }
         return self.render_to_response(self.get_context_data(**context))
 
-    def Executer(self, commande=""):
+    def Executer(self, commande="", activite=None, structure=None):
         # Analyse de la commande
         if " " in commande:
             texte_fonction = commande.split(" ")[0].strip()
@@ -55,19 +58,15 @@ class View(CustomView, TemplateView):
             return "Le module %s n'a pas été trouvé dans le répertoire des procédures." % texte_fonction
 
         try:
-            parser = argparse.ArgumentParser()
-            procedure.Arguments(parser=parser)
-            if texte_arguments:
-                liste_arguments = texte_arguments.split(" ") if " " in texte_arguments else [texte_arguments]
-            else:
-                liste_arguments = []
-            variables = parser.parse_args(liste_arguments)
-        except SystemExit:
-            return "Une erreur a été détectée dans les arguments de la commande."
+            # On prépare un dictionnaire pour les variables
+            variables = {
+                "activite": activite,
+                "structure": structure,
+                "arguments": texte_arguments.split() if texte_arguments else []
+            }
 
-        try:
             # Exécution de la procédure
             resultat = procedure.Executer(variables=variables)
             return resultat
         except Exception as err:
-            return err
+            return str(err)

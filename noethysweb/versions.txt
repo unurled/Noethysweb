@@ -1,3 +1,8 @@
+Version 1.2.2.9.33 (29/08/2024)
+- Filtre liste reglements en fonction user
+- Intégration MAJ Noethys famille pièces FORM
+- Création procédure Archivage des activités
+
 Version 1.2.2.9.32 (07/08/2024)
 - Amélioration synthèse prestations
 - Amélioration liste détaillée reglements

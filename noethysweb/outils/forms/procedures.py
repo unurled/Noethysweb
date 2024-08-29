@@ -8,10 +8,14 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
+from core.forms.select2 import Select2MultipleWidget
+from core.models import Activite, Structure
 
 
 class Formulaire(FormulaireBase, forms.Form):
     commande = forms.CharField(label="", required=True)
+    activite = forms.ModelMultipleChoiceField(label="Activité", widget=Select2MultipleWidget(), queryset=Activite.objects.filter(visible=True), required=False)
+    structure = forms.ModelMultipleChoiceField(label="Structure", widget=Select2MultipleWidget(), queryset=Structure.objects.filter(visible=True), required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -22,4 +26,6 @@ class Formulaire(FormulaireBase, forms.Form):
 
         self.helper.layout = Layout(
             Field("commande"),
+            Field("activite"),
+            Field("structure"),
         )

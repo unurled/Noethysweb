@@ -8,8 +8,9 @@
     {% embed 'core/box.html' with box_titre=True box_introduction=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}Commande{% endblock %}
-        {% block box_introduction %}Saisissez une commande et cliquez sur Exécuter.{% endblock %}
+        {% block box_introduction %}Saisissez une commande, une activité et/ou structure si besoin et cliquez sur Exécuter.{% endblock %}
         {% block box_contenu %}
+            Commande
             <form id="form_procedures" method="post">
                 {% csrf_token %}
                 <div class="row">
@@ -30,6 +31,15 @@
         {% block box_contenu %}
             {{ resultat|safe }}
         {% endblock %}
+    {% endembed %}
+
+    {% embed 'core/box.html' with box_titre=True %}
+        {% block box_theme %}card-outline{% endblock %}
+        {% block box_titre %}Aide{% endblock %}
+        {% block box_contenu %}
+            Archivage : Permet d'archiver une activité dès qu'elle est terminée. Pour cela il faut taper "Archivage" dans commande et sélectionner l'activité. Ensuite appuyer sur "Exécuter" <br />
+            MSI : Procédure pour le développement. Affectation en masse du statut "jeunes" à des individus<br />
+{% endblock %}
     {% endembed %}
 
 {% endblock contenu_page %}

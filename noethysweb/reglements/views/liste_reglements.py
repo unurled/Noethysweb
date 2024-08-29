@@ -7,7 +7,7 @@ import json
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Reglement
+from core.models import Reglement, Activite
 from core.utils import utils_preferences
 from django.db.models import Q
 
@@ -22,6 +22,13 @@ class Page(crud.Page):
 class Liste(Page, crud.Liste):
     model = Reglement
 
+    def get_queryset(self):
+        user = self.request.user
+
+        activite_ids = Activite.objects.filter(structure__in=user.structures.all(),visible=True).values_list('idactivite', flat=True)
+        queryset = super().get_queryset()
+        queryset = queryset.filter(Q(ventilation__prestation__activite__idactivite__in=activite_ids)).distinct()
+        return queryset
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Liste des règlements"
