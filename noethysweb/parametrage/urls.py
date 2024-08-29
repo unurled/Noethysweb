@@ -669,4 +669,6 @@ urlpatterns = [
     path('parametrage/sondages/valid_form_question', secure_ajax(sondages.Valid_form_question), name='ajax_sondages_valid_form_question'),
     path('parametrage/sondages/supprimer_question', secure_ajax(sondages.Supprimer_question), name='ajax_sondages_supprimer_question'),
     path('parametrage/sondages/reorganiser', secure_ajax(sondages.Reorganiser), name='ajax_sondages_reorganiser'),
+    path('paremetrage/activite/liste', secure_ajax(activites.Appliquer_modification), name='ajax_appliquer_modification_portail'),
+
 ]

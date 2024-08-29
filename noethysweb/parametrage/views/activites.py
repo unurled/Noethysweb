@@ -14,7 +14,23 @@ from core.models import Activite, Inscription, ResponsableActivite, Agrement, Gr
                         Unite, UniteRemplissage, Tarif, TarifLigne, CombiTarif, Ouverture, Remplissage, PortailPeriode
 from core.views.base import CustomView
 from parametrage.forms.activites import Formulaire
+from core.utils import utils_dates, utils_parametres
 
+
+def Appliquer_modification(request):
+    etat_filtre = request.POST.get("etat", "false") == "true"
+
+    # Obtenir les données de la base
+    queryset = VotreModel.objects.all()
+
+    # Filtrer les données si le filtre est activé
+    if etat_filtre:
+        queryset = queryset.exclude(nom__icontains='ARCHIVE')
+
+    # Convertir les données en format JSON
+    donnees = serialize('json', queryset)
+
+    return JsonResponse({'data': donnees})
 
 class Page(crud.Page):
     model = Activite
@@ -28,23 +44,28 @@ class Page(crud.Page):
     objet_singulier = "une activité"
     objet_pluriel = "des activités"
     boutons_liste = [
-        {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
-        {"label": "Ajouter avec assistant", "classe": "btn btn-default", "href": reverse_lazy("activites_assistant_liste"), "icone": "fa fa-magic"},
+        {"label": "Ajouter une activité", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
+     #  {"label": "Ajouter avec assistant", "classe": "btn btn-default", "href": reverse_lazy("activites_assistant_liste"), "icone": "fa fa-magic"},
     ]
 
 
 class Liste(Page, crud.Liste):
     model = Activite
+    template_name = "parametrage/activite_liste.html"
 
     def get_queryset(self):
-        return Activite.objects.prefetch_related("groupes_activites").filter(self.Get_filtres("Q"), structure__in=self.request.user.structures.all()).annotate(nbre_inscrits=Count("inscription"))
+        queryset = Activite.objects.prefetch_related("groupes_activites").filter(
+            self.Get_filtres("Q"), structure__in=self.request.user.structures.all()
+        ).annotate(nbre_inscrits=Count("inscription"))
 
-    def get_context_data(self, **kwargs):
-        context = super(Liste, self).get_context_data(**kwargs)
-        context['impression_introduction'] = ""
-        context['impression_conclusion'] = ""
-        context['afficher_menu_brothers'] = True
-        return context
+        # Filtrage basé sur la session (ou autre mécanisme de stockage)
+        self.afficher_renseignements_attente = utils_parametres.Get(nom="afficher_renseignements_attente", categorie="renseignements_attente", utilisateur=self.request.user, valeur=True)
+        if self.afficher_renseignements_attente:
+            queryset = queryset.filter()
+        else:
+            queryset = queryset.exclude(nom__icontains="ARCHIVE")
+
+        return queryset
 
     class datatable_class(MyDatatable):
         filtres = ["idactivite", "nom", "date_debut", "date_fin"]
