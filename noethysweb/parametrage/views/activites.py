@@ -56,7 +56,7 @@ from django.utils.translation import gettext_lazy as _
 
 class Liste(Page, crud.Liste):
     model = Activite
-    template_name = "parametrage/activite_liste.html"
+    template_name = "parametrage/activite_liste1.html"
 
     def get_queryset(self):
         # Récupère les filtres de base et les structures associées à l'utilisateur

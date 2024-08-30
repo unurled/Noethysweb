@@ -16,6 +16,7 @@ from core.models import ResponsableActivite, Activite
 class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = ResponsableActivite
+
         fields = "__all__"
 
     def __init__(self, *args, **kwargs):

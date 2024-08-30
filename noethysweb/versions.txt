@@ -1,3 +1,6 @@
+Version 1.2.2.9.39 (30/08/2024)
+- remise en état activite_liste
+
 Version 1.2.2.9.38 (30/08/2024)
 - bug procedure (encore...)
 - Ajout fiel activité dans questionnaires
