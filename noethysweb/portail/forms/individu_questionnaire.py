@@ -9,9 +9,11 @@ from django.utils.translation import gettext as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, ButtonHolder
 from crispy_forms.bootstrap import Field, StrictButton
-from core.models import QuestionnaireQuestion, QuestionnaireReponse, PortailRenseignement
+from core.models import QuestionnaireQuestion, QuestionnaireReponse, PortailRenseignement, Inscription, Activite
 from parametrage.forms import questionnaires
 from portail.forms.fiche import FormulaireBase
+from django.db.models import Q
+
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -28,9 +30,22 @@ class Formulaire(FormulaireBase, forms.Form):
         # Importation des renseignements en attente de validation
         renseignements = PortailRenseignement.objects.filter(categorie="individu_questionnaire", famille=rattachement.famille, individu=rattachement.individu, etat="ATTENTE", validation_auto=False).order_by("date")
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
+        # Récupération des inscriptions et des activités associées
+        individu = rattachement.individu
+        inscriptions = Inscription.objects.filter(individu=individu)
+        activite_ids = inscriptions.values_list('activite', flat=True).distinct()
+        activites = Activite.objects.filter(idactivite__in=activite_ids)
 
-        # Création des champs
-        for question in QuestionnaireQuestion.objects.filter(categorie="individu", visible_portail=True).order_by("ordre"):
+        # Filtrage des questions
+        questions = QuestionnaireQuestion.objects.filter(
+            categorie="individu",
+            visible_portail=True
+        ).filter(
+            Q(activite=None) | Q(activite__in=activites)
+        ).order_by("ordre")
+
+        # Traitement des questions
+        for question in questions:
             nom_controle, ctrl = questionnaires.Get_controle(question)
             if ctrl:
                 self.fields[nom_controle] = ctrl

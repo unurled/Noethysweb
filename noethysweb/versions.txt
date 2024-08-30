@@ -1,3 +1,8 @@
+Version 1.2.2.9.38 (30/08/2024)
+- bug procedure (encore...)
+- Ajout fiel activité dans questionnaires
+- Filtre des questions si inscriptions à l'activité
+
 Version 1.2.2.9.37 (30/08/2024)
 -bug procedure (encore...)
 

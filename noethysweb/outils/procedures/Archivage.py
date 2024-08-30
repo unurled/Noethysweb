@@ -67,6 +67,8 @@ class Procedure(BaseProcedure):
             for doc in actdocument_modifies:
                 doc.activites.set([23])
 
+            structures.delete()
+
             return (
                 f"Nombre d'articles modifiés : {articles_modifies}, "
                 f"Nombre de documents modifiés : {strucdocument_modifies}, "

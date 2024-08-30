@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Hidden, Submit, HTML, Row, ButtonHolder,
 from crispy_forms.bootstrap import Field, FormActions, PrependedText, StrictButton
 from core.utils.utils_commandes import Commandes
 from core.forms.select2 import Select2MultipleWidget
-from core.models import QuestionnaireQuestion
+from core.models import QuestionnaireQuestion, Activite
 from core.widgets import DatePickerWidget, ColorPickerWidget, SliderWidget
 from django.db.models import Max
 
@@ -67,6 +67,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        self.fields['activite'].queryset = Activite.objects.filter(visible=True)
+
         # Ordre
         if self.instance.ordre == None:
             max = QuestionnaireQuestion.objects.filter(categorie=categorie).aggregate(Max('ordre'))['ordre__max']
@@ -90,6 +92,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Field('choix'),
             Field('texte_aide'),
             Field('structure'),
+            Field('activite'),
             Field('visible'),
             Field('visible_portail'),
             Field('visible_fiche_renseignement'),

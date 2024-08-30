@@ -32,7 +32,7 @@ class Liste(Page, liste_questionnaires_base.Liste):
 
     def Get_customdatatable(self):
         lignes = []
-        for reponse in QuestionnaireReponse.objects.select_related("question", "individu").filter(Q(question=self.Get_categorie()) & self.Get_filtres("Q")):
+        for reponse in QuestionnaireReponse.objects.select_related("question", "individu").filter(Q(question=self.Get_categorie()) & self.Get_filtres("Q"), reponse__isnull=False):
             lignes.append([
                 reponse.individu.nom,
                 reponse.individu.prenom,
