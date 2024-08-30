@@ -49,22 +49,33 @@ class Page(crud.Page):
     ]
 
 
+from django.db.models import Count
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
+
 class Liste(Page, crud.Liste):
     model = Activite
     template_name = "parametrage/activite_liste.html"
 
     def get_queryset(self):
+        # Récupère les filtres de base et les structures associées à l'utilisateur
         queryset = Activite.objects.prefetch_related("groupes_activites").filter(
             self.Get_filtres("Q"), structure__in=self.request.user.structures.all()
-        ).annotate(nbre_inscrits=Count("inscription"))
+        ).annotate(nbre_inscrits=Count("inscription")).exclude(nom__icontains="ARCHIVE")
 
-        # Filtrage basé sur la session (ou autre mécanisme de stockage)
-        self.afficher_renseignements_attente = utils_parametres.Get(nom="afficher_renseignements_attente", categorie="renseignements_attente", utilisateur=self.request.user, valeur=True)
+        # Détermine si les renseignements d'attente doivent être affichés
+        self.afficher_renseignements_attente = utils_parametres.Get(
+            nom="afficher_renseignements_attente",
+            categorie="renseignements_attente",
+            utilisateur=self.request.user,
+            valeur=True
+        )
+
         if self.afficher_renseignements_attente:
-            queryset = queryset.filter()
-        else:
-            queryset = queryset.exclude(nom__icontains="ARCHIVE")
-
+            queryset = Activite.objects.prefetch_related("groupes_activites").filter(
+                self.Get_filtres("Q"), structure__in=self.request.user.structures.all()
+            ).annotate(nbre_inscrits=Count("inscription"))
         return queryset
 
     class datatable_class(MyDatatable):
@@ -86,9 +97,10 @@ class Liste(Page, crud.Liste):
 
         def Get_validite(self, instance, **kwargs):
             if not instance.date_fin or instance.date_fin.year == 2999:
-                return "Validité illimitée"
+                return _("Validité illimitée")
             else:
-                return "Du %s au %s" % (instance.date_debut.strftime('%d/%m/%Y'), instance.date_fin.strftime('%d/%m/%Y'))
+                return _("Du %s au %s") % (
+                instance.date_debut.strftime('%d/%m/%Y'), instance.date_fin.strftime('%d/%m/%Y'))
 
         def Get_groupes(self, instance, *args, **kwargs):
             return ", ".join([groupe.nom for groupe in instance.groupes_activites.all()])
@@ -103,7 +115,7 @@ class Liste(Page, crud.Liste):
             return self.Create_boutons_actions(html)
 
         def Format_visible(self, instance, *args, **kwargs):
-            return "Oui" if instance.visible else "Non"
+            return _("Oui") if instance.visible else _("Non")
 
 class Ajouter(Page, crud.Ajouter):
     form_class = Formulaire
