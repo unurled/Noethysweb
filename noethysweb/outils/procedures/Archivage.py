@@ -56,14 +56,16 @@ class Procedure(BaseProcedure):
 
             actdocument_modifies = PortailDocument.objects.filter(
                 structure=12
-            ).update(activites=23)
+            )
 
             # Renommage Activité
             activite_statut = Activite.objects.filter(
                 idactivite=activite_id
             ).update(visible=False, nom=Concat(Value('ARCHIVE - '), F('nom')), structure=12)
 
-
+            # Mise à jour des documents associés
+            for doc in actdocument_modifies:
+                doc.activites.set([23])
 
             return (
                 f"Nombre d'articles modifiés : {articles_modifies}, "
