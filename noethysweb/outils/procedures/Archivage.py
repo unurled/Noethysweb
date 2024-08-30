@@ -1,9 +1,11 @@
 import logging
-logger = logging.getLogger(__name__)
 from outils.views.procedures import BaseProcedure
-from core.models import Article, Activite, Structure, PortailDocument
+from core.models import Article, Activite, Structure, PortailDocument, SignatureEmail, Album, ModeleDocument
 from django.db.models import F, Value
 from django.db.models.functions import Concat
+
+logger = logging.getLogger(__name__)
+
 
 class Procedure(BaseProcedure):
     def Arguments(self, parser=None):
@@ -13,27 +15,65 @@ class Procedure(BaseProcedure):
     def Executer(self, variables=None):
         try:
             # Vérification que l'activité a été fournie
-            activites = variables.get('activite')
-            if not activites:
+            activite = variables.get('activite')
+
+            if not activite:
                 return "Aucune activité sélectionnée."
 
-            # Récupérer tous les articles liés aux activités sélectionnées
+            # Assurer que `activite` est un seul objet Activite
+            if isinstance(activite, Activite):
+                activite_id = activite.idactivite
+            else:
+                return "L'activité fournie n'est pas valide."
+
+            # Récupérer les structures associées à l'activité
+            structures = Structure.objects.filter(activite=activite_id)
+
+            # Articles
             articles_modifies = Article.objects.filter(
-                activites__in=activites
+                activites=activite
             ).update(structure=12, statut='non_publie')
-            strucdocument_modifies = PortailDocument.objects.filter(
-                activites__in=activites
+
+            # Signature email
+            sign_modifies = SignatureEmail.objects.filter(
+                structure__in=structures
             ).update(structure=12)
+
+            # Album
+            album_modifies = Album.objects.filter(
+                structure__in=structures
+            ).update(structure=12)
+
+            # Modèle document
+            modeledoc_modifies = ModeleDocument.objects.filter(
+                structure__in=structures
+            ).update(structure=12)
+
+            # Documents
+            strucdocument_modifies = PortailDocument.objects.filter(
+                activites=activite
+            ).update(structure=12)
+
             actdocument_modifies = PortailDocument.objects.filter(
                 structure=12
             )
+
+            # Renommage Activité
             activite_statut = Activite.objects.filter(
-                idactivite__in=activites
+                idactivite=activite_id
             ).update(visible=False, nom=Concat(Value('ARCHIVE - '), F('nom')))
 
+            # Mise à jour des documents associés
             for doc in actdocument_modifies:
                 doc.activites.set([23])
-            return f"Nombre d'articles modifiés : {articles_modifies}, Nombre de documents modifiés : {strucdocument_modifies}"
+
+            return (
+                f"Nombre d'articles modifiés : {articles_modifies}, "
+                f"Nombre de documents modifiés : {strucdocument_modifies}, "
+                f"Nombre de signatures modifiées : {sign_modifies}, "
+                f"Nombre d'albums modifiés : {album_modifies}, "
+                f"Nombre de modèles de documents modifiés : {modeledoc_modifies}"
+            )
 
         except Exception as e:
             logger.error(f"Une erreur est survenue : {str(e)}")

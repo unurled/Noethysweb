@@ -1,3 +1,6 @@
+Version 1.2.2.9.35 (30/08/2024)
+- Modifs procédures
+
 Version 1.2.2.9.34 (29/08/2024)
 - Ajout visible False procédure Archivage
 - Ajout ARCHIVE lors de l'archivage de l'activité
