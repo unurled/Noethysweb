@@ -80,15 +80,14 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idactivite", "nom", "date_debut", "date_fin"]
-        groupes = columns.TextColumn("Groupes d'activités", sources=None, processor='Get_groupes')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
-        periode = columns.DisplayColumn("Validité", sources="date_fin", processor='Get_validite')
+        periode = columns.DisplayColumn("Dates", sources="date_fin", processor='Get_validite')
         nbre_inscrits = columns.TextColumn("Inscrits", sources="nbre_inscrits")
         visible = columns.TextColumn("Visible sur le portail", sources="visible", processor='Format_visible')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits", "visible", "actions"]
+            columns = ["idactivite", "nom", "periode", "nbre_inscrits", "visible", "actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),

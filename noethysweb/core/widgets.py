@@ -467,8 +467,9 @@ class SelectionActivitesWidget(Widget):
 
         context['activites'] = Activite.objects.filter(
             structure__in=self.request.user.structures.all(),
-            visible=1  # Filtrer les activités où visible est égal à 1
-        ).order_by("-date_fin")
+            visible=1
+        ).exclude(nom__icontains="ARCHIVE").order_by("-date_fin")
+
         if context.get("afficher_groupes", False):
             context['groupes'] = {}
             for groupe in Groupe.objects.select_related('activite').all().order_by("ordre"):

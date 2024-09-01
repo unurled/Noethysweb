@@ -11,8 +11,22 @@ from django.views.generic import TemplateView
 from django.utils.translation import gettext as _
 from individus.utils import utils_pieces_manquantes
 from portail.utils import utils_approbations
-from core.models import PortailDocument, Inscription
+from core.models import PortailDocument, Inscription, Attestationdoc
 from core.utils import utils_dates
+from django.http import FileResponse, Http404
+from django.conf import settings
+import os
+import shutil
+
+def imprimer_attestation(request):
+    attestation = int(request.POST.get("idattestation", 0))
+    idattestationdoc = Attestationdoc.objects.get(idattestation=attestation)
+    print(idattestationdoc)
+    chemin_relatif_fichier = idattestationdoc.fichier
+    fichier_chemin = os.path.join(settings.MEDIA_ROOT, chemin_relatif_fichier)
+    print(fichier_chemin)
+    response = FileResponse(open(fichier_chemin, 'rb'), as_attachment=True, filename=fichier_chemin)
+    return response
 
 class View(CustomView, TemplateView):
     menu_code = "portail_documents"
@@ -50,5 +64,9 @@ class View(CustomView, TemplateView):
                 "extension": unite_consentement.Get_extension()
             })
         context['liste_documents'] = liste_documents
+
+        famille = self.request.user.famille
+        attestations = Attestationdoc.objects.filter(famille=famille)
+        context['liste_attestations'] = attestations
 
         return context

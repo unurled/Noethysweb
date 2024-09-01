@@ -237,6 +237,8 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_inscriptions.Add(code="inscriptions_email", titre="Envoyer des inscriptions par Email", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_modifier", titre="Modifier des inscriptions par lot", icone="file-text-o")
     menu_inscriptions.Add(code="inscriptions_changer_groupe", titre="Changer de groupe par lot", icone="file-text-o")
+    menu_inscriptions.Add(code="famille_attestations", titre="Génerer les attestations de présence", icone="file-text-o")
+
 
     # Inscriptions scolaires
     menu_scolarite = menu_individus.Add(titre="Scolarité")

@@ -2786,6 +2786,20 @@ class Attestation(models.Model):
     def __str__(self):
         return "Attestation ID%d" % self.idattestation
 
+class Attestationdoc(models.Model):
+    idattestation = models.AutoField(verbose_name="ID", db_column='IDattestation', primary_key=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
+    activites = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
+    individus = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.PROTECT)
+    fichier = models.CharField(verbose_name="Chemin du fichier", max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'attestationsdoc'
+        verbose_name = "attestationdoc"
+        verbose_name_plural = "attestationsdoc"
+
+    def __str__(self):
+        return "Attestation ID%d" % self.idattestation
 
 class Devis(models.Model):
     iddevis = models.AutoField(verbose_name="ID", db_column='IDdevis', primary_key=True)

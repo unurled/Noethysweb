@@ -1,3 +1,6 @@
+Version 1.2.2.9.40 (01/09/2024)
+- Grosse modif pour intégrer les attestations
+
 Version 1.2.2.9.39 (30/08/2024)
 - remise en état activite_liste
 
