@@ -151,7 +151,7 @@ def Generer_pdf(request):
         dossier_attestations.mkdir(parents=True, exist_ok=True)
 
         # Nom du fichier dans le répertoire de destination
-        nom_fichier = f"AttestationI{parametres['numero']}I{parametres['date_edition']}.pdf"
+        nom_fichier = f"Attestation-{parametres['numero']}-{parametres['date_edition']}.pdf"
         chemin_destination = dossier_attestations / nom_fichier
 
         # Copier le fichier
