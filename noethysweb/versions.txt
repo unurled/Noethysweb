@@ -1,3 +1,6 @@
+Version 1.2.2.9.41 (01/09/2024)
+- Correction bug
+
 Version 1.2.2.9.40 (01/09/2024)
 - Grosse modif pour intégrer les attestations
 

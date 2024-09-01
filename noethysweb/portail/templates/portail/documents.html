@@ -106,10 +106,7 @@
                                     <td>{{ attestationdoc.individus.prenom }}</td>
                                     <td>{{ attestationdoc.activites.nom }}</td>
                                     <td>
-                                    <button data-idattestation="{{ attestationdoc.pk }}" class="btn btn-primary btn-xs bouton_telecharger" title="{% trans "Télécharger l'attestation" %}"><i class="fa fa-fw fa-download"></i></button>
-                                    </td>
-                                    <td>
-                                        <a href="{{ attestationdoc.fichier.url }}" class="btn btn-default btn-sm float-right" target="_blank" title="{% trans "Télécharger le document" %}"><i class="fa fa-download"></i></a>
+                                        <a href="{{ MEDIA_URL }}{{ attestationdoc.fichier }}" class="btn btn-primary btn-xs bouton_telecharger" target="_blank" title="{% trans "Télécharger le document" %}"><i class="fa fa-download"></i></a>
                                     </td>
                                 </tr>
                             {% endfor %}
