@@ -107,7 +107,7 @@ class Formulaire(FormulaireBase, ModelForm):
     def clean(self):
         # Catégorie
         if "disabled" in self.fields['categorie'].widget.attrs:
-            self.cleaned_data["categorie"] = 1
+            self.cleaned_data["categorie"] = "1"
 
         if self.cleaned_data["categorie"] == "":
             self.add_error("categorie", "Vous devez sélectionner une catégorie")
