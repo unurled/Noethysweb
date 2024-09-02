@@ -1,4 +1,4 @@
-Version 1.2.2.9.43 (02/09/2024)
+Version 1.2.2.9.44 (02/09/2024)
 - Correction bug création famille
 
 Version 1.2.2.9.42 (01/09/2024)
