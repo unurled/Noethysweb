@@ -272,6 +272,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_questionnaires = menu_individus.Add(titre="Questionnaires")
     menu_infos_questionnaires.Add(code="questionnaires_familles_liste", titre="Liste des questionnaires familiaux", icone="file-text-o")
     menu_infos_questionnaires.Add(code="questionnaires_individus_liste", titre="Liste des questionnaires individuels", icone="file-text-o")
+    menu_infos_questionnaires.Add(code="questionnaires_individus_modif", titre="Modification groupée des réponses aux questionnaires", icone="file-text-o")
 
     # Sondages
     menu_infos_sondages = menu_individus.Add(titre="Formulaires")

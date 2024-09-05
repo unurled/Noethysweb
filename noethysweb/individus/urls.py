@@ -13,7 +13,8 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             liste_regimes_alimentaires, liste_maladies, liste_informations, individus_doublons_liste, liste_familles_sans_inscriptions, \
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
-                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, telecharger_plusieurs, famille_attestations
+                            abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, telecharger_plusieurs, famille_attestations, \
+                            liste_questionnaires_individus_modif, liste_questionnaires_individus_modif_valid
 from fiche_individu.views import individu_inscriptions
 
 urlpatterns = [
@@ -136,6 +137,10 @@ urlpatterns = [
     path('individus/questionnaires/familles/liste', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
     path('individus/questionnaires/familles/liste/<str:categorie>', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
     path('individus/questionnaires/individus/liste', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
+    path('individus/questionnaires/individus/modif', liste_questionnaires_individus_modif.Liste.as_view(), name='questionnaires_individus_modif'),
+    path('individus/questionnaires/individus/validation', liste_questionnaires_individus_modif_valid.liste_questionnaires_individus_modif_valid.as_view(), name='questionnaires_individus_modif_valid'),
+
+    path('individus/questionnaires/individus/modif/<str:categorie>', liste_questionnaires_individus_modif.Liste.as_view(),name='questionnaires_individus_modif'),
     path('individus/questionnaires/individus/liste/<str:categorie>', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
 
     # Sondages
