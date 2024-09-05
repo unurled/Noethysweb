@@ -255,14 +255,13 @@ class Liste(Page, crud.Liste):
                 4: "Ami(e)",
                 5: "Jeunes"
             }
-            statut_code = instance.individu.statut
-            statut = statut_mapping.get(statut_code, "Statut inconnu")
-            # Retourner le nom, prénom et statut
             if instance.individu:
+                statut_code = instance.individu.statut
+                statut = statut_mapping.get(statut_code, "Statut inconnu")
                 nom_prenom = instance.individu.Get_nom()
                 return f"{nom_prenom} ({statut})"
             else:
-                return ""
+                return "Individu non défini"
 
         def Formate_etat(self, instance, **kwargs):
             if instance.validation_auto:
