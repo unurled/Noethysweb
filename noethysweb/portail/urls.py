@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.urls import include, path
-from portail.views import accueil, login
+from portail.views import accueil, login, inscription_famille
 from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
@@ -23,6 +23,7 @@ urlpatterns = [
     # Connexion
     path('connexion', login.LoginViewFamille.as_view(), name='portail_connexion'),
     path('deconnexion', auth_views.LogoutView.as_view(next_page='portail_connexion'), name='portail_deconnexion'),
+    path('inscription_famille/', inscription_famille.InscriptionFamilleView.as_view(), name='inscription_famille'),
 
     # Change mot de passe
     path('password_change/', change_password.MyPasswordChangeView.as_view(), name='password_change'),

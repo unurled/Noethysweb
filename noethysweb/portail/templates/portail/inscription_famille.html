@@ -1,0 +1,72 @@
+{% extends "core/base_login.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block titre_contenu %}
+    {% trans "Créer un compte" %}
+{% endblock titre_contenu %}
+
+{% block contenu_page %}
+    {% if inscription_ok %}
+        {% blocktrans %}Votre comtpe a bien été créé, vous allez recevoir un mail contenant votre identifiant.{% endblocktrans %}
+    {% else %}
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="form-group">
+                {{ form.civilite }}
+                {{ form.civilite.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.nom }}
+                {{ form.nom.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.prenom }}
+                {{ form.prenom.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.mail }}
+                {{ form.mail.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.new_password1 }}
+                <small class="form-text text-muted">
+                    {{ form.new_password1.help_text }}
+                </small>
+                {{ form.new_password1.errors }}
+            </div>
+            <div class="form-group">
+                {% if form.new_password2.errors  %}
+                    <div class="alert alert-danger">
+                        {{ form.new_password2.errors }}
+                    </div>
+                {% endif %}
+                {{ form.new_password2 }}
+            </div>
+
+            {% if form.captcha.errors %}
+                <div class="alert alert-danger">
+                    {% blocktrans %}Vous devez recopier le code de sécurité ci-dessous{% endblocktrans %}
+                </div>
+            {% endif %}
+
+            <div>
+                {{ form.captcha }}
+            </div>
+
+            <button name="login" id="login" class="btn btn-block btn-primary login-btn mb-4" type="submit">{% trans "Envoyer" %}</button>
+        </form>
+    {% endif %}
+{% endblock contenu_page %}

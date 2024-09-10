@@ -32,6 +32,15 @@ def GetListeCivilitesForModels():
             liste_civilites.append((dict_civilite["id"], dict_civilite["label"]))
     return liste_civilites
 
+def GetListeCivilitesByCategory(category):
+    liste_civilites = []
+    for categorie, items in LISTE_CIVILITES:
+        if categorie == category:
+            for dict_civilite in items:
+                liste_civilites.append((dict_civilite["id"], dict_civilite["label"]))
+            break
+    return liste_civilites
+
 def GetCiviliteForIndividu(individu=None):
     for categorie, items in LISTE_CIVILITES:
         for dict_civilite in items:
