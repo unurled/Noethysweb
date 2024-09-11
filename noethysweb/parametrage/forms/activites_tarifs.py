@@ -211,6 +211,13 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Configurer le queryset dynamiquement
         self.fields['categories_tarifs'].queryset = CategorieTarif.objects.all().filter(activite=activite)
+        cat = CategorieTarif.objects.filter(activite=activite).first()
+        initial_category = cat.idcategorie_tarif
+        print(initial_category)
+        if initial_category:
+            self.fields['categories_tarifs'].initial = [initial_category]
+        else:
+            self.fields['categories_tarifs'].initial = []
 
         # Définir les valeurs initiales
         initial_categories = CategorieTarif.objects.first()
@@ -346,109 +353,19 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('activite', value=activite.idactivite),
             Hidden('nom_tarif', value=nom_tarif),
+            Hidden('categories_tarifs', value=initial_category),
             TabHolder(
                 Tab("Généralités",
                     Field("date_debut"),
-                  #  Field("date_fin"),
                     Field("description"),
-                    #Field("observations"),
-                    Field("categories_tarifs"),
-                  # Fieldset("Label de la prestation",
-                  #     Field("label_type"),
-                  #     Field("label_prestation"),
-                  # ),
-                   # Field("code_compta"),
-                   # PrependedText('tva', '%'),
-               # ),
-              # Tab("Conditions d'application",
-               #     Fieldset("Groupes associés",
-               #         Field("groupes_type"),
-                #        Field("groupes"),
-                 #   ),
-           #         Fieldset("Cotisations associées",
-            #            Field("cotisations_type"),
-             #           Field("cotisations"),
-             #       ),
-              #      Fieldset("Caisses associées",
-               #         Field("caisses_type"),
-                #        Field("caisses"),
-                 #   ),
-           #         Fieldset("Périodes",
-           #             Field("periodes_type"),
-            #            InlineCheckboxes("jours_scolaires"),
-             #           InlineCheckboxes("jours_vacances"),
-              #      ),
-               # ),
                Tab("Type de tarif",
-                   Field("type"),
-             #       # Prestation journalière
-               #     Div(
-             #           Div(
-              #              HTML("<label class='col-form-label col-md-2 requiredField'>Paramètres*</label>"),
-               #             Div(
-                #                Formset("formset_unites_journ"),
-                 #               css_class="controls col-md-10"
-                  #          ),
-                   #         css_class="form-group row"
-                    #    ),
-                #       InlineCheckboxes("etats"),
-                 #      Field("penalite"),
-                  #     PrependedText("penalite_pourcentage", "%"),
-                   #    Field("penalite_label"),
-                    #   id="div_type_journ"
+                   Hidden("type", value="FORFAIT"),
                     ),
-                    # Forfait daté
-                #   Div(
-                #       Field("conso_forfait_type"),
-                 #      Div(
-                  #         HTML("<label class='col-form-label col-md-2 requiredField'>Paramètres*</label>"),
-                  #         Div(
-                   #            Formset("formset_unites_forfait"),
-                    #           css_class="controls col-md-10"
-                     #      ),
-                      #     css_class="form-group row",
-                #           id="div_formset_unites_forfait"
-                #       ),
-                #       Field("forfait_saisie_manuelle"),
-                #       Field("forfait_saisie_auto"),
-                 #      Field("forfait_suppression_auto"),
-                  #     Field("date_facturation_forfait_type"),
-                   #    Field("date_facturation_forfait"),
-                    #   id="div_type_forfait"
-                 #  ),
-                    # Forfait crédit
-#                   Div(
- #                      Div(
-  #                         HTML("<label class='col-form-label col-md-2 requiredField'>Paramètres*</label>"),
-   #                        Div(
-    #                           Formset("formset_unites_credit"),
-     #                          css_class="controls col-md-10"
-      #                     ),
-       #                    css_class="form-group row"
-        #               ),
-         #              Field("blocage_plafond"),
-          #             Field("forfait_beneficiaire"),
-           #            Field("date_facturation_credit_type"),
-            #           Field("date_facturation_credit"),
-             #          Fieldset('Durée par défaut',
-              #             Field('validite_duree_forfait'),
-               #            Div(
-                #               Field('validite_annees'),
-                 #              Field('validite_mois'),
-                  #             Field('validite_jours'),
-                   #            id='bloc_duree_forfait'
-                    #       ),
-       #                ),
-       #                id="div_type_credit"
-       #           ),
                ),
                 Tab("Calcul du tarif",
                     Field("methode"),
                     Hidden("tarifs_lignes_data", value='', id='tarifs_lignes_data'),
-                    # HTML(TABLEAU_TARIFS_LIGNES),
                     Field("parametres_tarif"),
-         #          Field("type_quotient"),
-          #         Field("facturation_unite"),
                 ),
             ),
             HTML(EXTRA_SCRIPT),

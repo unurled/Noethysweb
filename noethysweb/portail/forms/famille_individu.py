@@ -6,7 +6,7 @@ from django.shortcuts import render
 class IndividuForm(forms.ModelForm):
     class Meta:
         model = Individu
-        fields = ['prenom', 'nom', "statut"]
+        fields = ['prenom', 'nom', "statut", "date_naiss"]
 
 def contact(request):
     contact_form = IndividuForm()

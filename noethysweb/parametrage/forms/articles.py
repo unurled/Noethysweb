@@ -88,6 +88,10 @@ class Formulaire(FormulaireBase, ModelForm):
         condition = (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
         self.fields["sondage"].queryset = Sondage.objects.filter(condition).order_by("titre")
 
+        #Public
+        if not self.request.user.is_staff:
+            self.fields["public"].choices = [choice for choice in self.fields["public"].choices if choice[0] != "toutes"]
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'articles_liste' %}"),
@@ -115,9 +119,9 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Album photos joint",
                 Field("album"),
             ),
-            Fieldset("Formulaire joint",
-                Field("sondage"),
-            ),
+           # Fieldset("Formulaire joint",
+           #     Field("sondage"),
+           # ),
             Fieldset("Fenêtre popup",
                 Field("texte_popup"),
             ),

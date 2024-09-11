@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Individu, Piece, TypePiece, Inscription, Rattachement
+from core.models import Famille, Individu, Piece, TypePiece, Inscription, Rattachement, Activite
 from fiche_famille.forms.famille_pieces import Formulaire
 from fiche_famille.views.famille import Onglet
 import datetime
@@ -25,7 +25,7 @@ class Page(Onglet):
     url_modifier = "famille_pieces_modifier"
     url_supprimer = "famille_pieces_supprimer"
     url_supprimer_plusieurs = "famille_pieces_supprimer_plusieurs"
-    description_liste = "Saisissez ici les pièces de la famille."
+    description_liste = "Saisissez ici les pièces de la famille. Les pièces d'un enfant sont uniquement visibles si l'enfant est inscrit à l'une de vos activités."
     description_saisie = "Saisissez toutes les informations concernant la pièce et cliquez sur le bouton Enregistrer."
     objet_singulier = "une pièce"
     objet_pluriel = "des pièces"
@@ -64,8 +64,19 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_pieces.html"
 
     def get_queryset(self):
+        structures = self.request.user.structures.all()  # Adaptez cette ligne en fonction de la façon dont vous obtenez les structures du user
         inscriptions = Inscription.objects.filter(famille_id=self.Get_idfamille())
-        liste = Piece.objects.select_related('individu', 'type_piece').filter((Q(famille_id=self.Get_idfamille()) | Q(individu_id__in=[i.individu_id for i in inscriptions], type_piece__valide_rattachement=True)) & self.Get_filtres("Q"))
+        activites_structures = Activite.objects.filter(structure__in=structures)
+        inscriptions_valides = inscriptions.filter(activite__in=activites_structures)
+        individus_inscriptions = [i.individu_id for i in inscriptions_valides]
+
+        if individus_inscriptions:
+            liste = Piece.objects.select_related('individu', 'type_piece').filter(
+                (Q(famille_id=self.Get_idfamille()) |
+                Q(individu_id__in=individus_inscriptions, type_piece__valide_rattachement=True)) &
+                self.Get_filtres("Q"))
+        else:
+            liste = Piece.objects.none()
         return liste
 
     def get_context_data(self, **kwargs):
