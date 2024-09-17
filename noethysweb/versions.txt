@@ -1,3 +1,12 @@
+Version 1.3.2.0.0 (17/09/2024)
+- Ajout tarif label des tarifs inscription
+- Correction beug pour les modèles de documents lors de l'inscription
+- Hide responsable dans parametrage de l'activité
+- Divers détails
+- Résolution beug pouce et oeil
+- Filtrage email
+- Ajout visualisation et possibilité de suppression des pièces sur le portail famille
+
 Version 1.3.1.0.0 (11/09/2024)
 - Ajout création compte parent (Merci Sap !)
 - Ajout date de naissance dans la création d'un enfant

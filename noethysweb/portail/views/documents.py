@@ -5,14 +5,18 @@
 
 import logging
 from django.db.models import Q
-logger = logging.getLogger(__name__)
-from portail.views.base import CustomView
-from django.views.generic import TemplateView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
 from django.utils.translation import gettext as _
+from django.views.generic import TemplateView
+
+from portail.views.base import CustomView
 from individus.utils import utils_pieces_manquantes
 from portail.utils import utils_approbations
-from core.models import PortailDocument, Inscription, Attestationdoc
+from core.models import PortailDocument, Inscription, Attestationdoc, Piece
 from core.utils import utils_dates
+
+logger = logging.getLogger(__name__)
 
 class View(CustomView, TemplateView):
     menu_code = "portail_documents"
@@ -23,7 +27,10 @@ class View(CustomView, TemplateView):
         context['page_titre'] = _("Documents")
 
         # Pièces à fournir
-        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille, exclure_individus=self.request.user.famille.individus_masques.all())
+        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(
+            famille=self.request.user.famille,
+            exclure_individus=self.request.user.famille.individus_masques.all()
+        )
 
         # Récupération des activités de la famille
         conditions = Q(famille=self.request.user.famille)
@@ -41,7 +48,10 @@ class View(CustomView, TemplateView):
                 "couleur_fond": document.couleur_fond,
                 "extension": document.Get_extension()
             })
-        for unite_consentement in utils_approbations.Get_approbations_requises(famille=self.request.user.famille, avec_consentements_existants=False).get("consentements", []):
+        for unite_consentement in utils_approbations.Get_approbations_requises(
+                famille=self.request.user.famille,
+                avec_consentements_existants=False
+        ).get("consentements", []):
             liste_documents.append({
                 "titre": unite_consentement.type_consentement.nom,
                 "texte": "Version du %s" % utils_dates.ConvertDateToFR(unite_consentement.date_debut),
@@ -52,7 +62,18 @@ class View(CustomView, TemplateView):
         context['liste_documents'] = liste_documents
 
         famille = self.request.user.famille
-        attestations = Attestationdoc.objects.filter(famille=famille)
-        context['liste_attestations'] = attestations
+        pieces = Piece.objects.filter(famille=famille)
+        context['liste_pieces'] = pieces
+
+        attestation = Attestationdoc.objects.filter(famille=famille)
+        context['liste_attestations'] = attestation
 
         return context
+
+def supprimer_piece(request, pk):
+    piece = get_object_or_404(Piece, pk=pk)
+    if request.method == 'POST':
+        piece.delete()
+        messages.success(request, 'La pièce a été supprimée avec succès.')
+        return redirect('portail_documents')  # Redirigez vers la vue appropriée
+    return render(request, 'core/confirmation_suppression.html', {'piece': piece})

@@ -70,7 +70,6 @@ def Valid_form(request):
         field_name = f"tarifs_{nom_tarif.idnom_tarif}"
         tarifs_selectionnes = request.POST.getlist(field_name)
         id_tarifs_selectionnes.extend(tarifs_selectionnes)
-    print(id_tarifs_selectionnes)
 
     if not activite.inscriptions_multiples:
 
@@ -114,7 +113,6 @@ def Valid_form(request):
     demande = form.save()
     demande.nouvelle_valeur = json.dumps("%d;%d;%s" % (activite.pk, groupe.pk, json.dumps(id_tarifs_selectionnes)),cls=DjangoJSONEncoder)
     demande.save()
-    print(demande.nouvelle_valeur)
 
     # Enregistrement des pièces
     for nom_champ, valeur in form_extra.cleaned_data.items():

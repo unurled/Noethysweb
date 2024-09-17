@@ -6,7 +6,7 @@
 import logging, json
 logger = logging.getLogger(__name__)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Count
+from django.db.models import Count, Q, OuterRef, Subquery
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.cache import cache
@@ -154,16 +154,49 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
 
         # Filtrage
         structures = self.request.user.structures.all()
-        activites = Activite.objects.filter(structure__in=structures)
-        inscriptions = Inscription.objects.filter(activite__in=activites)
+        activites_autorisees = Activite.objects.filter(structure__in=structures)
+        activites_ids = activites_autorisees.values_list('idactivite', flat=True)
+        inscriptions = Inscription.objects.filter(activite__in=activites_autorisees)
         familles_ids = inscriptions.values_list('famille_id', flat=True).distinct()
         familles = Famille.objects.filter(idfamille__in=familles_ids)
 
         context["familles_liees"] = familles
 
-        # Filtrer les renseignements en fonction des familles trouvées
-        renseignements_attente = PortailRenseignement.objects.filter(etat="ATTENTE",famille__in=familles_ids,validation_auto=True).count()
-        renseignements_attente_false = PortailRenseignement.objects.filter(etat="ATTENTE",famille__in=familles_ids,validation_auto=False).count()
+        premiere_valeur_subquery = PortailRenseignement.objects.filter(
+            code='inscrire_activite',
+            etat='ATTENTE',
+            idrenseignement=OuterRef('idrenseignement')
+        ).order_by('date').values('nouvelle_valeur')[:1]
+
+        # Obtenez les lignes de PortailRenseignement où le code est "inscrire_activite"
+        portail_renseignement_inscrire_activite = PortailRenseignement.objects.filter(code='inscrire_activite')
+
+        # Exécutez une requête pour obtenir les valeurs filtrées
+        resultat = portail_renseignement_inscrire_activite.annotate(
+            premiere_valeur=Subquery(premiere_valeur_subquery)
+        ).values('idrenseignement', 'premiere_valeur')
+
+
+        # Créer un ensemble des IDs des activités autorisées pour une recherche plus rapide
+        activite_ids_autorisees = set(activites_ids)
+
+        # Décoder les valeurs de premiere_valeur et filtrer les résultats
+        resultat_filtre = set()
+        for entry in resultat:
+            premiere_valeur = entry.get('premiere_valeur')
+            if premiere_valeur:
+                # Extraire l'ID de l'activité de la nouvelle valeur
+                premiere_valeur_strip = premiere_valeur.split(';')[0].strip('"')
+                if premiere_valeur_strip.isdigit() and int(premiere_valeur_strip) in activite_ids_autorisees:
+                    resultat_filtre.add(entry['idrenseignement'])
+
+        # Filtrage des renseignements en attente
+        renseignements_attente = PortailRenseignement.objects.filter(
+            etat="ATTENTE",
+            validation_auto=False,
+            idrenseignement__in=resultat_filtre
+        ).count()
+        renseignements_attente_false = PortailRenseignement.objects.filter(etat="ATTENTE",famille__in=familles_ids,validation_auto=True).count()
 
         # Préparer les contextes
         context["nbre_renseignements_attente_validation"] = renseignements_attente

@@ -175,6 +175,10 @@ class Liste(Page, crud.Liste):
         else:
             conditions &= ~Q(code="inscrire_activite")
             conditions |= Q(idrenseignement__in=resultat_filtre)
+            conditions &= ~Q(etat="VALIDE")
+           #conditions &= ~Q(code="inscrire_activite")
+
+
 
         return PortailRenseignement.objects.select_related("famille", "individu", "traitement_utilisateur").filter(conditions).order_by("date")
 

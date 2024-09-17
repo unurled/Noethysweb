@@ -144,7 +144,7 @@ class Onglet(CustomView):
         {"code": "resume", "label": "Résumé", "icone": "fa-home", "url": "activites_resume"},
         {"rubrique": "Généralités"},
         {"code": "generalites", "label": "Généralités", "icone": "fa-info-circle", "url": "activites_generalites"},
-        {"code": "responsables", "label": "Responsables", "icone": "fa-user", "url": "activites_responsables_liste"},
+    #   {"code": "responsables", "label": "Responsables", "icone": "fa-user", "url": "activites_responsables_liste"},
     #   {"code": "agrements", "label": "Agréments", "icone": "fa-file-text-o", "url": "activites_agrements_liste"},
         {"code": "groupes", "label": "Groupes", "icone": "fa-users", "url": "activites_groupes_liste"},
         {"code": "renseignements", "label": "Renseignements", "icone": "fa-check-circle-o", "url": "activites_renseignements"},

@@ -84,7 +84,44 @@
             {% endblock box_contenu %}
         {% endembed %}
     {% endif %}
-
+{# Liste des pièces fournies #}
+{% embed 'core/box.html' with box_titre=True %}
+    {% block box_theme %}card-outline card-lightblue{% endblock %}
+    {% block box_titre %}{% blocktrans %}Liste des pièces fournies{% endblocktrans %}{% endblock %}
+    {% block box_contenu %}
+        <div style="display: block;overflow-x: auto;white-space: nowrap;">
+            {% if liste_pieces %}
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="text-center">
+                            <th>{% trans "Individu" %}</th>
+                            <th>{% trans "Type de pièce" %}</th>
+                            <th style="width: 90px;">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for piece in liste_pieces %}
+                            <tr class="text-center">
+                                <td>{{ piece.individu.prenom }}</td>
+                                <td>{{ piece.type_piece.nom }}</td>
+                                <td>
+                                    <a href="{{ MEDIA_URL }}{{ piece.document }}" class="btn btn-primary btn-xs bouton_telecharger" target="_blank" title="{% trans "Ouvrir le document" %}"><i class="fa fa-eye"></i></a>
+                                    <form action="{% url 'supprimer_piece' pk=piece.pk %}" method="post" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette pièce ?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-xs" title="{% trans "Supprimer le document" %}"><i class="fa fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <b>{% blocktrans %}Aucune pièce.{% endblocktrans %}</b>
+            {% endif %}
+        </div>
+    {% endblock box_contenu %}
+    {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+{% endembed %}
     {# Liste des attestations #}
     {% embed 'core/box.html' with box_titre=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}

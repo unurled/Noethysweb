@@ -1161,7 +1161,7 @@ class Activite(models.Model):
     portail_inscriptions_affichage = models.CharField(verbose_name="Inscriptions autorisées", max_length=100, choices=choix_affichage_inscriptions, default="TOUJOURS")
     portail_inscriptions_date_debut = models.DateTimeField(verbose_name="Date de début d'affichage", blank=True, null=True)
     portail_inscriptions_date_fin = models.DateTimeField(verbose_name="Date de fin d'affichage", blank=True, null=True)
-    portail_inscriptions_imposer_pieces = models.BooleanField(verbose_name="Imposer le téléchargement des pièces à fournir", default=True)
+    portail_inscriptions_imposer_pieces = models.BooleanField(verbose_name="Imposer le téléchargement des pièces à fournir lors de l'inscription", default=True)
     portail_inscriptions_bloquer_si_complet = models.BooleanField(verbose_name="Empêcher l'inscription si activité complète", default=False)
     choix_affichage_reservations = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser")]
     portail_reservations_affichage = models.CharField(verbose_name="Réservations autorisées", max_length=100, choices=choix_affichage_reservations, default="JAMAIS")

@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div, Field
 from crispy_forms.bootstrap import Field
-from core.models import Activite, Rattachement, Groupe, PortailRenseignement, CategorieTarif, NomTarif, Tarif, Structure
+from core.models import Activite, Rattachement, Groupe, PortailRenseignement, CategorieTarif, NomTarif, Tarif, Structure, TarifLigne, PortailDocument
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from individus.utils import utils_pieces_manquantes
@@ -20,7 +20,7 @@ from individus.utils import utils_pieces_manquantes
 
 class Formulaire_extra(FormulaireBase, forms.Form):
     groupe = forms.ModelChoiceField(label=_("Groupe"), queryset=Groupe.objects.all(), required=True, help_text=_("Sélectionnez le groupe correspondant à l'individu dans la liste."))
-    image_url = forms.CharField(widget=HiddenInput(), required=False)  # Champ caché pour l'URL de l'image
+    image_url = forms.CharField(widget=HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         structure = kwargs.pop("structure", None)
@@ -46,14 +46,21 @@ class Formulaire_extra(FormulaireBase, forms.Form):
         for nom_tarif in liste_nom_tarif:
             tarifs = Tarif.objects.filter(nom_tarif=nom_tarif, activite=activite)
             field_name = f"tarifs_{nom_tarif.idnom_tarif}"
-            self.fields[field_name] = forms.ModelMultipleChoiceField(
+            self.fields[field_name] = forms.ModelChoiceField(
                 label=nom_tarif.nom,
                 queryset=tarifs,
-                widget=forms.CheckboxSelectMultiple(),
+                widget=forms.RadioSelect(),
                 required=False
             )
-            self.fields[field_name].widget.choices = [(tarif.pk, tarif.description) for tarif in tarifs if
-                                                      tarif.description]
+            # Modification du widget pour afficher le label avec description + montant_unique
+            tarif_choices = []
+            for tarif in tarifs:
+                tarif_lignes = TarifLigne.objects.filter(tarif=tarif)
+                montant_unique = tarif_lignes.first().montant_unique if tarif_lignes.exists() else 0
+                montant_formate = f"{montant_unique:,.2f}".replace(',', ' ').replace('.',',')  # Formater avec espace comme séparateur
+                tarif_choices.append((tarif.pk, f"{tarif.description} - {montant_formate}\u00A0€"))
+
+            self.fields[field_name].widget.choices = tarif_choices
 
         liste_groupes = Groupe.objects.filter(activite=activite).order_by("nom")
         self.fields["groupe"].queryset = liste_groupes
@@ -97,9 +104,20 @@ class Formulaire_extra(FormulaireBase, forms.Form):
                     if not piece_necessaire["valide"]:
                         nom_field = f"document_{piece_necessaire['type_piece'].pk}"
                         help_text = """Vous devez joindre ce document au format pdf, jpg ou png. """
-                        if piece_necessaire["document"]:
+
+                        portail_document = PortailDocument.objects.filter(activites=activite, type_piece=piece_necessaire["type_piece"]).first()
+
+                        if portail_document:
+                            url_document_a_telecharger = portail_document.document.url
+                            help_text += f"""Vous pouvez télécharger le document modèle de la structure à compléter en cliquant sur le lien suivant : 
+                                                         <a href='{url_document_a_telecharger}' target="_blank" title="Télécharger le document">
+                                                         <i class="fa fa-download margin-r-5"></i>Télécharger le document</a>."""
+                        elif piece_necessaire["document"]:
                             url_document_a_telecharger = piece_necessaire["document"].document.url
-                            help_text += f"""Vous pouvez télécharger le document à compléter en cliquant sur le lien suivant : <a href='{url_document_a_telecharger}' target="_blank" title="Télécharger le document"><i class="fa fa-download margin-r-5"></i>Télécharger le document</a>."""
+                            help_text += f"""Vous pouvez télécharger le document modèle standard à compléter en cliquant sur le lien suivant : 
+                                                         <a href='{url_document_a_telecharger}' target="_blank" title="Télécharger le document">
+                                                         <i class="fa fa-download margin-r-5"></i>Télécharger le document</a>."""
+
                         self.fields[nom_field] = forms.FileField(
                             label=piece_necessaire["type_piece"].nom,
                             help_text=help_text,
@@ -107,6 +125,7 @@ class Formulaire_extra(FormulaireBase, forms.Form):
                             validators=[FileExtensionValidator(allowed_extensions=['pdf', 'png', 'jpg'])]
                         )
                         self.helper.layout.append(Field(nom_field))
+
 
 class Formulaire(FormulaireBase, ModelForm):
     activite = forms.ModelChoiceField(label=_("Activité"), queryset=Activite.objects.none(), required=True, help_text=_("Sélectionnez l'activité souhaitée dans la liste."))

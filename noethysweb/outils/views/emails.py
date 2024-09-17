@@ -28,7 +28,7 @@ class Liste(Page, crud.Liste):
     model = Mail
 
     def get_queryset(self):
-        return Mail.objects.select_related("utilisateur").filter(self.Get_filtres("Q")).annotate(nbre_destinataires=Count("destinataires"))
+        return Mail.objects.select_related("utilisateur").filter(self.Get_filtres("Q"), utilisateur=self.request.user).annotate(nbre_destinataires=Count("destinataires"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
