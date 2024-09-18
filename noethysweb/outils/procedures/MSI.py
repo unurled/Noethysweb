@@ -18,6 +18,8 @@ class Procedure(BaseProcedure):
             # Mettre à jour les individus
             individus_modifies = Individu.objects.filter(
                 rattachement__categorie=2
+            ).exclude(
+                statut=5
             ).update(statut=5)
 
             return f"Nombre d'individus modifiés : {individus_modifies}"
