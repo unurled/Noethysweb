@@ -20,6 +20,9 @@ media/
 settings_production.py
 TODO.txt
 mysql.cfg
+/static/
+gunicorn.pid
+gunicron.sock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -47,7 +50,7 @@ var/
 *.egg
 
 # PyInstaller
-#  Usually these files are written by a python script from a template 
+#  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
@@ -158,9 +161,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-*.sqlite3
-noethysweb/db.sqlite3
-
-
-noethysweb/db.sqlite3
