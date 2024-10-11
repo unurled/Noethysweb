@@ -18,7 +18,7 @@ def add_watermark(document, text: str):
     x_center = width / 3
     y_center = height / 4
     
-    print("width", width, "height", height,"text_width", text_width, "x", x, "y", y, "x_center", x_center, "y_center", y_center)
+    #print("width", width, "height", height,"text_width", text_width, "x", x, "y", y, "x_center", x_center, "y_center", y_center)
     
     can.saveState()
     
