@@ -21,7 +21,8 @@ class Accueil(CustomView, TemplateView):
 
         # Technique
         context['mode_demo'] = settings.MODE_DEMO
-        context['nouvelle_version'] = utils_update.Get_update_for_accueil(request=self.request)
+        if self.request.user.is_superuser:
+            context['nouvelle_version'] = utils_update.Get_update_for_accueil(request=self.request)
         context['super_utilisateur'] = self.request.user.is_superuser
 
         # Configuration accueil

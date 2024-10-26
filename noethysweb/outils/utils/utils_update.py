@@ -14,20 +14,23 @@ from django.core.cache import cache
 
 def Get_update_for_accueil(request=None):
     """ Recherche si une nouvelle version est disponible """
-    logger.debug("Recherche d'une nouvelle version...")
-    nouvelle_version, changelog = Recherche_update()
-    key_cache = "last_check_update_user%d" % request.user.pk
-    cache.set(key_cache, {"date": datetime.datetime.now(), "nouvelle_version": nouvelle_version})
+    key_cache = "last_check_update"
+    last_check_update = cache.get(key_cache)
+    if last_check_update:
+        nouvelle_version = last_check_update["nouvelle_version"]
+    if not last_check_update:
+        nouvelle_version, changelog = Recherche_update()
+        cache.set(key_cache, {"nouvelle_version": nouvelle_version}, timeout=60*60)
     return nouvelle_version
 
 
 def Recherche_update():
     # Lecture de la version disponible en ligne
-    url = "https://raw.githubusercontent.com/Arthur67190/Noethysweb/master/noethysweb/versions.txt"
-
+    url = "https://raw.githubusercontent.com/Arthur67190/Noethysweb/main/noethysweb/versions.txt"
+    logger.debug("Recherche d'une nouvelle version...")
     try:
-        data = requests.get(url)
-    except:
+        data = requests.get(url, timeout=10)
+    except requests.exceptions.RequestException:
         logger.debug("Le fichier des versions n'a pas pu être téléchargé sur Github.")
         return False, False
     changelog = data.text
@@ -51,11 +54,6 @@ def Recherche_update():
 
     return version_online_txt, changelog
 
-def NormalizedVersionTuple(version_str):
-    """ Convertit une chaîne de version en tuple d'entiers, normalisé sur 5 éléments """
-    version_parts = version_str.split('.')
-    version_parts = [int(part) for part in version_parts]
-    return tuple(version_parts + [0] * (5 - len(version_parts)))
 
 def Update():
     # Recherche une version disponible
