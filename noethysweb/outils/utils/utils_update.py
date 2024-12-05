@@ -147,6 +147,7 @@ def AutoReloadWSGI():
             gunicorn_pid = int(pidfile.read())
         import signal
 
+        logger.debug(f"Envoi de SIGHUP à {gunicorn_pid} pour reload le code")
         try:
             os.kill(gunicorn_pid, signal.SIGHUP)
         except ProcessLookupError:
@@ -160,6 +161,7 @@ def AutoReloadWSGI():
         liste_lignes_wsgi = fichier_wsgi.readlines()
 
     # Modification du fichier
+    logger.debug(f"Modification de {nom_fichier} pour que l'autoreload du serveur reload le code")
     with codecs.open(nom_fichier, "w") as fichier_wsgi:
         for ligne in liste_lignes_wsgi:
             if ligne.startswith("# lastupdate"):
