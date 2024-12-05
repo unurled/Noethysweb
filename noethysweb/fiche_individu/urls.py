@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.decorators import secure_ajax
 from fiche_individu.views import individu, individu_identite, individu_coords, individu_questionnaire, individu_scolarite, individu_inscriptions, \
                                 individu_medical, individu_notes, individu_liens, individu_appliquer_forfait_date, individu_contacts, \
-                                individu_regimes_alimentaires, individu_assurances, individu_maladies, individu_transports
+                                individu_regimes_alimentaires, individu_assurances, individu_maladies, individu_transports, individu_allergies, individu_dispmed, individu_traitement
 
 urlpatterns = [
 
@@ -46,6 +46,17 @@ urlpatterns = [
 
     path('individus/individus/maladies/<int:idfamille>/<int:idindividu>', individu_maladies.Consulter.as_view(), name='individu_maladies'),
     path('individus/individus/maladies/modifier/<int:idfamille>/<int:idindividu>', individu_maladies.Modifier.as_view(), name='individu_maladies_modifier'),
+
+    path('individus/individus/allergies/<int:idfamille>/<int:idindividu>', individu_allergies.Consulter.as_view(), name='individu_allergies'),
+    path('individus/individus/allergies/modifier/<int:idfamille>/<int:idindividu>', individu_allergies.Modifier.as_view(), name='individu_allergies_modifier'),
+
+    path('individus/individus/dispmed/<int:idfamille>/<int:idindividu>', individu_dispmed.Consulter.as_view(),name='individu_dispmed'),
+    path('individus/individus/dispmed/modifier/<int:idfamille>/<int:idindividu>', individu_dispmed.Modifier.as_view(), name='individu_dispmed_modifier'),
+
+    path('individus/individus/traitement/liste/<int:idfamille>/<int:idindividu>', individu_traitement.Liste.as_view(), name='individu_traitement_liste'),
+ #   path('individus/individus/traitement/ajouter_info/<int:idfamille>/<int:idindividu>', individu_traitement.Ajouter_traitement.as_view(), name='individu_traitement_ajouter'),
+ #   path('individus/individus/traitement/modifier_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_traitement.Modifier_traitement.as_view(), name='individu_traitement_modifier'),
+ #   path('individus/individus/traitement/supprimer_info/<int:idfamille>/<int:idindividu>/<int:pk>', individu_traitement.Supprimer_traitement.as_view(), name='individu_traitement_supprimer'),
 
     path('individus/individus/medical/liste/<int:idfamille>/<int:idindividu>', individu_medical.Liste.as_view(), name='individu_medical_liste'),
 
@@ -93,6 +104,8 @@ urlpatterns = [
     path('individus/get_coords_gps', secure_ajax(individu_coords.Get_coords_gps), name='ajax_get_coords_gps'),
     path('individus/ajouter_regime_alimentaire', secure_ajax(individu_regimes_alimentaires.Ajouter_regime_alimentaire), name='ajax_ajouter_regime_alimentaire'),
     path('individus/ajouter_maladie', secure_ajax(individu_maladies.Ajouter_maladie), name='ajax_ajouter_maladie'),
+    path('individus/ajouter_allergie', secure_ajax(individu_allergies.Ajouter_allergie), name='ajax_ajouter_allergie'),
+    path('individus/ajouter_dispmed', secure_ajax(individu_dispmed.Ajouter_dispmed), name='ajax_ajouter_dispmed'),
     path('individus/ajouter_assureur', secure_ajax(individu_assurances.Ajouter_assureur), name='ajax_ajouter_assureur'),
     path('individus/get_info_transport', secure_ajax(individu_transports.Get_info_transport), name='ajax_get_info_transport'),
 

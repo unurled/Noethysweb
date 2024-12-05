@@ -73,8 +73,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_renseignements.Add(code="secteurs_liste", titre="Secteurs géographiques", icone="file-text-o")
     menu_renseignements.Add(code="types_sieste_liste", titre="Types de sieste", icone="file-text-o")
     menu_renseignements.Add(code="types_regimes_alimentaires_liste", titre="Types de régimes alimentaires", icone="file-text-o")
-    menu_renseignements.Add(code="categories_informations_liste", titre="Catégories d'infos personnelles", icone="file-text-o")
+    menu_renseignements.Add(code="categories_informations_liste", titre="Catégories PAI et automédication", icone="file-text-o")
     menu_renseignements.Add(code="types_maladies_liste", titre="Types de maladies", icone="file-text-o")
+    menu_renseignements.Add(code="types_allergies_liste", titre="Types d'allergies", icone="file-text-o")
+    menu_renseignements.Add(code="types_dispmed_liste", titre="Types dispositifs médicaux", icone="file-text-o")
     menu_renseignements.Add(code="types_vaccins_liste", titre="Types de vaccins", icone="file-text-o")
     menu_renseignements.Add(code="medecins_liste", titre="Médecins", icone="file-text-o")
     menu_renseignements.Add(code="assureurs_liste", titre="Assureurs", icone="file-text-o")
@@ -158,6 +160,10 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # ------------------------------------ Outils ------------------------------------
     menu_outils = menu.Add(code="outils_toc", titre="Outils", icone="wrench")
+
+    # Assistant sanitaire
+    menu_stats = menu_outils.Add(titre="Assistant sanitaire")
+    menu_stats.Add(code="traitement_liste", titre="Liste des traitements sanitaires", icone="file-text-o")
 
     # Statistiques
     menu_stats = menu_outils.Add(titre="Statistiques")
@@ -258,6 +264,9 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_infos_individus.Add(code="edition_contacts", titre="Edition des contacts", icone="file-text-o")
     menu_infos_individus.Add(code="regimes_alimentaires_liste", titre="Liste des régimes alimentaires", icone="file-text-o")
     menu_infos_individus.Add(code="maladies_liste", titre="Liste des maladies", icone="file-text-o")
+    menu_infos_individus.Add(code="allergies_liste", titre="Liste des allergies", icone="file-text-o")
+    menu_infos_individus.Add(code="dispmed_liste", titre="Liste des dispositifs médicaux", icone="file-text-o")
+
     menu_infos_individus.Add(code="informations_liste", titre="Liste des informations personnelles", icone="file-text-o")
     menu_infos_individus.Add(code="edition_informations", titre="Edition des informations et régimes", icone="file-text-o")
     menu_infos_individus.Add(code="liste_comptes_internet", titre="Liste des comptes internet", icone="file-text-o")

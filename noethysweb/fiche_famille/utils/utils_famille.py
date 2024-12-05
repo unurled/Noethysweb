@@ -19,5 +19,5 @@ LISTE_ONGLETS = [
     {"code": "portail", "label": "Portail", "icone": "fa-globe", "url": "famille_portail"},
     {"code": "divers", "label": "Paramètres", "icone": "fa-gear", "url": "famille_divers"},
     {"code": "outils", "label": "Outils", "icone": "fa-wrench", "url": "famille_outils"},
-    {"code": "consommations", "label": "Consommations", "icone": "fa-calendar", "url": "famille_consommations"},
+#    {"code": "consommations", "label": "Consommations", "icone": "fa-calendar", "url": "famille_consommations"},
 ]

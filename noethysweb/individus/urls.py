@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, telecharger_plusieurs, famille_attestations, \
-                            liste_questionnaires_individus_modif, liste_questionnaires_individus_modif_valid
+                            liste_questionnaires_individus_modif, liste_questionnaires_individus_modif_valid, liste_allergies, liste_dispmed
 from fiche_individu.views import individu_inscriptions
 
 urlpatterns = [
@@ -111,6 +111,12 @@ urlpatterns = [
 
     path('individus/maladies/liste', liste_maladies.Liste.as_view(), name='maladies_liste'),
     path('individus/maladies/modifier/<int:pk>', liste_maladies.Modifier.as_view(), name='maladies_modifier'),
+
+    path('individus/allergies/liste', liste_allergies.Liste.as_view(), name='allergies_liste'),
+    path('individus/allergies/modifier/<int:pk>', liste_allergies.Modifier.as_view(), name='allergies_modifier'),
+
+    path('individus/dispmed/liste', liste_dispmed.Liste.as_view(), name='dispmed_liste'),
+    path('individus/dispmed/modifier/<int:pk>', liste_dispmed.Modifier.as_view(), name='dispmed_modifier'),
 
     path('individus/informations/liste', liste_informations.Liste.as_view(), name='informations_liste'),
     path('individus/informations/modifier/<int:pk>', liste_informations.Modifier.as_view(), name='informations_modifier'),

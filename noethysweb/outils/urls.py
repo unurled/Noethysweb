@@ -11,12 +11,18 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations
+                        suivi_reservations, traitement
 
 urlpatterns = [
 
     # Table des matières
     path('outils/', toc.Toc.as_view(menu_code="outils_toc"), name='outils_toc'),
+
+    # Assistant sanitaire
+    path('outils/traitement/liste', traitement.Liste.as_view(), name='traitement_liste'),
+    path('outils/traitement/ajouter', traitement.Ajouter.as_view(), name='traitement_ajouter'),
+    path('outils/traitement/modifier/<int:pk>', traitement.Modifier.as_view(), name='traitement_modifier'),
+    path('outils/traitement/supprimer/<int:pk>', traitement.Supprimer.as_view(), name='traitement_supprimer'),
 
     # Statistiques
     path('outils/statistiques', statistiques.View.as_view(), name='statistiques'),

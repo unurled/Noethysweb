@@ -8,8 +8,8 @@ from portail.views import accueil, login, inscription_famille
 from django.contrib.auth import views as auth_views
 from consommations.views import grille
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
-                            individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
-                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
+                            individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, individu_allergies, individu_dispmed, \
+                            famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, individu_traitement, \
                             transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales, famille_individu, famille_parent
 from core.decorators import secure_ajax_portail
 
@@ -78,6 +78,14 @@ urlpatterns = [
 
     path('renseignements/individu/maladies/<int:idrattachement>', individu_maladies.Consulter.as_view(), name='portail_individu_maladies'),
     path('renseignements/individu/maladies/modifier/<int:idrattachement>', individu_maladies.Modifier.as_view(), name='portail_individu_maladies_modifier'),
+
+    path('renseignements/individu/allergies/<int:idrattachement>', individu_allergies.Consulter.as_view(), name='portail_individu_allergies'),
+    path('renseignements/individu/allergies/modifier/<int:idrattachement>', individu_allergies.Modifier.as_view(), name='portail_individu_allergies_modifier'),
+
+    path('renseignements/individu/dispmed/<int:idrattachement>', individu_dispmed.Consulter.as_view(), name='portail_individu_dispmed'),
+    path('renseignements/individu/dispmed/modifier/<int:idrattachement>', individu_dispmed.Modifier.as_view(), name='portail_individu_dispmed_modifier'),
+
+    path('renseignements/individu/traitement/<int:idrattachement>', individu_traitement.Liste.as_view(), name='portail_individu_traitement'),
 
     path('renseignements/individu/medecin/<int:idrattachement>', individu_medecin.Consulter.as_view(), name='portail_individu_medecin'),
     path('renseignements/individu/medecin/modifier/<int:idrattachement>', individu_medecin.Modifier.as_view(), name='portail_individu_medecin_modifier'),
@@ -151,6 +159,8 @@ urlpatterns = [
     path('reglements/imprimer_recu', secure_ajax_portail(reglements.imprimer_recu), name='portail_ajax_imprimer_recu'),
     path('individus/ajouter_regime_alimentaire', secure_ajax_portail(individu_regimes_alimentaires.Ajouter_regime_alimentaire), name='portail_ajax_ajouter_regime_alimentaire'),
     path('individus/ajouter_maladie', secure_ajax_portail(individu_maladies.Ajouter_maladie), name='portail_ajax_ajouter_maladie'),
+    path('individus/ajouter_allergie', secure_ajax_portail(individu_allergies.Ajouter_allergie), name='portail_ajax_ajouter_allergie'),
+    path('individus/ajouter_dispmed', secure_ajax_portail(individu_dispmed.Ajouter_dispmed), name='portail_ajax_ajouter_dispmed'),
     path('individus/ajouter_medecin', secure_ajax_portail(individu_medecin.Ajouter_medecin), name='portail_ajax_ajouter_medecin'),
     path('individus/ajouter_assureur', secure_ajax_portail(individu_assurances.Ajouter_assureur), name='portail_ajax_ajouter_assureur'),
     path('activites/get_form_extra', secure_ajax_portail(inscrire_activite.Get_form_extra), name='portail_ajax_inscrire_get_form_extra'),

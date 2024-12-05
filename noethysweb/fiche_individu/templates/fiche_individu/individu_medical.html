@@ -20,47 +20,10 @@
 {% block detail_individu %}
     <div class="col-md-9">
 
-        {# Médecin traitant #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Médecin traitant{% endblock %}
-            {% block box_contenu %}
-                {% if individu.medecin %}
-
-                    <div class="float-right">
-                        <a type='button' class='btn btn-default btn-sm' data-toggle="modal" data-target="#modal_selection_medecin" title="Sélectionner un médecin"><i class="fa fa-pencil"></i></a>
-                        <a type='button' class='btn btn-default btn-sm' href="#" onclick="SupprimerMedecin();" title="Désélectionner le médecin actuel"><i class="fa fa-trash"></i></a>
-                    </div>
-
-                    <div class="user-block">
-                        <img class="rounded-circle" src="{% static "images/medecin.png" %}" alt="User Image">
-
-                        <span class="username">
-                            <span>
-                                {% if individu.medecin.nom %}{{ individu.medecin.nom }}{% endif %}
-                                {% if individu.medecin.prenom %}{{ individu.medecin.prenom }}{% endif %}
-                            </span>
-                        </span>
-                        <span class="description">
-                            {% if individu.medecin.rue_resid %}{{ individu.medecin.rue_resid }}{% endif %}
-                            {% if individu.medecin.cp_resid %}{{ individu.medecin.cp_resid }}{% endif %}
-                            {% if individu.medecin.ville_resid %}{{ individu.medecin.ville_resid }}{% endif %}
-                            {% if individu.medecin.tel_cabinet %}<br><i class="fa fa-phone"></i> {{ individu.medecin.tel_cabinet }}{% endif %}
-                            {% if individu.medecin.tel_mobile %}<br><i class="fa fa-mobile-phone"></i> {{ individu.medecin.tel_mobile }}{% endif %}
-                        </span>
-                    </div>
-                {% else %}
-                    <div class="btn-group">
-                        <a class="btn btn-success" data-toggle="modal" data-target="#modal_selection_medecin"><i class="fa fa-plus"></i> Ajouter</a>
-                    </div>
-                {% endif %}
-            {% endblock box_contenu %}
-        {% endembed %}
-
         {# Informations personnelles #}
         {% embed 'core/box.html' %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Informations personnelles{% endblock %}
+            {% block box_titre %}Traitement, PAI et automédication{% endblock %}
             {% block box_introduction %}{% endblock %}
             {% block box_contenu %}
                 <div class="btn-group">

@@ -103,7 +103,7 @@
                         {% for piece in liste_pieces %}
                             <tr class="text-center">
                                 <td>{{ piece.individu.prenom }}</td>
-                                <td>{{ piece.type_piece.nom }}</td>
+                                <td>{{ piece.type_piece.nom|default:piece.titre }}</td>
                                 <td>
                                     <a href="{{ MEDIA_URL }}{{ piece.document }}" class="btn btn-primary btn-xs bouton_telecharger" target="_blank" title="{% trans "Ouvrir le document" %}"><i class="fa fa-eye"></i></a>
                                     <form action="{% url 'supprimer_piece' pk=piece.pk %}" method="post" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette pièce ?');">

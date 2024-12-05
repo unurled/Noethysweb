@@ -57,7 +57,10 @@ class Liste(Page, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['box_titre'] = _("Vaccinations")
-        context['box_introduction'] = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination.")
+        context['box_introduction'] = _(
+            "Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle vaccination.<br>"
+            "Si votre modèle de vaccin n'existe pas, merci de sélectionner le modèle similaire couvrant les mêmes maladies"
+        )
         context['liste_vaccinations'] = Vaccin.objects.select_related("type_vaccin").filter(individu=self.get_rattachement().individu).order_by("date")
         context['vaccins_obligatoires'] = utils_vaccinations.Get_vaccins_obligatoires_individu(individu=self.get_rattachement().individu)
         return context
