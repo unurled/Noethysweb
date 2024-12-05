@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word, releves_bancaires, sondages
+    modeles_word, releves_bancaires, sondages, types_allergies, types_dispmed
 
 
 urlpatterns = [
@@ -317,6 +317,18 @@ urlpatterns = [
     path('parametrage/types_maladies/ajouter', types_maladies.Ajouter.as_view(), name='types_maladies_ajouter'),
     path('parametrage/types_maladies/modifier/<int:pk>', types_maladies.Modifier.as_view(), name='types_maladies_modifier'),
     path('parametrage/types_maladies/supprimer/<int:pk>', types_maladies.Supprimer.as_view(), name='types_maladies_supprimer'),
+
+    # Types d'allergies
+    path('parametrage/types_allergies/liste', types_allergies.Liste.as_view(), name='types_allergies_liste'),
+    path('parametrage/types_allergies/ajouter', types_allergies.Ajouter.as_view(), name='types_allergies_ajouter'),
+    path('parametrage/types_allergies/modifier/<int:pk>', types_allergies.Modifier.as_view(), name='types_allergies_modifier'),
+    path('parametrage/types_allergies/supprimer/<int:pk>', types_allergies.Supprimer.as_view(), name='types_allergies_supprimer'),
+
+    # Types dispositifs médicaux
+    path('parametrage/types_dispmed/liste', types_dispmed.Liste.as_view(), name='types_dispmed_liste'),
+    path('parametrage/types_dispmed/ajouter', types_dispmed.Ajouter.as_view(), name='types_dispmed_ajouter'),
+    path('parametrage/types_dispmed/modifier/<int:pk>', types_dispmed.Modifier.as_view(), name='types_dispmed_modifier'),
+    path('parametrage/types_dispmed/supprimer/<int:pk>', types_dispmed.Supprimer.as_view(), name='types_dispmed_supprimer'),
 
     # Types de vaccins
     path('parametrage/types_vaccins/liste', types_vaccins.Liste.as_view(), name='types_vaccins_liste'),

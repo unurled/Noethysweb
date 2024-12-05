@@ -56,8 +56,11 @@ class Liste(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['box_titre'] = _("Informations personnelles")
-        context['box_introduction'] = _("Cliquez sur le bouton Ajouter au bas de la page pour ajouter une nouvelle information.")
+        context['box_titre'] = _("Traitement, PAI et automédication")
+        context['box_introduction'] = _(
+            "Cliquez sur le bouton <strong>Ajouter</strong> au bas de la page pour ajouter une nouvelle information médicale.<br><br>"
+            "<strong>Note importante :</strong>  Il est obligatoire de fournir une prescription médicale chaque fois que des médicaments doivent être administrés. De plus, ils doivent être remis en mains propres à l'assistant sanitaire ou au directeur par les parents.<br><br>"
+        )
         context['liste_informations'] = Information.objects.filter(individu=self.get_rattachement().individu).order_by("intitule")
         return context
 

@@ -66,6 +66,14 @@ LISTE_CHAMPS = [
 
     Champ(page="individu_maladies", code="maladies", label="Maladies", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
 
+    Champ(page="individu_allergies", code="allergies", label="Allergies", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
+    Champ(page="individu_allergies", code="allergies_detail", label="Allergies détail", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
+
+    Champ(page="individu_dispmed", code="dispmed", label="Allergies", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
+    Champ(page="individu_dispmed", code="dispmed_detail", label="Allergies détail", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
+
+    Champ(page="individu_traitement", code="traitement", label="Traitement effectués", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
+
     Champ(page="individu_medecin", code="medecin", label="Médecin", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),
 
     Champ(page="individu_vaccinations", code="vaccinations", label="Vaccinations", representant="MASQUER", enfant="MODIFIABLE", contact="MASQUER"),

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
-from core.models import Rattachement
+from core.models import Rattachement, Activite
 from individus.forms.edition_renseignements import Formulaire
 
 
@@ -48,7 +48,13 @@ class Liste(Page, crud.Liste):
     model = Rattachement
 
     def get_queryset(self):
-        return Rattachement.objects.select_related("famille", "individu").filter(self.Get_filtres("Q"))
+        # Filtrer les individus ayant une inscription à une activité autorisée
+        activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
+
+        # Obtenir les rattachements liés à ces individus
+        return Rattachement.objects.select_related("famille", "individu").filter(
+            individu__inscription__activite__in=activites_autorisees
+        ).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

@@ -1,3 +1,12 @@
+Version 1.3.5.0.0 (01/12/2024)
+- Travail sur la fiche sanitaire (menus, ajout dispmed et allergies)
+- Ajout possibilité d'ajouter plusieurs fichiers en même temps sur le portail
+- Ajout traitement sur l'espace directeur et parents
+- Amélioration droits sur les pages (liste allergies, liste dispmed, et fiche renseignements)
+
+Version 1.3.3.0.2 (25/11/2024)
+- Modif mail + divers
+
 Version 1.3.3.0.1 (20/09/2024)
 - Modification de la méthode de mise à jour du code
 

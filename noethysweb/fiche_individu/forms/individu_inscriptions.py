@@ -323,7 +323,7 @@ class Formulaire(FormulaireBase, ModelForm):
 Bonjour,
         
 La demande d'inscription de {inscription.individu.prenom} à l'activité {inscription.activite.nom} vient d'être validée par le directeur !
-Vous pouvez dès a présent vous rendre sur Sacadoc pour compléter le dossier d'inscription et accéder à toutes les informations concernant l'activité. -> www.sacadoc.flambeaux.org
+Vous pouvez dès a présent vous rendre sur Sacadoc pour compléter le dossier d'inscription et accéder à toutes les informations concernant l'activité. -> https://sacadoc.flambeaux.org
         
 Cordialement,
 L'équipe de Sacadoc

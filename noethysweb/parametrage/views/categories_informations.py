@@ -17,10 +17,10 @@ class Page(crud.Page):
     url_ajouter = "categories_informations_ajouter"
     url_modifier = "categories_informations_modifier"
     url_supprimer = "categories_informations_supprimer"
-    description_liste = "Voici ci-dessous la liste des catégories d'informations personnelles."
-    description_saisie = "Saisissez toutes les informations concernant la catégorie d'information personnelle à saisir et cliquez sur le bouton Enregistrer."
-    objet_singulier = "une catégorie d'information personnelle"
-    objet_pluriel = "des catégories d'informations personnelles"
+    description_liste = "Voici ci-dessous la liste des catégories pour les PAI et automédication."
+    description_saisie = "Saisissez toutes les informations concernant la catégorie du PAI et/ou automédicationà saisir et cliquez sur le bouton Enregistrer."
+    objet_singulier = "une catégorie de PAI et automédication"
+    objet_pluriel = "des catégories de PAI et automédication"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]

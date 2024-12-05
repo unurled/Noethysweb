@@ -43,7 +43,8 @@
                         <b>{% blocktrans %}Aucune vaccination enregistrée.{% endblocktrans %}</b>
                     {% endif %}
                 </div>
-                <a class="btn btn-primary pull-right" href="{% url 'portail_individu_vaccinations_ajouter' idrattachement=rattachement.pk %}" title="{% trans "Ajouter une vaccination" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Ajouter une vaccination{% endblocktrans %}</a>
+                <a class="btn btn-primary pull-right mr-2" href="{% url 'portail_individu_vaccinations_ajouter' idrattachement=rattachement.pk %}" title="{% trans "Ajouter une vaccination" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Ajouter une vaccination{% endblocktrans %}</a>
+                <a class="btn btn-primary pull-right mr-2" href="{% url 'portail_transmettre_piece'%}" title="{% trans "Transmettre le certificat vaccinal" %}"><i class="fa fa-plus margin-r-5"></i>{% blocktrans %}Transmettre le certificat vaccinal{% endblocktrans %}</a>
 
             {% endblock box_contenu %}
             {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}

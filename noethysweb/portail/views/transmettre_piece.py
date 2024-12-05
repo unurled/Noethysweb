@@ -9,10 +9,12 @@ from django.urls import reverse_lazy
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import gettext_lazy as _
 from core.views import crud
-from core.models import PortailMessage, PortailRenseignement
+from core.models import PortailMessage, PortailRenseignement, Piece
 from portail.forms.transmettre_piece import Formulaire
 from portail.views.base import CustomView
 from portail.utils.utils_impression import add_watermark
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 
 class Page(CustomView):
@@ -38,6 +40,34 @@ class Ajouter(Page, crud.Ajouter):
 
     def Get_detail_historique(self, instance):
         return "Famille=%s, Pièce=%s" % (self.request.user.famille, instance.Get_nom())
+
+    def form_valid(self, form):
+        # Appel de la méthode parent pour la validation
+        response = super().form_valid(form)
+
+        # Gestion des fichiers téléchargés
+        documents = {
+            'document1': form.cleaned_data.get('document1'),
+            'document2': form.cleaned_data.get('document2'),
+            'document3': form.cleaned_data.get('document3'),
+            'document4': form.cleaned_data.get('document4'),
+        }
+
+        for field_name, file in documents.items():
+            if file:
+                Piece.objects.create(
+                    titre=form.cleaned_data.get('titre'),
+                    document=file,
+                    famille=self.request.user.famille,
+                    individu=form.cleaned_data.get('individu'),
+                    type_piece=form.cleaned_data.get('type_piece'),
+                    date_debut=form.cleaned_data.get('date_debut'),
+                    date_fin=form.cleaned_data.get('date_fin'),
+                    auteur=self.request.user
+                )
+
+        messages.success(self.request, "Les pièces ont été ajoutées avec succès.")
+        return redirect(self.get_success_url())
 
     def Apres_form_valid(self, form=None, instance=None):
         # Mémorisation du renseignement

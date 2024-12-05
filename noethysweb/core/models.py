@@ -760,6 +760,29 @@ class TypeMaladie(models.Model):
     def __str__(self):
         return self.nom
 
+class TypeAllergie(models.Model):
+    idtype_allergie = models.AutoField(verbose_name="ID", db_column='IDtype_allergie', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = 'types_allergies'
+        verbose_name = "allergie"
+        verbose_name_plural = "allergies"
+
+    def __str__(self):
+        return self.nom
+
+class TypeDispmed(models.Model):
+    idtype_dispmed = models.AutoField(verbose_name="ID", db_column='IDtype_dispmed', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = 'types_dispmed'
+        verbose_name = "dispositif médical"
+        verbose_name_plural = "dispositifs médicaux"
+
+    def __str__(self):
+        return self.nom
 
 class TypeSieste(models.Model):
     idtype_sieste = models.AutoField(verbose_name="ID", db_column='IDtype_sieste', primary_key=True)
@@ -1656,6 +1679,10 @@ class Individu(models.Model):
     listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True, related_name="individu_listes_diffusion")
     regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name=_("Régimes alimentaires"), related_name="individu_regimes_alimentaires", blank=True)
     maladies = models.ManyToManyField(TypeMaladie, verbose_name=_("Maladies contractées"), related_name="individu_maladies", blank=True)
+    allergies = models.ManyToManyField(TypeAllergie, verbose_name=_("Allergies contractées"), related_name="individu_allergies", blank=True)
+    allergies_detail = models.CharField(verbose_name=_("Conduite à tenir"), max_length=400, blank=True, null=True)
+    dispmed = models.ManyToManyField(TypeDispmed, verbose_name=_("Dispositifs médicaux"), related_name="individu_dispmed", blank=True)
+    dispmed_detail = models.CharField(verbose_name=_("Conduite à tenir"), max_length=400, blank=True, null=True)
     situation_familiale_choix = [(1, "Célibataires"), (2, "Mariés"), (3, "Divorcés"), (4, "Veuf(ve)"), (5, "En concubinage"), (6, "Séparés"), (7, "Pacsés"), (8, "En union libre"), (9, "Autre")]
     situation_familiale = models.IntegerField(verbose_name=_("Situation des parents"), choices=situation_familiale_choix, blank=True, null=True)
     type_garde_choix = [(1, "Mère"), (2, "Père"), (3, "Garde alternée"), (4, "Autre personne")]
@@ -2010,6 +2037,24 @@ class Information(models.Model):
 
     def get_upload_path(self):
         return str(self.individu_id)
+
+class Traitement(models.Model):
+    idtraitement = models.AutoField(verbose_name="ID", db_column='IDtraitement', primary_key=True)
+    auteur = models.ForeignKey(Utilisateur, verbose_name="Réalisé par", on_delete=models.CASCADE)
+    individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE)
+    date = models.DateField(verbose_name="Date de réalisation")
+    titre = models.CharField(verbose_name="Nature des soins", max_length=50)
+    Description = models.CharField(verbose_name="Description", max_length=500)
+    typemaladie = models.ForeignKey(Information, verbose_name="Pathologie associée", on_delete=models.CASCADE)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = 'traitement'
+        verbose_name = "traitement"
+        verbose_name_plural = "traitements"
+
+    def __str__(self):
+        return self.titre
 
 
 class Vaccin(models.Model):

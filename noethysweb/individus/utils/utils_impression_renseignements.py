@@ -180,18 +180,6 @@ class Impression(utils_impression.Impression):
             tableau.setStyle(style)
             self.story.append(tableau)
 
-            # Famille
-            contenu_tableau = []
-            detail = []
-            if rattachement.individu.situation_familiale:
-                detail.append("Situation parentale : %s" % rattachement.individu.get_situation_familiale_display())
-            if rattachement.individu.type_garde:
-                detail.append("Type de garde : %s" % rattachement.individu.get_type_garde_display())
-            if rattachement.individu.info_garde:
-                detail.append("<font color='red'>Info garde : %s</font>" % rattachement.individu.info_garde)
-            contenu_tableau.append([Paragraph("<br/>".join(detail), style_defaut)])
-            self.story.append(Tableau(titre="Famille".upper(), contenu=contenu_tableau))
-
             # Représentants
             contenu_tableau = []
             for representant in dict_representants.get(rattachement.famille_id):
@@ -239,41 +227,29 @@ class Impression(utils_impression.Impression):
 
             if not self.dict_donnees["mode_condense"]:
                 contenu_tableau.append(Paragraph("<br/><br/><br/>", style_defaut))
-            self.story.append(Tableau(titre="Contacts".upper(), aide="Lister les noms des contacts d'urgence et leurs coordonnées", contenu=contenu_tableau))
+            self.story.append(Tableau(titre="Contacts".upper(), aide="", contenu=contenu_tableau))
 
-            # Assurance
-            assurance = dict_assurances.get((rattachement.individu_id, rattachement.famille_id), None)
-            if assurance:
-                texte_assurance = "%s - Contrat n°%s valable du %s au %s" % (assurance.assureur.nom, assurance.num_contrat, utils_dates.ConvertDateToFR(assurance.date_debut), utils_dates.ConvertDateToFR(assurance.date_fin) or "----")
-            else:
-                texte_assurance = ""
+            #Allergies
+            texte_allergies = ", ".join([f"<b>{allergie.nom}</b>" for allergie in rattachement.individu.allergies.all()])
+            if rattachement.individu.allergies_detail:
+                texte_allergies += f" : {rattachement.individu.allergies_detail}"
             if not self.dict_donnees["mode_condense"]:
-                texte_assurance += "<br/><br/>"
-            self.story.append(Tableau(titre="Assurance".upper(), aide="Préciser l'assureur et ses coordonnées puis le numéro et les dates de validité du contrat", contenu=[Paragraph(texte_assurance, style_defaut)]))
+                texte_allergies += "<br/><br/>"
+            self.story.append(Tableau(titre="Allergies".upper(), aide="", contenu=[Paragraph(texte_allergies, style_defaut)]))
 
-            # Médecin
-            if rattachement.individu.medecin:
-                texte = "%s %s" % (rattachement.individu.medecin.nom, rattachement.individu.medecin.prenom or "")
-                if rattachement.individu.medecin.tel_cabinet:
-                    texte += "&nbsp;&nbsp; Tél : %s" % rattachement.individu.medecin.tel_cabinet
-                texte_medecin = texte
-            else:
-                texte_medecin = ""
+            #Dispositifs médicaux
+            texte_dispmed = ", ".join([f"<b>{dispmed.nom}</b>" for dispmed in rattachement.individu.dispmed.all()])
+            if rattachement.individu.dispmed_detail:
+                texte_dispmed += f" : {rattachement.individu.dispmed_detail}"
             if not self.dict_donnees["mode_condense"]:
-                texte_medecin += "<br/><br/>"
-            self.story.append(Tableau(titre="Médecin traitant".upper(), aide="Renseigner le nom et les coordonnées du médecin traitant", contenu=[Paragraph(texte_medecin, style_defaut)]))
-
-            # Régimes alimentaires
-            texte_regimes = ", ".join([regime.nom for regime in rattachement.individu.regimes_alimentaires.all()])
-            if not self.dict_donnees["mode_condense"]:
-                texte_regimes += "<br/><br/>"
-            self.story.append(Tableau(titre="Régimes alimentaires".upper(), aide="Lister les régimes alimentaires", contenu=[Paragraph(texte_regimes, style_defaut)]))
+                texte_dispmed += "<br/><br/>"
+            self.story.append(Tableau(titre="Dispositifs médicaux".upper(), aide="", contenu=[Paragraph(texte_dispmed, style_defaut)]))
 
             # Maladies
             texte_maladies = ", ".join([maladie.nom for maladie in rattachement.individu.maladies.all()])
             if not self.dict_donnees["mode_condense"]:
                 texte_maladies += "<br/><br/>"
-            self.story.append(Tableau(titre="Maladies contractées".upper(), aide="Lister les maladies contractées", contenu=[Paragraph(texte_maladies, style_defaut)]))
+            self.story.append(Tableau(titre="Maladies déjà contractées".upper(), aide="", contenu=[Paragraph(texte_maladies, style_defaut)]))
 
             # Informations
             contenu_tableau = []
@@ -284,7 +260,7 @@ class Impression(utils_impression.Impression):
                 contenu_tableau.append(Paragraph(texte, style_defaut))
             if not self.dict_donnees["mode_condense"]:
                 contenu_tableau.append(Paragraph("<br/><br/><br/>", style_defaut))
-            self.story.append(Tableau(titre="Informations et recommandations".upper(), aide="Préciser les informations particulières et recommandations", contenu=contenu_tableau))
+            self.story.append(Tableau(titre="Informations et recommandations".upper(), aide="", contenu=contenu_tableau))
 
             # Vaccinations obligatoires
             liste_vaccinations_obligatoires = [vaccination for vaccination in dict_vaccinations.get(rattachement.individu, []) if vaccination["obligatoire"]]

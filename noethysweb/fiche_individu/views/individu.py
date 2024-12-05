@@ -116,7 +116,7 @@ class Onglet(CustomView):
     def get_context_data(self, **kwargs):
         context = super(Onglet, self).get_context_data(**kwargs)
         context['page_titre'] = "Fiche individuelle"
-        context['liste_onglets'] = [dict_onglet for dict_onglet in self.liste_onglets if self.request.user.has_perm("core.individu_%s" % dict_onglet["code"])]
+        context['liste_onglets'] = [dict_onglet for dict_onglet in self.liste_onglets ]
         context['idindividu'] = self.kwargs['idindividu']
         context['individu'] = Individu.objects.get(pk=self.kwargs['idindividu'])
         if self.kwargs.get('idfamille', None):

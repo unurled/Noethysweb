@@ -9,54 +9,88 @@
 {#<link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/searchPanes.bootstrap.min.css' %}"/>#}
 <link rel="stylesheet" type="text/css" href="{% static 'lib/datatables/css/select.bootstrap4.min.css' %}"/>
 
-
 <style type="text/css">
     table.dataTable {
         margin-top: 4px !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 4px !important;
+        width: 100%; /* Assure que le tableau occupe toute la largeur disponible */
+        table-layout: auto; /* Ne fixe pas la largeur des colonnes, permet de s'ajuster automatiquement */
     }
+
     table.dataTable th {
         text-align: center !important;
     }
+
+    table.dataTable td, table.dataTable th {
+        word-wrap: break-word;      /* Permet de casser les mots trop longs */
+        white-space: normal;        /* Autorise les retours à la ligne */
+        overflow-wrap: break-word; /* Gestion des navigateurs qui ne supportent pas word-wrap */
+        vertical-align: middle;     /* Aligne le contenu verticalement au centre */
+        padding: 0.4rem;            /* Uniformise le padding des cellules */
+    }
+
+    /* Limiter la largeur des cellules à 50 caractères (en ch) */
+    table.dataTable td, table.dataTable th {
+        max-width: 50ch; /* Limite la largeur des cellules */
+        word-wrap: break-word; /* Assure que le texte est coupé en cas de besoin */
+    }
+
     .dt-buttons-haut {
         text-align: right;
         margin-top: 10px;
     }
+
     .dataTables_filter {
-        {#text-align: right !important;#}
         width: 100% !important;
     }
+
     .barre_menu_dt > * {
         display: inline-block;
         float: right;
         margin-top: 6px;
     }
+
     .dataTables_filter input {
         margin-top: 0px !important;
         width: 150px !important;
         border-radius: 4px;
         margin-right: 10px;
     }
+
     .dataTables_info {
         color: #c6c6c6;
         margin-left: 10px;
         font-size: 12px;
     }
+
     .datatable th[data-name="ordre"] {
         width: 25px;
     }
+
     .datatable th[data-name="id"] {
         width: 25px;
     }
+
     .datatable th[data-name="defaut"] {
         width: 25px;
     }
+
     .datatable th[data-name="actions"] {
         width: 100px;
     }
-    .datatable td, .datatable th {
-        padding: 0.4rem;
+
+    table.dataTable tbody td {
+        vertical-align: middle; /* Centre verticalement le contenu des cellules */
     }
+
+    table.dataTable tbody td.select-checkbox:before,
+    table.dataTable tbody td.select-checkbox:after,
+    table.dataTable tbody th.select-checkbox:before,
+    table.dataTable tbody th.select-checkbox:after {
+        top: 50%;
+    }
+
+    /* Responsive Styles */
     @media screen and (max-width: 767px) {
         .dataTables_filter {
             text-align: center !important;
@@ -68,14 +102,11 @@
         .dt-buttons-haut {
             text-align: center;
         }
+        table.dataTable {
+            font-size: 12px; /* Réduit la taille de la police pour les petits écrans */
+        }
+        table.dataTable td, table.dataTable th {
+            white-space: normal; /* Autorise les retours à la ligne */
+        }
     }
-    table.dataTable tbody td {
-      vertical-align: middle;
-    }
-
-    table.dataTable tbody td.select-checkbox:before,table.dataTable tbody td.select-checkbox:after,table.dataTable tbody th.select-checkbox:before,table.dataTable tbody th.select-checkbox:after {
-        top: 50%;
-    }
-
 </style>
-
