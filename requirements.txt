@@ -39,3 +39,4 @@ pystrich==0.8
 docx-mailmerge2
 xlrd
 xlsxwriter
+pypdf

@@ -110,7 +110,7 @@ def Get_labels():
     dict_labels = utils_champs.Get_labels_champs()
 
     # Ajout des tables spéciales
-    for categorie, table in [("individu_contacts", ContactUrgence), ("individu_assurances", Assurance), ("individu_informations", Information), ("individu_vaccinations", Vaccin)]:
+    for categorie, table in [("individu_contacts", ContactUrgence)]:
         for field in table._meta.get_fields():
             dict_labels[(categorie, field.name)] = "%s : %s" % (table._meta.verbose_name.capitalize(), field.verbose_name)
 
@@ -137,6 +137,8 @@ class Liste(Page, crud.Liste):
         # Obtenez les activités autorisées
         structures_utilisateur = self.request.user.structures.all()
         activites_autorisees = Activite.objects.filter(structure__in=structures_utilisateur)
+
+       # individu_filtres = Individu.objects.filter(idindividu__in=)
 
         # Obtenez les premières valeurs de la nouvelle valeur pour les lignes où le code est "inscrire_activite" et l'état est "ATTENTE"
         premiere_valeur = PortailRenseignement.objects.filter(
