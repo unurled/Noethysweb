@@ -11,7 +11,7 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, \
-                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe,CategorieTarif
+                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe,CategorieTarif, Inscription
 from core.data import data_civilites
 from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
@@ -137,14 +137,15 @@ class Liste(Page, crud.Liste):
         # Obtenez les activités autorisées
         structures_utilisateur = self.request.user.structures.all()
         activites_autorisees = Activite.objects.filter(structure__in=structures_utilisateur)
-
-       # individu_filtres = Individu.objects.filter(idindividu__in=)
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
+        individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
 
         # Obtenez les premières valeurs de la nouvelle valeur pour les lignes où le code est "inscrire_activite" et l'état est "ATTENTE"
         premiere_valeur = PortailRenseignement.objects.filter(
             code='inscrire_activite',
             etat='ATTENTE',
-            idrenseignement=OuterRef('idrenseignement')
+            idrenseignement=OuterRef('idrenseignement'),
+            individu__in=individus_inscrits,
         ).order_by('date').values('nouvelle_valeur')[:1]
 
         # Obtenez les lignes de PortailRenseignement où le code est "inscrire_activite"
@@ -174,10 +175,13 @@ class Liste(Page, crud.Liste):
             conditions &= Q(etat="ATTENTE")
             conditions &= Q(code="inscrire_activite")
             conditions &= Q(idrenseignement__in=resultat_filtre)
+            conditions &= Q(individu__in=individus_inscrits)
+
         else:
             conditions &= ~Q(code="inscrire_activite")
             conditions |= Q(idrenseignement__in=resultat_filtre)
             conditions &= ~Q(etat="VALIDE")
+            conditions &= Q(individu__in=individus_inscrits)
            #conditions &= ~Q(code="inscrire_activite")
 
 

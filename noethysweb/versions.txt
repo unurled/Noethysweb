@@ -1,4 +1,7 @@
 Version 1.3.5.2.0 (07/12/2024)
+- Amélioration notifs historique
+
+Version 1.3.5.2.0 (07/12/2024)
 - Modif délai mdp 1 mois
 - correction beug demande portail
 
