@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Depot, Reglement
+from core.models import Depot, Reglement, Activite
 from core.utils import utils_texte
 from reglements.forms.depots_reglements import Formulaire
 
@@ -35,7 +35,8 @@ class Liste(Page, crud.Liste):
     model = Depot
 
     def get_queryset(self):
-        return Depot.objects.select_related("compte").filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Sum("reglement__montant"))
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        return Depot.objects.select_related("compte").filter(activite__in=activites_accessibles).filter(self.Get_filtres("Q")).annotate(nbre_reglements=Count("reglement"), montant_reglements=Sum("reglement__montant"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Paiement
+from core.models import Paiement, Activite, Inscription, Famille
 from core.utils import utils_texte
 
 
@@ -21,7 +21,10 @@ class Liste(Page, crud.Liste):
     model = Paiement
 
     def get_queryset(self):
-        return Paiement.objects.select_related("famille").prefetch_related("reglements").filter(self.Get_filtres("Q"))
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
+        individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        return Paiement.objects.select_related("famille").prefetch_related("reglements").filter(famille__in=individus_inscrits).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

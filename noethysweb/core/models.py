@@ -326,7 +326,7 @@ class Structure(models.Model):
     logo = ResizedImageField(verbose_name="Logo", upload_to=get_uuid_path, blank=True, null=True)
     gps = models.CharField(verbose_name="GPS", max_length=200, blank=True, null=True)
     logo_update = models.DateTimeField(verbose_name="Date MAJ Logo", max_length=200, blank=True, null=True)
-    adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une des adresses d'expédition d'emails dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
+    adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", null=True, on_delete=models.PROTECT, help_text="Sélectionnez une des adresses d'expédition d'emails dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
     configuration_sms = models.ForeignKey(ConfigurationSMS, verbose_name="Configuration SMS", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une configuration SMS dans la liste. Il est possible de créer de nouvelles configurations depuis le menu Paramétrage > Configurations SMS.")
     messagerie_active = models.BooleanField(verbose_name="Les familles sont autorisées à converser avec cette structure depuis la rubrique Contact du portail.", default=True)
     afficher_coords = models.BooleanField(verbose_name="Afficher les coordonnées de la structure sur le portail.", default=True)
@@ -2693,6 +2693,7 @@ class Depot(models.Model):
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
+    activite = models.ForeignKey(Activite, verbose_name="Activite", on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'depots'
@@ -3520,7 +3521,7 @@ class Article(models.Model):
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
     choix_public = [("toutes", "Toutes les familles"),
                     ("inscrits", "Les familles dont un membre est inscrit à l'une des activités suivantes"),
-                    ("presents", "Les familles dont un membre est présent sur l'une des activités suivantes et sur la période suivante"),
+                   #("presents", "Les familles dont un membre est présent sur l'une des activités suivantes et sur la période suivante"),
                     ("presents_groupes", "Les familles dont un membre est présent sur l'un des groupes suivants et sur la période suivante"),
                     ]
     public = models.CharField(verbose_name="Public", max_length=100, choices=choix_public, help_text="Sélectionnez le public qui pourra consulter cet article.")

@@ -52,9 +52,7 @@ class Liste(Page, crud.Liste):
         activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
 
         # Obtenir les rattachements liés à ces individus
-        return Rattachement.objects.select_related("famille", "individu").filter(
-            individu__inscription__activite__in=activites_autorisees
-        ).filter(self.Get_filtres("Q"))
+        return Rattachement.objects.select_related("famille", "individu").filter(individu__inscription__activite__in=activites_autorisees).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

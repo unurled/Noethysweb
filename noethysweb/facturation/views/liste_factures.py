@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Facture, Ventilation
+from core.models import Facture, Ventilation, Activite
 from core.utils import utils_preferences
 from decimal import Decimal
 from django.db.models import Sum
@@ -25,7 +25,8 @@ class Liste(Page, crud.Liste):
     model = Facture
 
     def get_queryset(self):
-        return Facture.objects.select_related('famille', 'lot', 'prefixe', 'regie').filter(self.Get_filtres("Q"))
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        return Facture.objects.select_related('famille', 'lot', 'prefixe', 'regie').filter(activites__in=activites_accessibles).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django import forms
+from datetime import date, timedelta
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
@@ -13,7 +14,7 @@ from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
+    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(), initial=f"{(date.today() - timedelta(days=365)).isoformat()};{date.today().isoformat()}" )
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
     regroupement_lignes = forms.ChoiceField(label="Lignes", choices=[("activites", "Activité"), ("familles", "Famille")], initial="activites", required=False)
     regroupement_colonnes = forms.ChoiceField(label="Colonnes", choices=[("mois", "Mois"), ("annee", "Année")], initial="mois", required=False)

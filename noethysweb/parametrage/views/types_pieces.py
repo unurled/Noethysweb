@@ -18,10 +18,10 @@ class Page(crud.Page):
     url_ajouter = "types_pieces_ajouter"
     url_modifier = "types_pieces_modifier"
     url_supprimer = "types_pieces_supprimer"
-    description_liste = "Voici ci-dessous la liste des types de pièces."
+    description_liste = "Voici ci-dessous la liste des documents à envoyer par les parents."
     description_saisie = "Saisissez toutes les informations concernant le type de pièce à saisir et cliquez sur le bouton Enregistrer."
-    objet_singulier = "un type de pièce"
-    objet_pluriel = "des types de pièces"
+    objet_singulier = "un type de document à envoyer par les parents"
+    objet_pluriel = "des types de documents à envoyer par les parents"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]

@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.views.generic import TemplateView
 from django.db.models import Q, Sum
 from core.views.base import CustomView
-from core.models import Famille, Prestation, Reglement
+from core.models import Famille, Prestation, Reglement, Ventilation
 from facturation.forms.liste_soldes import Formulaire
 
 
@@ -39,14 +39,38 @@ class View(CustomView, TemplateView):
     def Get_resultats(self, parametres={}):
         # Calcul des soldes
         familles = Famille.objects.all()
-
         conditions_prestations = Q(date__lte=parametres["date_situation"])
+        activites= parametres.get("activites", [])
+        activites_data = json.loads(activites)
+        ids_activites = activites_data.get("ids", [])
+        if ids_activites:
+            presta = Prestation.objects.filter(activite__in=ids_activites)
+
+        if ids_activites:
+            conditions_prestations &= Q(activite__in=ids_activites)
+
         if parametres["uniquement_factures"]:
             conditions_prestations &= Q(facture__isnull=False)
         dict_prestations = {temp["famille"]: temp["total"] for temp in Prestation.objects.filter(conditions_prestations).values('famille').annotate(total=Sum("montant"))}
 
-        dict_reglements = {temp["famille"]: temp["total"] for temp in Reglement.objects.filter(date__lte=parametres["date_situation"]).values('famille').annotate(total=Sum("montant"))}
-
+        dict_regle = Reglement.objects.filter(date__lte=parametres["date_situation"])
+        if ids_activites:
+            dict_reglements = {
+                temp["famille"]: temp["total"]
+                for temp in Ventilation.objects.filter(
+                    idventilation__in=dict_regle, prestation__activite__in=ids_activites
+                )
+                .values('famille')
+                .annotate(total=Sum("montant"))
+            }
+        else:
+            # Si pas d'activités spécifiées, récupérer les ventilations sans ce filtre
+            dict_reglements = {
+                temp["famille"]: temp["total"]
+                for temp in Ventilation.objects.filter(idventilation__in=dict_regle)
+                .values('famille')
+                .annotate(total=Sum("montant"))
+            }
         # Création des colonnes
         liste_colonnes = ["Famille", "Solde", "Prestations", "Règlements"]
 

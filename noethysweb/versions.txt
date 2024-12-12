@@ -1,4 +1,25 @@
-Version 1.3.5.2.0 (07/12/2024)
+Version 1.3.5.3.1 (09/12/2024)
+- Modif selesction structure
+- titres docs.
+- période liste impayés
+- Correction liste des soldes
+- Ajout décochage et multiple dans inscriptions
+- Ajout formulaire dans les articles
+- Obligation adress exp dans structure pour éviter les beug dans la messagerie
+- Filtre structure dans liste contacts urgence
+- Filtre structure dans liste des familles
+- Filtre génération attestation présence
+- Filtre régimes alimentaires
+- Filtre maladie
+- Filtre informations personnelles
+- Filtre compte internet
+- Filtre pieces fournies
+- Filtre facture (liste, generation, email)
+- Filtre reglement dispo.
+- Filtre dépot reglements
+- Filtre paiements en ligne
+
+Version 1.3.5.3.0 (07/12/2024)
 - Amélioration notifs historique
 
 Version 1.3.5.2.0 (07/12/2024)

@@ -18,8 +18,8 @@ class Page(crud.Page):
     url_supprimer = "portail_documents_supprimer"
     description_liste = "Voici ci-dessous la liste documents disponibles au téléchargement dans la page documents du portail."
     description_saisie = "Saisissez toutes les informations concernant le document et cliquez sur le bouton Enregistrer."
-    objet_singulier = "un document"
-    objet_pluriel = "des documents à télécharger"
+    objet_singulier = "du document à destination des familles"
+    objet_pluriel = "des documents à destination des familles"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
     ]

@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Reglement
+from core.models import Reglement, Inscription, Famille, Activite
 
 
 class Page(crud.Page):
@@ -18,7 +18,10 @@ class Liste(Page, crud.Liste):
     menu_code = "liste_reglements_disponibles"
 
     def get_queryset(self):
-        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur').filter(self.Get_filtres("Q"), depot__isnull=True)
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
+        individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        return Reglement.objects.select_related('mode', 'emetteur', 'famille', 'payeur').filter(famille__in=individus_inscrits).filter(self.Get_filtres("Q"), depot__isnull=True)
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

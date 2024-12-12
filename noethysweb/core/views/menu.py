@@ -65,7 +65,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Renseignements
     menu_renseignements = menu_parametrage.Add(titre="Renseignements")
-    menu_renseignements.Add(code="types_pieces_liste", titre="Types de pièces", icone="file-text-o")
+    menu_renseignements.Add(code="types_pieces_liste", titre="Document à envoyer par les parents", icone="file-text-o")
     menu_renseignements.Add(code="regimes_liste", titre="Régimes sociaux", icone="file-text-o")
     menu_renseignements.Add(code="caisses_liste", titre="Caisses", icone="file-text-o")
     menu_renseignements.Add(code="types_quotients_liste", titre="Types de quotients", icone="file-text-o")
@@ -137,7 +137,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_portail.Add(code="images_articles_liste", titre="Banque d'images des articles", icone="file-text-o")
     menu_portail.Add(code="articles_liste", titre="Articles", icone="file-text-o")
     menu_portail.Add(code="images_fond_liste", titre="Banque d'images de fond", icone="file-text-o")
-    menu_portail.Add(code="portail_documents_liste", titre="Documents à télécharger", icone="file-text-o")
+    menu_portail.Add(code="portail_documents_liste", titre="Documents à destination des familles", icone="file-text-o")
 
     # Locations
     menu_locations = menu_parametrage.Add(titre="Locations")

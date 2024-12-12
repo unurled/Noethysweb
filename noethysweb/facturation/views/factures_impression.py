@@ -7,7 +7,7 @@ import json
 from django.http import JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Facture
+from core.models import Facture, Activite
 from core.utils import utils_preferences
 from core.models import MessageFacture, ModeleImpression
 from facturation.forms.factures_options_impression import Formulaire as Form_parametres
@@ -66,7 +66,8 @@ class Liste(Page, crud.Liste):
     model = Facture
 
     def get_queryset(self):
-        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(self.Get_filtres("Q"))
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(activites__in=activites_accessibles).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

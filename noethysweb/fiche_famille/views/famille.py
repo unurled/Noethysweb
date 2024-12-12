@@ -13,7 +13,7 @@ from django.views.generic.detail import DetailView
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription
+from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Individu, Activite, Structure
 from core.utils import utils_texte
 from individus.utils import utils_pieces_manquantes
 from fiche_individu.forms.individu import Formulaire
@@ -104,7 +104,10 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        return Famille.objects.filter(self.Get_filtres("Q"))
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
+        individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        return Famille.objects.filter(idfamille__in=individus_inscrits).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)

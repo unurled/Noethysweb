@@ -52,7 +52,7 @@ class Formulaire(FormulaireBase, forms.Form):
     selection_familles = forms.TypedChoiceField(label="Sélection des familles", choices=choix_selection_familles, initial="TOUTES", required=False)
     famille = forms.ModelChoiceField(label="Famille", widget=Select2Widget(), queryset=Famille.objects.all().order_by("nom"), required=False)
     date_limite_paiement = forms.DateField(label="Date limite paiement en ligne", required=False, widget=DatePickerWidget({"afficher_check": True, "label_checkbox": "Interdire le paiement en ligne après le"}))
-    modelimp = forms.ModelChoiceField(queryset=ModeleImpression.objects.all(), label="Modèle d'impression")
+    modelimp = forms.ModelChoiceField(queryset=ModeleImpression.objects.filter(categorie='facture'), label="Modèle d'impression")
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

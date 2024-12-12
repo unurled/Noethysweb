@@ -33,7 +33,7 @@ class Formulaire(FormulaireBase, forms.Form):
         modele_defaut = ModeleDocument.objects.filter(categorie="attestation", defaut=True)
         if modele_defaut:
             self.fields["modele"].initial = modele_defaut.first()
-
+        self.fields['activite'].queryset = Activite.objects.exclude(nom__icontains="ARCHIVE").filter(structure__in=self.request.user.structures.all()).order_by('nom')
         self.fields['options_impression'].widget.attrs.update({"form": Form_options_impression(request=self.request)})
 
         self.helper.layout = Layout(

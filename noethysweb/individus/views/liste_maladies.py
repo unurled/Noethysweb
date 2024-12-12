@@ -6,7 +6,7 @@
 from django.urls import reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Individu
+from core.models import Individu, Activite, Inscription
 from fiche_individu.forms.individu_maladies import Formulaire
 
 
@@ -24,7 +24,10 @@ class Liste(Page, crud.Liste):
     model = Individu
 
     def get_queryset(self):
-        return Individu.objects.prefetch_related("maladies").filter(self.Get_filtres("Q"))
+        activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
+        individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
+        return Individu.objects.prefetch_related("maladies").filter(idindividu__in=individus_inscrits).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
