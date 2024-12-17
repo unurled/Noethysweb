@@ -49,7 +49,7 @@ class Formulaire_extra(FormulaireBase, forms.Form):
             self.fields[field_name] = forms.ModelChoiceField(
                 label=nom_tarif.nom,
                 queryset=tarifs,
-                widget=forms.CheckboxSelectMultiple(),
+                widget=forms.RadioSelect(),
                 required=False
             )
             # Modification du widget pour afficher le label avec description + montant_unique
