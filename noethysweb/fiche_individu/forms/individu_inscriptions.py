@@ -12,7 +12,7 @@ from crispy_forms.layout import Layout, Hidden, Div, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Inscription, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse, Tarif, CategorieTarif, Prestation, TarifLigne, AdresseMail, Utilisateur
+from core.models import Inscription, PortailRenseignement, Individu, Activite, Consommation, QuestionnaireQuestion, QuestionnaireReponse, Tarif, CategorieTarif, Prestation, TarifLigne, AdresseMail, Utilisateur
 from core.widgets import DatePickerWidget
 from core.forms.select2 import Select2Widget
 from core.widgets import Select_many_avec_plus
@@ -52,6 +52,7 @@ class Formulaire(FormulaireBase, ModelForm):
         idcategorie_tarif = kwargs.pop("idcategorie_tarif", None)
         idgroupe = kwargs.pop("idgroupe", None)
         self.idtarifs = kwargs.pop("idtarifs", None)
+        self.iddemande = kwargs.pop("iddemande", None)
         super(Formulaire, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'individu_inscriptions_form'
@@ -59,6 +60,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+        self.request = kwargs.pop('request', None)
 
         # Définit l'individu associé
         if hasattr(self.instance, "individu") == False:
@@ -187,6 +189,8 @@ class Formulaire(FormulaireBase, ModelForm):
         return self.cleaned_data
 
     def save(self):
+        if not self.iddemande:
+            self.add_error('iddemande', "L'identifiant de la demande est requis.")
         is_new_instance = self.instance.pk is None
         instance = super(Formulaire, self).save()
 
@@ -252,6 +256,15 @@ class Formulaire(FormulaireBase, ModelForm):
                     famille=instance.famille,
                     activite=instance.activite,
                 ).delete()
+
+        #Validation de la demande portail
+        demande = PortailRenseignement.objects.get(idrenseignement=self.iddemande)
+        if demande:
+                demande.traitement_date = datetime.datetime.now()
+                demande.traitement_utilisateur = self.request.user
+                demande.etat = "VALIDE"
+                demande.save()
+                logger.debug("Demande portail validée.")
 
         # Créer une prestation pour chaque tarif
         for tarif in tarifs_selectionnes:

@@ -83,6 +83,7 @@ class Page(Onglet):
         form_kwargs["idactivite"] = self.kwargs.get("idactivite", None)
         form_kwargs["idgroupe"] = self.kwargs.get("idgroupe", None)
         form_kwargs["idtarifs"] = self.kwargs.get("idstarifs", None)
+        form_kwargs["iddemande"] = self.kwargs.get("iddemande", None)
         return form_kwargs
 
     def get_success_url(self):

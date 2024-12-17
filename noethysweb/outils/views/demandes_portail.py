@@ -72,9 +72,11 @@ def Traiter_demande(request=None, demande=None, etat=None):
                 "idindividu": demande.individu_id,
                 "idactivite": int(idactivite),
                 "idgroupe": int(idgroupe),
-                "idstarifs": ','.join(map(str, idstarifs))
+                "idstarifs": ','.join(map(str, idstarifs)),
+                "iddemande": demande.idrenseignement
             })
             messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
+        return redirection
 
     # Modifie l'état de la demande
     demande.traitement_date = datetime.datetime.now()
