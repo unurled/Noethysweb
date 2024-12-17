@@ -71,10 +71,6 @@ def Valid_form(request):
         tarifs_selectionnes = request.POST.getlist(field_name)
         id_tarifs_selectionnes.extend(tarifs_selectionnes)
 
-    if not id_tarifs_selectionnes:
-        return JsonResponse({"erreur": "Vous devez sélectionner au moins un tarif"}, status=401)
-
-
     if not activite.inscriptions_multiples:
 
         # Vérifie que l'individu n'est pas déjà inscrit à cette activité

@@ -61,22 +61,42 @@ def Traiter_demande(request=None, demande=None, etat=None):
 
         # Inscription à une activité
         if demande.code == "inscrire_activite":
-            # Extraire chaque valeur
             valeurs = nouvelle_valeur.split(";")
-            idactivite = valeurs[0]
-            idgroupe = valeurs[1]
             idstarifs = json.loads(valeurs[2])
-            # Création de la redirection avec les paramètres requis
-            redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={
-                "idfamille": demande.famille_id,
-                "idindividu": demande.individu_id,
-                "idactivite": int(idactivite),
-                "idgroupe": int(idgroupe),
-                "idstarifs": ','.join(map(str, idstarifs)),
-                "iddemande": demande.idrenseignement
-            })
-            messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
-        return redirection
+
+            if idstarifs == []:
+                # Extraire chaque valeur
+                valeurs = nouvelle_valeur.split(";")
+                idactivite = valeurs[0]
+                idgroupe = valeurs[1]
+                # Création de la redirection avec les paramètres requis sans idtarifs
+                redirection1 = reverse_lazy("individu_inscriptions_ajouter1", kwargs={
+                    "idfamille": demande.famille_id,
+                    "idindividu": demande.individu_id,
+                    "idactivite": int(idactivite),
+                    "idgroupe": int(idgroupe),
+                    "iddemande": demande.idrenseignement
+                })
+                messages.add_message(request, messages.WARNING,"Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
+                return redirection1
+
+            else:
+                # Extraire chaque valeur
+                valeurs = nouvelle_valeur.split(";")
+                idactivite = valeurs[0]
+                idgroupe = valeurs[1]
+                idstarifs = json.loads(valeurs[2])
+                # Création de la redirection avec les paramètres requis
+                redirection = reverse_lazy("individu_inscriptions_ajouter", kwargs={
+                    "idfamille": demande.famille_id,
+                    "idindividu": demande.individu_id,
+                    "idactivite": int(idactivite),
+                    "idgroupe": int(idgroupe),
+                    "idstarifs": ','.join(map(str, idstarifs)),
+                    "iddemande": demande.idrenseignement
+                })
+                messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
+                return redirection
 
     # Modifie l'état de la demande
     demande.traitement_date = datetime.datetime.now()
