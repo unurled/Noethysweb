@@ -1,10 +1,4 @@
-Noethysweb
+Sacadoc
 ==================
-Code d'accès : 
-
-ADMIN : admin
-admin
-
-FAMILLE : FAMILLE3
-12345678bb
-
+https://sacadoc.flambeaux.org/utilisateur/ -> Espace directeurs
+https://sacadoc.flambeaux.org/ -> Espace famille
