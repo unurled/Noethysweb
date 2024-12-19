@@ -1,4 +1,11 @@
 Version 1.3.5.3.4 (17/12/2024)
+- Erreur si pas de selection de tarif lors de l'inscription
+- Ménage dans l'onglet outil dans fiche famille
+- Amélioration des titres
+- Filtre des pièces dans le paramétrage de l'activité
+- Ajout colonne activité dans la ventilation des règlements
+
+Version 1.3.5.3.4 (17/12/2024)
 - Correctif
 Version 1.3.5.3.3 (17/12/2024)
 - Correctif

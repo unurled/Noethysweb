@@ -34,6 +34,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
+        self.fields['pieces'].queryset = TypePiece.objects.filter(structure__in=self.request.user.structures.all())
+
         # Création des boutons de commande
         if self.mode == "CONSULTATION":
             commandes = Commandes(modifier_url="activites_renseignements_modifier", modifier_args="idactivite=activite.idactivite", modifier=True, enregistrer=False, annuler=False, ajouter=False)
@@ -44,7 +46,7 @@ class Formulaire(FormulaireBase, ModelForm):
         # Affichage
         self.helper.layout = Layout(
             commandes,
-            Fieldset("Pièces à fournir",
+            Fieldset("Pièces à fournir par la famille",
                 Field("pieces"),
             ),
             #Fieldset("Adhésions à jour",

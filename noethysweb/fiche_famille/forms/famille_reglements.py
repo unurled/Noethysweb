@@ -161,8 +161,8 @@ EXTRA_HTML = """
     </div>
     <input id="statut_ventilation" type="text" class="form-control" style="font-weight: bold;" readonly>
     <select id="id_mode_regroupement" title="Mode de regroupement" class="custom-select" style="width: 100px;flex: 0.2;">
-        <option value='mois'>Mois</option>
         <option value='facture'>Facture</option>
+        <option value='mois'>Mois</option>
         <option value='individu'>Individu</option>
         <option value='date'>Date</option>
     </select>
@@ -180,6 +180,7 @@ EXTRA_HTML = """
                 <th>Date</th>
                 <th>Individu</th>
                 <th>Intitulé</th>
+                <th>Activité</th>
                 <th style="width: 80px;">N° Facture</th>
                 <th style="width: 70px;">Montant</th>
                 <th style="width: 70px;">A ventiler</th>

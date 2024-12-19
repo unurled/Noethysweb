@@ -21,18 +21,18 @@ class View(Onglet, DetailView):
                     {"titre": "Générer une attestation de présence", "url": reverse_lazy("famille_attestations_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                     {"titre": "Liste des attestations générées", "url": reverse_lazy("famille_attestations_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
-                {"titre": "Devis", "items": [
-                    {"titre": "Générer un devis", "url": reverse_lazy("famille_devis_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                    {"titre": "Liste des devis générés", "url": reverse_lazy("famille_devis_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                ]},
-                {"titre": "Lettres de rappels", "items": [
-                    {"titre": "Générer une lettre de rappel", "url": reverse_lazy("rappels_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                    {"titre": "Liste des lettres de rappel générées", "url": reverse_lazy("famille_rappels_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                ]},
-                {"titre": "Attestations fiscales", "items": [
-                    {"titre": "Générer une attestation fiscale", "url": reverse_lazy("attestations_fiscales_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                    {"titre": "Liste des attestations fiscales générées", "url": reverse_lazy("famille_attestations_fiscales_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                ]},
+             #   {"titre": "Devis", "items": [
+             #       {"titre": "Générer un devis", "url": reverse_lazy("famille_devis_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+             #       {"titre": "Liste des devis générés", "url": reverse_lazy("famille_devis_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+             #   ]},
+             #   {"titre": "Lettres de rappels", "items": [
+             #       {"titre": "Générer une lettre de rappel", "url": reverse_lazy("rappels_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+             #       {"titre": "Liste des lettres de rappel générées", "url": reverse_lazy("famille_rappels_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+             #   ]},
+            #    {"titre": "Attestations fiscales", "items": [
+            #        {"titre": "Générer une attestation fiscale", "url": reverse_lazy("attestations_fiscales_generation", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+            #        {"titre": "Liste des attestations fiscales générées", "url": reverse_lazy("famille_attestations_fiscales_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+            #    ]},
             ],
             [
                 {"titre": "Historique", "items": [
@@ -40,14 +40,14 @@ class View(Onglet, DetailView):
                 ]},
                 {"titre": "Renseignements", "items": [
                     {"titre": "Edition des fiches de renseignements", "url": reverse_lazy("famille_edition_renseignements", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                    {"titre": "Export XML", "url": reverse_lazy("famille_export_xml", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                #    {"titre": "Export XML", "url": reverse_lazy("famille_export_xml", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
                 {"titre": "Formulaires", "items": [
                     {"titre": "Liste des formulaires remplis", "url": reverse_lazy("famille_formulaires_liste", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
                 {"titre": "Communication", "items": [
                     {"titre": "Envoyer un Email", "url": reverse_lazy("famille_emails_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
-                    {"titre": "Envoyer un SMS", "url": reverse_lazy("famille_sms_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
+                 #   {"titre": "Envoyer un SMS", "url": reverse_lazy("famille_sms_ajouter", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
                 ]},
                 {"titre": "Portail", "items": [
                     {"titre": "Messagerie", "url": reverse_lazy("famille_messagerie_portail", kwargs={'idfamille': self.kwargs.get('idfamille', None)}), "icone": "file-text-o"},
