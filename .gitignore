@@ -13,6 +13,8 @@ setup_windows.bat
 .idea/
 *.db
 *.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
 build.bat
 upload.bat
 upload.py
