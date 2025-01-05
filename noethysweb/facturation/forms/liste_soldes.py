@@ -15,8 +15,8 @@ from core.widgets import SelectionActivitesWidget, DatePickerWidget
 class Formulaire(FormulaireBase, forms.Form):
     date_situation = forms.DateField(label="Date de situation", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=True)
     afficher_debits = forms.BooleanField(label="Afficher les soldes débiteurs", required=False, initial=True)
-    afficher_credits = forms.BooleanField(label="Afficher les soldes créditeurs", required=False, initial=True)
-    afficher_nuls = forms.BooleanField(label="Afficher les soldes nuls", required=False, initial=True)
+    afficher_credits = forms.BooleanField(label="Afficher les soldes créditeurs", required=False, initial=False)
+    afficher_nuls = forms.BooleanField(label="Afficher les soldes nuls", required=False, initial=False)
     uniquement_factures = forms.BooleanField(label="Uniquement les inscriptions facturées", required=False, initial=False)
     activites = forms.CharField(label="Activités", required=True, widget=SelectionActivitesWidget(attrs={"afficher_colonne_detail": False}))
 

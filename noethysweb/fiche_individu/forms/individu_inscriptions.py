@@ -189,8 +189,6 @@ class Formulaire(FormulaireBase, ModelForm):
         return self.cleaned_data
 
     def save(self):
-        if not self.iddemande:
-            self.add_error('iddemande', "L'identifiant de la demande est requis.")
         is_new_instance = self.instance.pk is None
         instance = super(Formulaire, self).save()
 
@@ -258,35 +256,36 @@ class Formulaire(FormulaireBase, ModelForm):
                 ).delete()
 
         #Validation de la demande portail
-        demande = PortailRenseignement.objects.get(idrenseignement=self.iddemande)
-        if demande:
-                demande.traitement_date = datetime.datetime.now()
-                demande.traitement_utilisateur = self.request.user
-                demande.etat = "VALIDE"
-                demande.save()
-                logger.debug("Demande portail validée.")
+        if self.iddemande:
+            demande = PortailRenseignement.objects.get(idrenseignement=self.iddemande)
+            if demande:
+                    demande.traitement_date = datetime.datetime.now()
+                    demande.traitement_utilisateur = self.request.user
+                    demande.etat = "VALIDE"
+                    demande.save()
+                    logger.debug("Demande portail validée.")
 
-        # Créer une prestation pour chaque tarif
+            # Créer une prestation pour chaque tarif
         for tarif in tarifs_selectionnes:
-            if tarif not in tarifs_prestations_existants:
-                tarif_ligne = TarifLigne.objects.get(tarif_id=tarif.pk)
-                montant_unique = tarif_ligne.montant_unique
-                nouvelle_prestation = Prestation.objects.create(
-                    date=timezone.now().date(),
-                    categorie="consommation",
-                    label=tarif.description,
-                    forfait=1,
-                    montant_initial=montant_unique, #fonctionne pas à chercher dans tarifs_lignes
-                    montant=montant_unique, #fonctionne pas a chercher dans tarifs_lignes
-                    quantite=1,
-                    tva=0,
-                    date_valeur=timezone.now().date(),
-                    activite=instance.activite,
-                    categorie_tarif=instance.categorie_tarif,
-                    famille=instance.famille,
-                    individu=instance.individu,
-                    tarif=tarif
-                )
+                if tarif not in tarifs_prestations_existants:
+                    tarif_ligne = TarifLigne.objects.get(tarif_id=tarif.pk)
+                    montant_unique = tarif_ligne.montant_unique
+                    nouvelle_prestation = Prestation.objects.create(
+                        date=timezone.now().date(),
+                        categorie="consommation",
+                        label=tarif.description,
+                        forfait=1,
+                        montant_initial=montant_unique, #fonctionne pas à chercher dans tarifs_lignes
+                        montant=montant_unique, #fonctionne pas a chercher dans tarifs_lignes
+                        quantite=1,
+                        tva=0,
+                        date_valeur=timezone.now().date(),
+                        activite=instance.activite,
+                        categorie_tarif=instance.categorie_tarif,
+                        famille=instance.famille,
+                        individu=instance.individu,
+                        tarif=tarif
+                    )
         if is_new_instance:
             self.envoyer_email_confirmation(instance)
         return instance

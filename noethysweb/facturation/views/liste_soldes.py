@@ -8,9 +8,11 @@ from decimal import Decimal
 from django.views.generic import TemplateView
 from django.db.models import Q, Sum
 from core.views.base import CustomView
-from core.models import Famille, Prestation, Reglement, Ventilation
+from core.models import Famille, Prestation, Reglement, Ventilation, ModeleEmail, Mail, Destinataire
 from facturation.forms.liste_soldes import Formulaire
-
+from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.contrib import messages
 
 class View(CustomView, TemplateView):
     menu_code = "liste_soldes"
@@ -51,14 +53,14 @@ class View(CustomView, TemplateView):
 
         if parametres["uniquement_factures"]:
             conditions_prestations &= Q(facture__isnull=False)
+
         dict_prestations = {temp["famille"]: temp["total"] for temp in Prestation.objects.filter(conditions_prestations).values('famille').annotate(total=Sum("montant"))}
 
-        dict_regle = Reglement.objects.filter(date__lte=parametres["date_situation"])
         if ids_activites:
             dict_reglements = {
                 temp["famille"]: temp["total"]
                 for temp in Ventilation.objects.filter(
-                    idventilation__in=dict_regle, prestation__activite__in=ids_activites
+                    prestation__in=presta
                 )
                 .values('famille')
                 .annotate(total=Sum("montant"))
@@ -67,7 +69,7 @@ class View(CustomView, TemplateView):
             # Si pas d'activités spécifiées, récupérer les ventilations sans ce filtre
             dict_reglements = {
                 temp["famille"]: temp["total"]
-                for temp in Ventilation.objects.filter(idventilation__in=dict_regle)
+                for temp in Ventilation.objects.filter(prestation__in=Prestation.objects.filter(conditions_prestations))
                 .values('famille')
                 .annotate(total=Sum("montant"))
             }
@@ -94,3 +96,64 @@ class View(CustomView, TemplateView):
             "liste_lignes": json.dumps(liste_lignes),
         }
         return data
+
+def Envoi_emails(request):
+    familles = Famille.objects.all()  # Adapter selon vos critères de sélection
+    dict_prestations = {
+        temp["famille"]: temp["total"]
+        for temp in Prestation.objects.values("famille").annotate(total=Sum("montant"))
+    }
+    dict_reglements = {
+        temp["famille"]: temp["total"]
+        for temp in Ventilation.objects.values("famille").annotate(total=Sum("montant"))
+    }
+
+    liste_anomalies = []
+
+    #Intégration des données
+    familles = Famille.objects.all()  # Adapter selon vos critères de sélection
+    dict_prestations = {
+        temp["famille"]: temp["total"]
+        for temp in Prestation.objects.values("famille").annotate(total=Sum("montant"))
+    }
+    dict_reglements = {
+        temp["famille"]: temp["total"]
+        for temp in Ventilation.objects.values("famille").annotate(total=Sum("montant"))
+    }
+
+    # Création du mail
+    logger.debug("Création d'un nouveau mail...")
+    modele_email = ModeleEmail.objects.filter(categorie="rappel", defaut=True).first()
+    mail = Mail.objects.create(
+        categorie="rappel",
+        objet=modele_email.objet if modele_email else "",
+        html=modele_email.html if modele_email else "",
+        adresse_exp=request.user.Get_adresse_exp_defaut(),
+        selection="NON_ENVOYE",
+        verrouillage_destinataires=True,
+        utilisateur=request.user,
+    )
+
+    for famille in familles:
+        total_prestations = dict_prestations.get(famille.pk, Decimal(0))
+        total_reglements = dict_reglements.get(famille.pk, Decimal(0))
+        solde = total_reglements - total_prestations
+
+        # Préparer les valeurs de fusion
+        valeurs_fusion = {
+            "{NOM_FAMILLE}": famille.nom,
+            "{SOLDE_CHIFFRES}": f"{solde:.2f}".replace(".", ","),
+        }
+        if famille.mail:
+            destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs_fusion))
+            mail.destinataires.add(destinataire)
+        else:
+            liste_anomalies.append(famille.nom)
+
+    if liste_anomalies:
+        messages.add_message(request, messages.ERROR, "Adresses mail manquantes : %s" % ", ".join(liste_anomalies))
+
+    # Création de l'URL pour ouvrir l'éditeur d'emails
+    logger.debug("Redirection vers l'éditeur d'emails...")
+    url = reverse_lazy("editeur_emails", kwargs={'pk': mail.pk})
+    return JsonResponse({"url": url})
