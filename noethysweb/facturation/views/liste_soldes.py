@@ -141,10 +141,10 @@ def Envoi_emails_soldes(request):
 
         valeurs_fusion = {
             "{NOM_FAMILLE}": famille.nom,
-            "{SOLDE_CHIFFRES}": f"{float(solde):.2f}".replace(".", ","),
-            "{ACTIVITE_CONCERNEES}": activites_str
+            "{SOLDE_CHIFFRES}": f"{float(solde):.2f}".replace(".", ",").replace("-", ""),
+            "{ACTIVITES_CONCERNEES}": activites_str
         }
-        logger.debug(f"Valeurs de fusion pour {famille.nom}: {valeurs_fusion}")
+        #logger.debug(f"Valeurs de fusion pour {famille.nom}: {valeurs_fusion}")
 
         if famille.mail:
             destinataire = Destinataire.objects.create(
