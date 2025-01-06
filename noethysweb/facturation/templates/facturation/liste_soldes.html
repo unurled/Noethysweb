@@ -40,7 +40,22 @@
                 </div>
                 <div class="card-body">
 
-                    {% if not data.activite %}
+                    {% if data.activites %}
+                    {# Boutons de commandes #}
+                    <div class="buttonHolder">
+                        <button class="btn btn-primary" onclick="envoiEmails()">
+                            <i class="fa fa-send-o"></i> Envoyer des rappels par Email
+                        </button>
+                    </div>
+                    <p id="activites-text" style="color: rgba(0, 0, 0, 0);">
+                        {% for activite in data.activites.ids %}
+                            {{ activite }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+
+
+                    {% if not data.activites %}
                         <p>Commencez par sélectionner les paramètres dans le cadre gauche et cliquez sur le bouton Actualiser.</p>
                     {% endif %}
 
@@ -99,5 +114,47 @@
 
         </div>
     </div>
+ <script>
+function envoiEmails() {
+     // Récupérer toutes les lignes de la table des soldes
+        let lignes = document.querySelectorAll('#table tbody tr');
+        let soldes = [];
 
+        // Parcourir chaque ligne pour extraire le nom de la famille et le solde
+        lignes.forEach(ligne => {
+            let nom = ligne.querySelector('td:nth-child(1)').innerText.trim(); // 1ère colonne (Famille)
+            let solde = ligne.querySelector('td:nth-child(2)').innerText.trim(); // 2ème colonne (Solde)
+            soldes.push({
+                nom: nom,
+                solde: parseFloat(solde.replace(",", "."))
+            });
+        });
+
+    var activitesText = document.getElementById("activites-text").innerText || "";
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'ajax_liste_soldes_emails' %}", // URL de la vue Django
+        data: {
+            familles: JSON.stringify(soldes), // Envoyer les données formatées
+            activites: JSON.stringify(activitesText),
+            csrfmiddlewaretoken: '{{ csrf_token }}', // CSRF token
+        },
+        datatype: "json",
+        success: function(response) {
+            if (response.url) {
+                window.location.href = response.url; // Redirige vers l'éditeur d'emails
+            } else {
+                toastr.success("Les rappels ont été envoyés avec succès.");
+            }
+        },
+        error: function(xhr) {
+            var erreur = xhr.responseJSON?.error || "Une erreur est survenue.";
+            toastr.error(erreur); // Afficher une notification d'erreur
+        }
+    });
+}
+
+
+    </script>
 {% endblock contenu_page %}

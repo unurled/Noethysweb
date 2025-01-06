@@ -182,11 +182,11 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
-        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
-        individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
-        return Famille.objects.select_related("utilisateur").annotate(derniere_action=Max("historique__horodatage")).filter(idfamille__in=individus_inscrits).filter(self.Get_filtres("Q"))
-
+        #activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        #inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
+        #individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        #return Famille.objects.select_related("utilisateur").annotate(derniere_action=Max("historique__horodatage")).filter(idfamille__in=individus_inscrits).filter(self.Get_filtres("Q"))
+        return Famille.objects.select_related("utilisateur").annotate(derniere_action=Max("historique__horodatage")).filter(self.Get_filtres("Q"))
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['page_titre'] = "Comptes internet"

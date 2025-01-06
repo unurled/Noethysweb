@@ -3,12 +3,13 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import json
+import logging, json, time
+logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.views.generic import TemplateView
 from django.db.models import Q, Sum
 from core.views.base import CustomView
-from core.models import Famille, Prestation, Reglement, Ventilation, ModeleEmail, Mail, Destinataire
+from core.models import Famille, Prestation, Reglement, Ventilation, ModeleEmail, Mail, Destinataire, Activite
 from facturation.forms.liste_soldes import Formulaire
 from django.urls import reverse_lazy
 from django.http import JsonResponse
@@ -94,39 +95,27 @@ class View(CustomView, TemplateView):
         data = {
             "liste_colonnes": liste_colonnes,
             "liste_lignes": json.dumps(liste_lignes),
+            "activites": activites_data,
         }
         return data
 
-def Envoi_emails(request):
-    familles = Famille.objects.all()  # Adapter selon vos critères de sélection
-    dict_prestations = {
-        temp["famille"]: temp["total"]
-        for temp in Prestation.objects.values("famille").annotate(total=Sum("montant"))
-    }
-    dict_reglements = {
-        temp["famille"]: temp["total"]
-        for temp in Ventilation.objects.values("famille").annotate(total=Sum("montant"))
-    }
+def Envoi_emails_soldes(request):
+    logger.debug("Démarrage de la fonction email")
+    # Récupération des données envoyées
+    soldes = json.loads(request.POST.get("familles", "[]"))
+    activites = json.loads(request.POST.get("activites", "[]"))
+    liste_activites = [int(x.strip()) for x in activites.split(',') if x.strip().isdigit()]
+    activites_objets = Activite.objects.filter(idactivite__in=liste_activites)
+    noms_activites = [activite.nom for activite in activites_objets]
+    activites_str = " ou ".join(noms_activites)
+    logger.debug(f"Activités sélectionnées : {noms_activites}")
 
-    liste_anomalies = []
-
-    #Intégration des données
-    familles = Famille.objects.all()  # Adapter selon vos critères de sélection
-    dict_prestations = {
-        temp["famille"]: temp["total"]
-        for temp in Prestation.objects.values("famille").annotate(total=Sum("montant"))
-    }
-    dict_reglements = {
-        temp["famille"]: temp["total"]
-        for temp in Ventilation.objects.values("famille").annotate(total=Sum("montant"))
-    }
-
-    # Création du mail
+    # Création d'un nouveau mail
     logger.debug("Création d'un nouveau mail...")
     modele_email = ModeleEmail.objects.filter(categorie="rappel", defaut=True).first()
     mail = Mail.objects.create(
         categorie="rappel",
-        objet=modele_email.objet if modele_email else "",
+        objet=modele_email.objet if modele_email else "Rappel de solde",
         html=modele_email.html if modele_email else "",
         adresse_exp=request.user.Get_adresse_exp_defaut(),
         selection="NON_ENVOYE",
@@ -134,22 +123,41 @@ def Envoi_emails(request):
         utilisateur=request.user,
     )
 
-    for famille in familles:
-        total_prestations = dict_prestations.get(famille.pk, Decimal(0))
-        total_reglements = dict_reglements.get(famille.pk, Decimal(0))
-        solde = total_reglements - total_prestations
+    # Importation des familles
+    noms_familles = [valeurs['nom'] for valeurs in soldes]
+    dict_familles = {famille.nom: famille for famille in Famille.objects.filter(nom__in=noms_familles)}
 
-        # Préparer les valeurs de fusion
+    # Création des destinataires
+    logger.debug("Enregistrement des destinataires...")
+    liste_anomalies = []
+    for solde_data in soldes:
+        famille_nom = solde_data.get("nom")
+        solde = solde_data.get("solde", 0)
+        famille = dict_familles.get(famille_nom)
+
+        if not famille:
+            liste_anomalies.append(famille_nom)
+            continue
+
         valeurs_fusion = {
             "{NOM_FAMILLE}": famille.nom,
-            "{SOLDE_CHIFFRES}": f"{solde:.2f}".replace(".", ","),
+            "{SOLDE_CHIFFRES}": f"{float(solde):.2f}".replace(".", ","),
+            "{ACTIVITE_CONCERNEES}": activites_str
         }
+        logger.debug(f"Valeurs de fusion pour {famille.nom}: {valeurs_fusion}")
+
         if famille.mail:
-            destinataire = Destinataire.objects.create(categorie="famille", famille=famille, adresse=famille.mail, valeurs=json.dumps(valeurs_fusion))
+            destinataire = Destinataire.objects.create(
+                categorie="famille",
+                famille=famille,
+                adresse=famille.mail,
+                valeurs=json.dumps(valeurs_fusion)
+            )
             mail.destinataires.add(destinataire)
         else:
             liste_anomalies.append(famille.nom)
 
+    # Gestion des anomalies
     if liste_anomalies:
         messages.add_message(request, messages.ERROR, "Adresses mail manquantes : %s" % ", ".join(liste_anomalies))
 

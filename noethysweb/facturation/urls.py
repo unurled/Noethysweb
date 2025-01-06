@@ -123,5 +123,6 @@ urlpatterns = [
     path('facturation/ajax_solder_impayes', secure_ajax(solder_impayes.Solder), name='ajax_solder_impayes'),
     path('facturation/ajax_factures_modifier', secure_ajax(factures_modifier.Appliquer), name='ajax_factures_modifier'),
     path('facturation/export_ecritures_cloe/exporter', secure_ajax(export_ecritures_cloe.Exporter), name='ajax_export_ecritures_cloe_exporter'),
+    path('facturation/liste_soldes_email', secure_ajax(liste_soldes.Envoi_emails_soldes), name='ajax_liste_soldes_emails'),
 
 ]
