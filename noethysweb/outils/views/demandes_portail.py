@@ -160,7 +160,11 @@ class Liste(Page, crud.Liste):
         structures_utilisateur = self.request.user.structures.all()
         activites_autorisees = Activite.objects.filter(structure__in=structures_utilisateur)
         inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
-        individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
+        incriptions_inaccessibles = Inscription.objects.exclude(activite__in=activites_autorisees)
+        individus_inscrits = Individu.objects.filter(
+            Q (idindividu__in=inscriptions_accessibles.values('individu')) |
+            ~Q (idindividu__in=Inscription.objects.values_list('individu', flat=True))
+        ).exclude(idindividu__in=incriptions_inaccessibles.values('individu'))
 
         # Obtenez les premières valeurs de la nouvelle valeur pour les lignes où le code est "inscrire_activite" et l'état est "ATTENTE"
         premiere_valeur = PortailRenseignement.objects.filter(

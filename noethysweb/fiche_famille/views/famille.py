@@ -104,9 +104,13 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
-        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
-        individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
+        incriptions_inaccessibles = Inscription.objects.exclude(activite__in=activites_autorisees)
+        individus_inscrits = Individu.objects.filter(
+            Q (idindividu__in=inscriptions_accessibles.values('individu')) |
+            ~Q (idindividu__in=Inscription.objects.values_list('individu', flat=True))
+        ).exclude(idindividu__in=incriptions_inaccessibles.values('individu'))
         return Famille.objects.filter(idfamille__in=individus_inscrits).filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
