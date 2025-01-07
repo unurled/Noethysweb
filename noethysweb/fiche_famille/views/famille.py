@@ -91,7 +91,7 @@ class Page(crud.Page):
     url_ajouter = "famille_ajouter"
     url_modifier = "famille_resume"
     url_supprimer = "famille_supprimer"
-    description_liste = "Voici ci-dessous la liste des familles."
+    description_liste = "Voici ci-dessous la liste des familles. Vous pouvez visualiser les familles dont un individu est inscrit à une de vos activités ou dont aucun n'individu n'a d'inscription."
     description_saisie = "Saisissez toutes les informations concernant la famille à saisir et cliquez sur le bouton Enregistrer."
     objet_singulier = "une famille"
     objet_pluriel = "des familles"

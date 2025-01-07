@@ -1,3 +1,7 @@
+Version 1.3.5.4.1 (06/01/2025)
+- Problèmes sur historique
+- Ajout champ activite dans portail renseignement pour faciliter
+
 Version 1.3.5.4.0 (06/01/2025)
 - Plus d'apparition de Noethysweb
 - Bug visualisation inscriptions en attente

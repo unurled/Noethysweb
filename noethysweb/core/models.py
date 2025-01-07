@@ -3175,6 +3175,7 @@ class PortailRenseignement(models.Model):
     traitement_date = models.DateTimeField(verbose_name="Date du traitement", blank=True, null=True)
     validation_auto = models.BooleanField(verbose_name="Validation automatique", default=True)
     idobjet = models.IntegerField(verbose_name="ID objet", blank=True, null=True)
+    activite = models.ForeignKey(Activite, verbose_name="Famille", on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'portail_renseignements'

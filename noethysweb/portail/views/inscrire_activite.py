@@ -116,6 +116,7 @@ def Valid_form(request):
     # Enregistrement de la demande
     demande = form.save()
     demande.nouvelle_valeur = json.dumps("%d;%d;%s" % (activite.pk, groupe.pk, json.dumps(id_tarifs_selectionnes)),cls=DjangoJSONEncoder)
+    demande.activite = activite
     demande.save()
 
     # Enregistrement des pièces
