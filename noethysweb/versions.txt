@@ -1,3 +1,8 @@
+Version 1.3.5.4.3 (08/01/2025)
+- Ajustement traitements
+- Ajout vidéos YT pour l'aide
+- Clean parametrage Activité
+
 Version 1.3.5.4.2 (08/01/2025)
 - Bug PortailRenseignement
 

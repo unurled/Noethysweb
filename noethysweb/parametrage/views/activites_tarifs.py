@@ -90,29 +90,20 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ['idtarif', 'date_debut', 'nom_tarif', 'description', 'type', 'methode']
-
-        categories = columns.TextColumn("Catégories", sources=None, processor='Get_categories')
-        type = columns.TextColumn("Type", sources=["type"], processor='Get_type')
+        filtres = ['date_debut', 'description', 'methode']
         methode = columns.TextColumn("Méthode", sources=["methode"], processor='Get_methode')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idtarif', 'date_debut', 'description', 'categories', 'type', 'methode']
+            columns = ['date_debut', 'description', 'methode']
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ['-date_debut']
 
-        def Get_type(self, instance, *args, **kwargs):
-            return instance.get_type_display()
-
         def Get_methode(self, instance, *args, **kwargs):
             return instance.get_methode_display()
-
-        def Get_categories(self, instance, *args, **kwargs):
-            return ", ".join([categorie.nom for categorie in instance.categories_tarifs.all()])
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             """ Inclut l'idactivite dans les boutons d'actions """

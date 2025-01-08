@@ -2045,7 +2045,7 @@ class Traitement(models.Model):
     date = models.DateField(verbose_name="Date de réalisation")
     titre = models.CharField(verbose_name="Nature des soins", max_length=50)
     Description = models.CharField(verbose_name="Description", max_length=500)
-    typemaladie = models.ForeignKey(Information, verbose_name="Pathologie associée", on_delete=models.CASCADE)
+    typemaladie = models.CharField(verbose_name="Pathologie associée", max_length=50)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.PROTECT)
 
     class Meta:

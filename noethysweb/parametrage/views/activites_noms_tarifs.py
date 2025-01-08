@@ -56,13 +56,13 @@ class Liste(Page, crud.Liste):
         return NomTarif.objects.filter(Q(activite=self.Get_idactivite()) & self.Get_filtres("Q"))
 
     class datatable_class(MyDatatable):
-        filtres = ['idnom_tarif', 'nom']
+        filtres = ['nom']
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['idnom_tarif', 'nom']
+            columns = ['nom']
             ordering = ['nom']
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
