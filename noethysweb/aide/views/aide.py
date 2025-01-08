@@ -24,8 +24,7 @@ class Aide(CustomView, TemplateView):
 
     def get_playlist_videos(self):
         api_key = 'AIzaSyAH4d8YfR35JZRDLVB-S80H64i32Q9naDc'
-#TEST        playlist_id = 'PLNbT8-G8ACCkCMhfvKlxQtju4mn8NtJlz'
-        playlist_id = 'PLX1Hj6AFyG5WzOavL7D0YT5csW9k'
+        playlist_id = 'PLNbT8-G8ACCnJcIvkubF0cUjXMiP9PRId'
         url = f'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={playlist_id}&maxResults=50&key={api_key}'
 
         try:
