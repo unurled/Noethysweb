@@ -404,7 +404,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_prestations.Add(code="liste_deductions", titre="Liste des déductions", icone="file-text-o")
     menu_prestations.Add(code="liste_soldes", titre="Liste des soldes", icone="file-text-o")
     menu_prestations.Add(code="synthese_prestations", titre="Synthèse des prestations", icone="file-text-o")
-    menu_prestations.Add(code="edition_prestations", titre="Edition des prestations", icone="file-text-o")
+    menu_prestations.Add(code="edition_prestations", titre="Edition PDF des prestations (export compta)", icone="file-text-o")
     menu_prestations.Add(code="recalculer_prestations", titre="Recalculer des prestations", icone="file-text-o")
 
     # Aides
@@ -438,15 +438,15 @@ def GetMenuPrincipal(organisateur=None, user=None):
 
     # Dépôts
     menu_depots_reglements = menu_reglements.Add(titre="Dépôts de règlements")
+    menu_depots_reglements.Add(code="depots_reglements_liste", titre="Dépôts de règlements", icone="file-text-o")
     menu_depots_reglements.Add(code="liste_reglements_disponibles", titre="Liste des règlements non déposés", icone="file-text-o")
     menu_depots_reglements.Add(code="detail_prestations_depot", titre="Détail des prestations d'un dépôt", icone="file-text-o")
     menu_depots_reglements.Add(code="detail_ventilations_depots", titre="Détail des ventilations des dépôts", icone="file-text-o")
-    menu_depots_reglements.Add(code="depots_reglements_liste", titre="Dépôts de règlements", icone="file-text-o")
 
     # Divers
     menu_reglements_divers = menu_reglements.Add(titre="Divers")
     menu_reglements_divers.Add(code="liste_recus", titre="Liste des reçus de règlements", icone="file-text-o")
-    menu_reglements_divers.Add(code="liste_paiements", titre="Liste des paiements en ligne", icone="file-text-o")
+    menu_reglements_divers.Add(code="liste_paiements", titre="Liste des paiements en CB", icone="file-text-o")
 
     # Ventilation
     menu_ventilation = menu_reglements.Add(titre="Ventilation")

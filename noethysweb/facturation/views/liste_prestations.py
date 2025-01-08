@@ -73,9 +73,7 @@ class View(CustomView, TemplateView):
             key = (famille.nom, individu.prenom)
 
             detail = (
-                f"<b>Tarif:</b> {tarif}<br>"
-                f"<b>Montant:</b> {utils_texte.Formate_montant(montant)}"
-                f"<b> - Reste à payer :</b> {utils_texte.Formate_montant(solde_facture)}<br>"
+                f"{tarif} - {utils_texte.Formate_montant(montant)}"
                 f"<br>"
             )
 

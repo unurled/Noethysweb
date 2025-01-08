@@ -10,6 +10,8 @@ from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.widgets import SelectionActivitesWidget, DateRangePickerWidget
 from core.forms.base import FormulaireBase
+from datetime import date, timedelta
+import datetime
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -25,6 +27,12 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        # Période par défaut: aujourd'hui jusqu'à un an plus tard
+        date_debut = date.today() - timedelta(days=182)
+        date_fin = date_debut + timedelta(days=725)
+        periode_initial = f"{date_debut};{date_fin}"
+        self.fields["periode"].initial = periode_initial
 
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'facturation_toc' %}", enregistrer=False, ajouter=False,

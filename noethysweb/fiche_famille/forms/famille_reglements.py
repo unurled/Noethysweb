@@ -42,6 +42,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         self.fields['modelimp'].queryset = ModeleImpression.objects.filter(categorie='reglement')
+        if self.fields['modelimp'].queryset.exists():
+            self.fields['modelimp'].initial = self.fields['modelimp'].queryset.first()
 
         # Date
         if not self.instance.idreglement:
@@ -101,21 +103,20 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('emetteur'),
                 Field('numero_piece'),
                 PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
-                Field('payeur'),
-            ),
-            Fieldset('Options',
-                Field('observations'),
-                     Field('modelimp'),
-
-                     ),
-            Fieldset('Encaissement',
-                Field('compte'),
-                Field('date_differe'),
             ),
             Fieldset('Ventilation',
-                Field('ventilation'),
-                HTML(EXTRA_HTML),
+                     Field('ventilation'),
+                     HTML(EXTRA_HTML),
+                     ),
+
+            Fieldset('Options',
+                     Field('date_differe'),
+                     Field('payeur'),
+                     Field('observations'),
+                     Field('modelimp'),
+                Field('compte'),
             ),
+
         )
         if self.instance.depot:
             self.helper.layout.insert(1, HTML("""
