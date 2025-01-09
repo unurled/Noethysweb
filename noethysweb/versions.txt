@@ -1,4 +1,4 @@
-Version 1.3.5.4.6 (08/01/2025)
+Version 1.3.5.4.7 (08/01/2025)
 - Modif liste email solde autorisée
 - Filtre pour questionnaires
 - Requiered identité
