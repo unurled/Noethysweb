@@ -12,6 +12,7 @@ from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
 from core.models import Activite, TypePiece, TypeCotisation, TypeConsentement
 from core.forms.select2 import Select2MultipleWidget
+from django.db.models import Q
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -34,7 +35,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        self.fields['pieces'].queryset = TypePiece.objects.filter(structure__in=self.request.user.structures.all())
+        self.fields['pieces'].queryset = TypePiece.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
 
         # Création des boutons de commande
         if self.mode == "CONSULTATION":

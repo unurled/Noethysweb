@@ -119,7 +119,7 @@ def Envoi_emails_soldes(request):
         html=modele_email.html if modele_email else "",
         adresse_exp=request.user.Get_adresse_exp_defaut(),
         selection="NON_ENVOYE",
-        verrouillage_destinataires=True,
+        verrouillage_destinataires=False,
         utilisateur=request.user,
     )
 

@@ -136,13 +136,13 @@ CATEGORIES_RATTACHEMENT = [(1, "Adulte"), (2, "Enfant"), (3, "Contact")]
 LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("individu", "Individu"),
     ("famille", "Famille"),
-    ("categorie_produit", "Catégorie de produits"),
-    ("produit", "Produit"),
-    ("location", "Location"),
-    ("location_demande", "Demande de location"),
-    ("inscription", "Inscription"),
-    ("collaborateur", "Collaborateur"),
-    ("contrat_collaborateur", "Contrat collaborateur"),
+    #("categorie_produit", "Catégorie de produits"),
+    #("produit", "Produit"),
+    #("location", "Location"),
+    #("location_demande", "Demande de location"),
+    #("inscription", "Inscription"),
+    #("collaborateur", "Collaborateur"),
+    #("contrat_collaborateur", "Contrat collaborateur"),
     ]
 
 LISTE_ETATS_CONSO = [
@@ -155,19 +155,19 @@ LISTE_ETATS_CONSO = [
 ]
 
 LISTE_CONTROLES_QUESTIONNAIRES = [
-    {"code": "ligne_texte", "label":u"Ligne de texte", "image": "Texte_ligne.png", "filtre": "texte"},
-    {"code": "bloc_texte", "label":u"Bloc de texte multiligne", "image": "Texte_bloc.png", "options": {"hauteur":60}, "filtre": "texte" },
+    #{"code": "ligne_texte", "label":u"Ligne de texte", "image": "Texte_ligne.png", "filtre": "texte"},
+    {"code": "bloc_texte", "label":u"Texte", "image": "Texte_bloc.png", "options": {"hauteur":60}, "filtre": "texte" },
     {"code": "entier", "label":u"Nombre entier", "image": "Ctrl_nombre.png", "options": {"min":0, "max":99999}, "filtre": "entier" },
     {"code": "decimal", "label":u"Nombre décimal", "image": "Ctrl_decimal.png", "options": {"min":0, "max":99999}, "filtre": "decimal" },
     {"code": "montant", "label":u"Montant", "image": "Euro.png", "filtre": "montant" },
     {"code": "liste_deroulante", "label":u"Liste déroulante", "image": "Ctrl_choice.png", "options":{"choix":None}, "filtre": "choix" },
     {"code": "liste_coches", "label":u"Sélection multiple", "image": "Coches.png", "options": {"hauteur":-1, "choix":None} , "filtre": "choix"},
-    {"code": "case_coche", "label":u"Case à cocher", "image": "Ctrl_coche.png" , "filtre": "coche"},
+    {"code": "case_coche", "label":u"Case unique à cocher", "image": "Ctrl_coche.png" , "filtre": "coche"},
     {"code": "date", "label":u"Date", "image": "Jour.png" , "filtre": "date"},
-    {"code": "slider", "label":u"Réglette", "image": "Reglette.png", "options": {"hauteur":-1, "min":0, "max":100}, "filtre": "entier" },
-    {"code": "couleur", "label":u"Couleur", "image": "Ctrl_couleur.png", "options": {"hauteur":20}, "filtre": None},
+    #{"code": "slider", "label":u"Réglette", "image": "Reglette.png", "options": {"hauteur":-1, "min":0, "max":100}, "filtre": "entier" },
+    #{"code": "couleur", "label":u"Couleur", "image": "Ctrl_couleur.png", "options": {"hauteur":20}, "filtre": None},
     # {"code": "documents", "label":u"Porte-documents", "image": "Document.png", "options": {"hauteur":60}, "filtre": None},
-    {"code": "codebarres", "label":u"Code-barres", "image": "Codebarres.png", "options": {"norme":"39"}, "filtre": "texte" },
+    #{"code": "codebarres", "label":u"Code-barres", "image": "Codebarres.png", "options": {"norme":"39"}, "filtre": "texte" },
     # {"code": "rfid", "label":u"Badge RFID", "image": "Rfid.png" , "filtre": "texte"},
     ]
 
