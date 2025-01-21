@@ -171,7 +171,6 @@ class Liste(Page, crud.Liste):
             code='inscrire_activite',
             etat='ATTENTE',
             idrenseignement=OuterRef('idrenseignement'),
-            individu__in=individus_inscrits,
         ).order_by('date').values('nouvelle_valeur')[:1]
 
         # Obtenez les lignes de PortailRenseignement où le code est "inscrire_activite"
@@ -193,7 +192,7 @@ class Liste(Page, crud.Liste):
                 if premiere_valeur_strip.isdigit() and int(premiere_valeur_strip) in activite_ids_autorisees:
                     resultat_filtre.add(entry['idrenseignement'])
 
-        self.afficher_renseignements_attente = utils_parametres.Get(nom="afficher_renseignements_attente", categorie="renseignements_attente", utilisateur=self.request.user, valeur=True)
+        self.afficher_renseignements_attente = utils_parametres.Get(nom="afficher_renseignements_attente", categorie="renseignements_attente", utilisateur=self.request.user, valeur=False)
         conditions = Q()
         if not self.afficher_renseignements_attente:
             conditions &= Q(etat="ATTENTE")
@@ -207,6 +206,7 @@ class Liste(Page, crud.Liste):
             conditions |= Q(idrenseignement__in=resultat_filtre)
             conditions &= ~Q(etat="VALIDE")
             conditions &= Q(individu__in=individus_inscrits)
+            conditions &= Q(activite__in = activites_autorisees)
             return PortailRenseignement.objects.select_related("famille", "individu", "traitement_utilisateur").filter(conditions).order_by("date").exclude(code="inscrire_activite")
 
     def get_context_data(self, **kwargs):

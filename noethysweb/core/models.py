@@ -1690,6 +1690,8 @@ class Individu(models.Model):
     info_garde = models.TextField(verbose_name=_("Information sur la garde"), blank=True, null=True)
     resp_flbx_liste = [(0, "Parent"), (1, "Chef/taine"), (2, "Chef/taine de groupe - Directeur/trice"), (3, "Délégué(e) Local"), (4, "Ami(e)"), (5, "Jeunes")]
     statut = models.IntegerField(verbose_name=_("Statut"), choices=resp_flbx_liste, blank=True, null=True, default=0)
+    secu = models.CharField(verbose_name="N° de sécurité sociale", max_length=15, blank=False, null=False)
+
 
     class Meta:
         db_table = 'individus'
