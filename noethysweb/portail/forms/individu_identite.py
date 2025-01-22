@@ -16,8 +16,6 @@ from portail.forms.fiche import FormulaireBase
 
 class Formulaire(FormulaireBase, ModelForm):
     date_naiss = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
-    cp_naiss = forms.CharField(label="Code postal de naissance", required=True, max_length=10,)
-    ville_naiss = forms.CharField(label="Ville de naissance", required=True, max_length=100,)
 
     class Meta:
         model = Individu
