@@ -62,7 +62,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('ordre', value=self.fields['ordre'].initial),
             Fieldset("Nom du groupe",
                 Field("nom"),
-                Field("abrege"),
             ),
             Fieldset("Limitation du nombre d'inscrits",
                 Field("type_nbre_inscrits"),

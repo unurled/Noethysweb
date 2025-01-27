@@ -14,7 +14,7 @@ from individus.views import liste_pieces_manquantes, liste_pieces_fournies, list
                             edition_contacts, edition_renseignements, edition_informations, liste_photos_manquantes, recherche_avancee, inscriptions_modifier, \
                             liste_titulaires_helios, inscriptions_activite_liste, effacer_familles, liste_transports, liste_progtransports, inscriptions_changer_groupe, \
                             abonnes_listes_diffusion, abonnes_listes_diffusion_ajouter, liste_mails, imprimer_liste_inscrits, sondages_reponses, telecharger_plusieurs, famille_attestations, \
-                            liste_questionnaires_individus_modif, liste_questionnaires_individus_modif_valid, liste_allergies, liste_dispmed
+                            liste_questionnaires_individus_modif, liste_questionnaires_individus_modif_valid, liste_allergies, liste_dispmed, inscriptions_activite_lot
 from fiche_individu.views import individu_inscriptions
 
 urlpatterns = [
@@ -52,6 +52,11 @@ urlpatterns = [
     path('individus/inscriptions_activite', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
     path('individus/inscriptions_activite/<str:activite>', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
     path('individus/inscriptions_activite/<str:activite>/<str:groupe>', inscriptions_activite_liste.Liste.as_view(), name='inscriptions_activite_liste'),
+    path('individus/inscriptions_activite_lot', inscriptions_activite_lot.Liste.as_view(),name='inscriptions_activite_lot'),
+    path('individus/inscriptions_activite_lot/<str:activite>', inscriptions_activite_lot.Liste.as_view(), name='inscriptions_activite_lot'),
+    path('individus/inscriptions_activite_lot/<str:activite>/<str:groupe>/<str:tarif>', inscriptions_activite_lot.Liste.as_view(),name='inscriptions_activite_lot'),
+    path('individus/inscriptions_activite_lot/créer_plusieurs/<str:activite>/<str:groupe>/<str:tarif>/<str:listepk>', inscriptions_activite_lot.lancer_inscriptions, name='inscription_button'),
+
     path('individus/inscriptions_activite/ajouter/<str:activite>', inscriptions_activite_liste.Ajouter.as_view(), name='inscriptions_activite_ajouter'),
     path('individus/inscriptions_activite/modifier/<str:activite>/<int:pk>', inscriptions_activite_liste.Modifier.as_view(), name='inscriptions_activite_modifier'),
     path('individus/inscriptions_activite/supprimer/<str:activite>/<int:pk>', inscriptions_activite_liste.Supprimer.as_view(), name='inscriptions_activite_supprimer'),

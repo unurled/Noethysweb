@@ -1,0 +1,122 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+
+        <!-- Sélection de l'activité -->
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Activité</span>
+            </div>
+            <select id="choix_activite" class="form-control">
+                {% for code, label in liste_activites %}
+                    <option {% if code == activite %}selected{% endif %} value="{% if not code %}0{% else %}{{ code }}{% endif %}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+
+        <!-- Sélection du groupe -->
+        <div class="input-group" {% if not activite %}style="display: none;"{% endif %}>
+            <div class="input-group-prepend">
+                <span class="input-group-text">Groupe</span>
+            </div>
+            <select id="choix_groupe" class="form-control">
+                {% for code, label in liste_groupes %}
+                    <option {% if code == groupe %}selected{% endif %} value="{% if not code %}0{% else %}{{ code }}{% endif %}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+
+        <!-- Sélection des tarifs -->
+        <div class="form-group">
+            <label style="font-weight: bold;">Tarifs :</label>
+            <div>
+                {% for tarif_id, tarif_desc in liste_tarifs %}
+                    <div>
+                        <label>
+                            <input type="checkbox" name="tarifs" value="{{ tarif_id }}" {% if tarif_id in tarifs %}checked{% endif %}>
+                            {{ tarif_desc }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Bouton Inscrire -->
+        <form id="inscription_form">
+            <button type="button" id="inscrire_button" class="btn btn-primary">Inscrire en lot</button>
+        </form>
+
+        <script>
+            $(document).ready(function () {
+                function buildUrl() {
+                    // Récupération des valeurs
+                    var activite = $("#choix_activite").val() || "0";
+                    var groupe = $("#choix_groupe").val() || "0";
+                    var tarifs = [];
+                    $("input[name='tarifs']:checked").each(function () {
+                        tarifs.push($(this).val());
+                    });
+                    if (tarifs.length === 0) {
+                        tarifs.push("0");
+                    }
+                    var listepk = get_coches();
+                    if (listepk.length === 0) {
+                        listepk.push("0");
+                    }
+
+                    // Construction de l'URL
+                    var url = "{% url 'inscription_button' activite=0 groupe=0 tarif=0 listepk=0 %}";
+                    url = url.replace("0", activite)
+                             .replace("0", groupe)
+                             .replace("0", tarifs.join(","))
+                             .replace("0", listepk.join(","));
+
+                    return url;
+                }
+
+                // Gestion du clic sur le bouton
+                $("#inscrire_button").on("click", function () {
+                    var url = buildUrl();
+                    window.location.href = url;
+                });
+
+                // Fonction pour recharger la page en fonction des sélections
+                function reloadPage() {
+                    var activite = $("#choix_activite").val() || "0";
+                    var groupe = $("#choix_groupe").val() || "0";
+                    var tarifs = [];
+                    var listepk = [];
+                    $("input[name='tarifs']:checked").each(function () {
+                        tarifs.push($(this).val());
+                    });
+                    if (tarifs.length === 0) {
+                        tarifs.push("0");
+                    }
+
+                    // Construire l'URL pour recharger la page
+                    var url = "{% url url_liste %}" + "/" + activite + "/" + groupe + "/" + tarifs.join(",");
+                    window.location.href = url;
+                }
+
+                // Événements sur les champs de sélection
+                $('#choix_activite').change(reloadPage);
+                $('#choix_groupe').change(reloadPage);
+            });
+        </script>
+
+        {% embed 'core/crud/liste.html' %}
+        {% endembed %}
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
+    {% endembed %}
+{% endblock contenu_page %}
