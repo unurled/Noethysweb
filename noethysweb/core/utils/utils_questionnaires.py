@@ -131,8 +131,6 @@ class Questionnaires():
         """ Récupération des réponses des questionnaires """
         # Filtre sur les réponses
         filtres_reponses = Q(question__categorie=categorie)
-        filtres_reponses &= Q(reponse__isnull=False)
-        filtres_reponses &= ~Q(reponse="")
 
         if filtre:
             filtres_reponses &= filtre
@@ -159,7 +157,7 @@ class Questionnaires():
                     dictReponses[reponse.question_id] = {}
                 if ID not in dictReponses[reponse.question_id]:
                     dictReponses[reponse.question_id][ID] = texteReponse
-            
+
         return dictReponses
 
 
@@ -184,4 +182,5 @@ class ChampsEtReponses():
                 #"defaut": dictQuestion["defaut"]
                 }
             listeDonnees.append(dictReponse)
+        print(listeDonnees)
         return listeDonnees

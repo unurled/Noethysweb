@@ -69,9 +69,16 @@ class Impression(utils_impression.Impression):
         dict_vaccinations = utils_vaccinations.Get_tous_vaccins()
 
         # Importation des questionnaires
-        questionnaires_individus = utils_questionnaires.ChampsEtReponses(categorie="individu", filtre_reponses=(Q(individu__in=[r.individu for r in rattachements])))
-        questionnaires_familles = utils_questionnaires.ChampsEtReponses(categorie="famille", filtre_reponses=(Q(famille__in=[r.famille for r in rattachements])))
+        questionnaires_individus = utils_questionnaires.ChampsEtReponses(
+            categorie="individu",
+            filtre_reponses=(Q(individu__in=[r.individu for r in rattachements]) & Q(reponse__isnull=False) & ~Q(
+                reponse="")))
+        questionnaires_familles = utils_questionnaires.ChampsEtReponses(
+            categorie="famille",
+            filtre_reponses=(Q(famille__in=[r.famille for r in rattachements]) & Q(reponse__isnull=False) & ~Q(
+                reponse="")))
 
+        print(questionnaires_individus)
         # Préparation des polices
         style_defaut = ParagraphStyle(name="defaut", fontName="Helvetica", fontSize=7, spaceAfter=0, leading=9)
         style_centre = ParagraphStyle(name="centre", fontName="Helvetica", alignment=1, fontSize=7, spaceAfter=0, leading=9)
