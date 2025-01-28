@@ -78,7 +78,6 @@ class Impression(utils_impression.Impression):
             filtre_reponses=(Q(famille__in=[r.famille for r in rattachements]) & Q(reponse__isnull=False) & ~Q(
                 reponse="")))
 
-        print(questionnaires_individus)
         # Préparation des polices
         style_defaut = ParagraphStyle(name="defaut", fontName="Helvetica", fontSize=7, spaceAfter=0, leading=9)
         style_centre = ParagraphStyle(name="centre", fontName="Helvetica", alignment=1, fontSize=7, spaceAfter=0, leading=9)
