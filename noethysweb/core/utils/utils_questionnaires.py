@@ -165,7 +165,7 @@ class ChampsEtReponses():
     """ Option : filtres_reponses = Q(collaborateur_is__in=(1, 2, 3)) """
     def __init__(self, categorie="individu", filtre_reponses=None):
         questionnaires = Questionnaires()
-        self.listeQuestions = questionnaires.GetQuestions(categorie=categorie, structure=self.request.user.structures.all()).include(reponse__isnull=True)
+        self.listeQuestions = questionnaires.GetQuestions(categorie=categorie)
         self.dictReponses = questionnaires.GetReponses(categorie=categorie, filtre=filtre_reponses)
 
     def GetDonnees(self, ID, formatStr=True):
