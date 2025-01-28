@@ -1,3 +1,7 @@
+Version 1.3.5.4.10 (27/01/2025)
+- Détails clarté
+- Page inscription en lot
+
 Version 1.3.5.4.9 (22/01/2025)
 - Bug identité
 
