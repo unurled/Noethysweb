@@ -132,6 +132,7 @@ class Questionnaires():
         # Filtre sur les réponses
         filtres_reponses = Q(question__categorie=categorie)
         filtres_reponses &= Q(reponse__isnull=False)
+        filtres_reponses &= ~Q(reponse="")
 
         if filtre:
             filtres_reponses &= filtre
