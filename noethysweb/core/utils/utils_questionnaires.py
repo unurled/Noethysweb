@@ -131,6 +131,8 @@ class Questionnaires():
         """ Récupération des réponses des questionnaires """
         # Filtre sur les réponses
         filtres_reponses = Q(question__categorie=categorie)
+        filtres_reponses &= Q(reponse__isnull=False)
+
         if filtre:
             filtres_reponses &= filtre
 
