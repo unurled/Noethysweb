@@ -173,14 +173,21 @@ class ChampsEtReponses():
         listeDonnees = []
         for dictQuestion in self.listeQuestions:
             reponse = GetReponse(self.dictReponses, dictQuestion["IDquestion"], ID)
-            if formatStr == True :
+
+            # Vérification si la réponse est vide ou null
+            if not reponse:
+                continue  # Si la réponse est vide ou None, passer à la prochaine question
+
+            if formatStr:
                 reponse = FormateStr(reponse)
+
             champ = "{QUESTION_%d}" % dictQuestion["IDquestion"]
             dictReponse = {
-                "champ": champ, "reponse":reponse, "IDquestion": dictQuestion["IDquestion"], "label": dictQuestion["label"],
-                "categorie": dictQuestion["categorie"], "controle": dictQuestion["controle"], "visible_fiche_renseignement": dictQuestion["visible_fiche_renseignement"],
-                #"defaut": dictQuestion["defaut"]
-                }
+                "champ": champ, "reponse": reponse, "IDquestion": dictQuestion["IDquestion"],
+                "label": dictQuestion["label"],
+                "categorie": dictQuestion["categorie"], "controle": dictQuestion["controle"],
+                "visible_fiche_renseignement": dictQuestion["visible_fiche_renseignement"],
+                # "defaut": dictQuestion["defaut"]
+            }
             listeDonnees.append(dictReponse)
-        print(listeDonnees)
         return listeDonnees
