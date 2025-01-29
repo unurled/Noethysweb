@@ -11,11 +11,96 @@ from django.contrib import messages
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import PortailRenseignement, TypeSieste, Caisse, Individu, Secteur, CategorieTravail, RegimeAlimentaire, TypeMaladie, \
-                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe,CategorieTarif, Inscription
+                        Medecin, ContactUrgence, Assurance, Information, QuestionnaireQuestion, Vaccin, Activite, Groupe,CategorieTarif, Inscription, AdresseMail
 from core.data import data_civilites
 from core.utils import utils_dates, utils_parametres
 from portail.utils import utils_champs
+from django.core.mail import send_mail
+from django.core import mail as djangomail
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from core.utils import utils_portail
+import logging
+logger = logging.getLogger(__name__)
 
+
+def envoyer_email_refus(demande):
+    """ Envoie un email si la demande est refusée """
+    print("Envoi d'un email de refus")
+
+    idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
+    adresse_exp = AdresseMail.objects.filter(pk=idadresse_exp, actif=True).first()
+
+    if not adresse_exp:
+        logger.debug("Erreur : Pas d'adresse d'expédition paramétrée.")
+        return _("L'envoi de l'email a échoué. Merci de signaler cet incident à l'organisateur.")
+
+    # Configuration du backend email
+    backend = 'django.core.mail.backends.console.EmailBackend'
+    backend_kwargs = {}
+
+    if adresse_exp.moteur == "smtp":
+        backend = 'django.core.mail.backends.smtp.EmailBackend'
+        backend_kwargs = {
+            "host": adresse_exp.hote,
+            "port": adresse_exp.port,
+            "username": adresse_exp.utilisateur,
+            "password": adresse_exp.motdepasse,
+            "use_tls": adresse_exp.use_tls
+        }
+    elif adresse_exp.moteur == "mailjet":
+        backend = 'anymail.backends.mailjet.EmailBackend'
+        backend_kwargs = {
+            "api_key": adresse_exp.Get_parametre("api_key"),
+            "secret_key": adresse_exp.Get_parametre("api_secret"),
+        }
+    elif adresse_exp.moteur == "brevo":
+        backend = 'anymail.backends.sendinblue.EmailBackend'
+        backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key")}
+
+    connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
+    try:
+        connection.open()
+    except Exception as err:
+        logger.debug(f"Erreur : Connexion impossible au serveur de messagerie : {err}.")
+        return f"Connexion impossible au serveur de messagerie : {err}"
+
+    # Création du message
+    objet = "Refus de votre inscription"
+    body = f"""
+Bonjour,
+
+La demande d'inscription de {inscription.individu.prenom} à l'activité {inscription.activite.nom} vient d'être refusée par le directeur.
+Pour plus d’informations, merci de le contacter directement.
+
+Cordialement,
+L’équipe de Sacadoc
+"""
+
+    destinataire = demande.famille.mail
+
+    message = EmailMultiAlternatives(
+        subject=objet,
+        body=body,
+        from_email=adresse_exp.adresse,
+        to=[destinataire],
+        connection=connection
+    )
+
+    # Envoi de l'email
+    try:
+        resultat = message.send()
+        if resultat == 1:
+            logger.debug("Email de refus envoyé.")
+            return "L'email de refus a été envoyé."
+        else:
+            logger.debug("Échec de l'envoi de l'email de refus.")
+            return "L'envoi de l'email a échoué."
+    except Exception as err:
+        logger.debug(f"Erreur : Envoi de l'email de refus impossible : {err}.")
+        return f"Erreur lors de l'envoi : {err}"
+
+    connection.close()
 
 def Traiter_demande(request=None, demande=None, etat=None):
     """ Traitement d'une demande donnée """
@@ -98,11 +183,13 @@ def Traiter_demande(request=None, demande=None, etat=None):
                 messages.add_message(request, messages.WARNING, "Vous avez été redirigé vers la fiche famille afin de vérifier et confirmer l'inscription")
                 return redirection
 
-    # Modifie l'état de la demande
-    demande.traitement_date = datetime.datetime.now()
-    demande.traitement_utilisateur = request.user
-    demande.etat = etat
-    demande.save()
+    if etat == "REFUS":
+        envoyer_email_refus(demande)
+        # Modifie l'état de la demande
+        demande.traitement_date = datetime.datetime.now()
+        demande.traitement_utilisateur = request.user
+        demande.etat = etat
+        demande.save()
 
     return redirection
 
