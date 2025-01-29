@@ -135,7 +135,7 @@ CATEGORIES_RATTACHEMENT = [(1, "Adulte"), (2, "Enfant"), (3, "Contact")]
 
 LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("individu", "Individu"),
-    ("famille", "Famille"),
+    #("famille", "Famille"),
     #("categorie_produit", "Catégorie de produits"),
     #("produit", "Produit"),
     #("location", "Location"),

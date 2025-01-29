@@ -145,6 +145,7 @@ urlpatterns = [
 
     path('individus/liste_comptes_internet', liste_comptes_internet.Liste.as_view(), name='liste_comptes_internet'),
 
+    # Questionnaires
     path('individus/questionnaires/familles/liste', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
     path('individus/questionnaires/familles/liste/<str:categorie>', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
     path('individus/questionnaires/individus/liste', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
@@ -208,4 +209,5 @@ urlpatterns = [
     path('individus/liste_pieces_manquantes_email', secure_ajax(liste_pieces_manquantes.Envoi_emails), name='ajax_liste_pieces_manquantes_emails'),
     path('individus/imprimer_liste_inscrits/generer_pdf', secure_ajax(imprimer_liste_inscrits.Generer_pdf), name='ajax_imprimer_liste_inscrits_generer_pdf'),
     path('individus/famille_attestations/generer_pdf', secure_ajax(famille_attestations.Generer_pdf), name='ajax_famille_attestations_generer_pdf'),
+    path('individus/questionnaires/individus/relance/', secure_ajax(liste_questionnaires_individus.traiter_relance), name='ajax_get_relance'),
 ]

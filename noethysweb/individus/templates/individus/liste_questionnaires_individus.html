@@ -1,0 +1,73 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    {% embed 'core/box.html' %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+            {# Boutons de commandes #}
+            <div class="buttonHolder">
+                <button class="btn btn-primary" onclick="traiterRelance()" title="Relancer par mail les familles sans réponses"><i class="fa fa-envelope margin-r-5"></i>Relancer par mail les familles sans réponses</button>
+            </div>
+            {# Sélection de la catégorie #}
+            <p>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">{{ label_categorie }}</span>
+                    </div>
+                    <select id="choix_categorie" class="form-control">
+                        {% for code, label in liste_categories %}
+                            <option {% if code == categorie %}selected{% endif %}
+                                    value="{% if not code %}{% url url_liste %}{% else %}{% url url_liste categorie=code %}{% endif %}">
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </p>
+
+            <script type="text/javascript" src="{% static 'lib/bootbox/bootbox.min.js' %}"></script>
+            <script>
+                $(document).ready(function() {
+                    $('#choix_categorie').change(function() {
+                        window.location.href = $(this).val();
+                    });
+                });
+
+                function getCSRFToken() {
+                    return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))
+                           ?.split('=')[1] || '';
+                }
+
+                // Relancer
+                function traiterRelance(waitbox) {
+                    var categorie = $('#choix_categorie').val();
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'ajax_get_relance' %}",
+                        data: {
+                            categorie: categorie,
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        },
+                        datatype: "json",
+                        success: function(data){
+                            window.location.href = data.url;
+                        },
+                        error: function(data) {
+                            toastr.error(data.responseJSON.erreur);
+                            waitbox.modal('hide');
+                        }
+                    })
+                };
+            </script>
+
+            {% embed 'core/crud/liste.html' %}
+            {% endembed %}
+
+        {% endblock box_contenu %}
+        {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
+    {% endembed %}
+{% endblock contenu_page %}

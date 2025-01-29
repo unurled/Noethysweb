@@ -19,6 +19,7 @@ CATEGORIES = [
     ("cotisation", "Cotisation"),
     ("mandat_sepa", "Mandat SEPA"),
     ("rappel_pieces_manquantes", "Rappel pièces manquantes"),
+    ("rappel_reponses_manquantes", "Rappel réponses manquantes"),
     ("portail", "Rappel des données du compte internet"),
     ("portail_demande_inscription", "Portail - Demande d'une inscription"),
     ("portail_demande_reservation", "Portail - Demande d'une réservation"),
@@ -171,6 +172,12 @@ MOTSCLES = {
     "rappel_pieces_manquantes": [
         ("{NOM_FAMILLE}", "Nom de la famille"),
         ("{LISTE_PIECES_MANQUANTES}", "Liste des pièces manquantes"),
+    ],
+
+    "rappel_reponses_manquantes": [
+        ("{NOM_FAMILLE}", "Nom de la famille"),
+        ("{LISTE_PIECES_MANQUANTES}", "Liste des pièces manquantes"),
+        ("{INDIVIDU}", "Prénom de l'individu"),
     ],
 
     "portail": [
