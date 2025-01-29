@@ -42,6 +42,7 @@ class Liste(Page, crud.Liste):
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
         context['show_download_button'] = True
+        context["bouton_supprimer"] = False
         return context
 
     class datatable_class(MyDatatable):

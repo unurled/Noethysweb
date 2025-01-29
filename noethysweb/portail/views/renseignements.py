@@ -33,7 +33,6 @@ class View(CustomView, crud.Modifier):
         #Recherche ID famille
         idfamille = self.request.user.famille
         familleid = Famille.objects.filter(nom=idfamille).values('idfamille').first()
-        print(familleid)
 
         # Récupération des activités de la famille
         conditions = Q(famille=self.request.user.famille) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
