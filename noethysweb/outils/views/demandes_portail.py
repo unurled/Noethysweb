@@ -30,6 +30,7 @@ def envoyer_email_refus(demande):
 
     idadresse_exp = utils_portail.Get_parametre(code="connexion_adresse_exp")
     adresse_exp = AdresseMail.objects.filter(pk=idadresse_exp, actif=True).first()
+    individu_f = Individu.objects.get(idindividu=demande.individu_id)
 
     if not adresse_exp:
         logger.debug("Erreur : Pas d'adresse d'expédition paramétrée.")
@@ -70,7 +71,7 @@ def envoyer_email_refus(demande):
     body = f"""
 Bonjour,
 
-La demande d'inscription de {demande.individu_id.prenom} vient d'être refusée par le directeur.
+La demande d'inscription de {individu_f} vient d'être refusée par le directeur.
 Pour plus d’informations, merci de le contacter directement.
 
 Cordialement,

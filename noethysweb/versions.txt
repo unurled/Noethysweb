@@ -1,4 +1,4 @@
-Version 1.3.5.5.2 (27/01/2025)
+Version 1.3.5.5.3 (27/01/2025)
 - Envoi mail refus inscription
 
 Version 1.3.5.4.20 (27/01/2025)
