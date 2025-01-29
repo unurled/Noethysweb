@@ -70,7 +70,7 @@ def envoyer_email_refus(demande):
     body = f"""
 Bonjour,
 
-La demande d'inscription de {inscription.individu.prenom} à l'activité {inscription.activite.nom} vient d'être refusée par le directeur.
+La demande d'inscription de {demande.individu_id.prenom} vient d'être refusée par le directeur.
 Pour plus d’informations, merci de le contacter directement.
 
 Cordialement,
