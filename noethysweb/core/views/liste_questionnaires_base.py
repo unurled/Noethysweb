@@ -23,7 +23,9 @@ class Liste(crud.CustomListe):
         # Importation des questions
         context['label_categorie'] = "Question"
         context['categorie'] = int(self.Get_categorie()) if self.Get_categorie() else None
-        questions = QuestionnaireQuestion.objects.filter(Q(categorie=self.categorie_question) & self.Get_condition_structure()).order_by("categorie", "ordre")
+        questions = QuestionnaireQuestion.objects.filter(
+            Q(categorie=self.categorie_question) &
+            (self.Get_condition_structure() | Q(activite__isnull=True))).order_by("categorie", "ordre")
         context['liste_categories'] = [(None, "--------")] + [(question.pk, "%s : %s" % (dict_categories_questions[question.categorie], question.label)) for question in questions]
 
         question = QuestionnaireQuestion.objects.get(pk=self.Get_categorie()) if self.Get_categorie() else None
