@@ -109,7 +109,7 @@ def Valid_form(request):
     if activite.public == 5 and individu.statut != 5:
         return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
 
-    if activite.public in [1, 2, 3, 4, 6] and individu.statut not in [1, 2, 3, 4]:
+    if activite.public in [0, 1, 2, 3, 4, 6] and individu.statut not in [0, 1, 2, 3, 4]:
         return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
 
 
