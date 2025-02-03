@@ -64,19 +64,11 @@ class Liste(Page, crud.Liste):
     template_name = "fiche_famille/famille_pieces.html"
 
     def get_queryset(self):
-        structures = self.request.user.structures.all()  # Adaptez cette ligne en fonction de la façon dont vous obtenez les structures du user
-        inscriptions = Inscription.objects.filter(famille_id=self.Get_idfamille())
-        activites_structures = Activite.objects.filter(structure__in=structures)
-        inscriptions_valides = inscriptions.filter(activite__in=activites_structures)
-        individus_inscriptions = [i.individu_id for i in inscriptions_valides]
-
-        if individus_inscriptions:
-            liste = Piece.objects.select_related('individu', 'type_piece').filter(
-                (Q(famille_id=self.Get_idfamille()) |
-                Q(individu_id__in=individus_inscriptions, type_piece__valide_rattachement=True)) &
-                self.Get_filtres("Q"))
-        else:
-            liste = Piece.objects.none()
+        structures = self.request.user.structures.all()
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles, famille_id=self.Get_idfamille())
+        individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
+        liste = Piece.objects.select_related('individu', 'type_piece').filter(individu__in=individus_inscrits)
         return liste
 
     def get_context_data(self, **kwargs):
