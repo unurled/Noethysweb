@@ -106,11 +106,13 @@ def Valid_form(request):
         if groupe.nbre_inscrits_max and places_prises["total_groupe"] >= groupe.nbre_inscrits_max:
             return JsonResponse({"erreur": "Ce groupe est déjà complet"}, status=401)
 
+    inscription_famille = Inscription.objects.filter(activite=activite, famille=famille)
+
     if activite.public == 5 and individu.statut != 5:
         return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
 
-    if activite.public in [0, 1, 2, 3, 4, 6] and individu.statut not in [0, 1, 2, 3, 4]:
-        return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
+    if activite.public in [0, 1, 2, 3, 4, 6] and individu.statut not in [0, 1, 2, 3, 4] and not inscription_famille:
+        return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité. Un adulte responsable doit être inscrit au préalable."}, status=401)
 
 
     # Enregistrement de la demande
