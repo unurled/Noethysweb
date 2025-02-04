@@ -36,13 +36,17 @@ class Formulaire(FormulaireBase, forms.Form):
         activite_ids = inscriptions.values_list('activite', flat=True).distinct()
         activites = Activite.objects.filter(idactivite__in=activite_ids)
 
+        cat_individu = individu.statut
+
         # Filtrage des questions
+        questions_filter = Q(activite__in=activites)
+        if not cat_individu in [0,1,2,3,4]:
+            questions_filter |= Q(activite=None)
+
         questions = QuestionnaireQuestion.objects.filter(
             categorie="individu",
             visible_portail=True
-        ).filter(
-            Q(activite=None) | Q(activite__in=activites)
-        ).order_by("ordre")
+        ).filter(questions_filter).order_by("ordre")
 
         # Traitement des questions
         for question in questions:
