@@ -30,7 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
         # self.helper.field_class = 'col-md-10'
 
         # Création des champs
-        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True) | Q(activite__isnull=True)
         for question in QuestionnaireQuestion.objects.filter(condition_structure, categorie="individu", visible=True).order_by("ordre"):
             nom_controle, ctrl = questionnaires.Get_controle(question)
             if ctrl:
