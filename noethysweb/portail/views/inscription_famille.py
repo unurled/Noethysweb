@@ -46,12 +46,8 @@ class InscriptionFamilleView(ClassCommuneLogin, ContextMixin, View):
         existing_individus = Individu.objects.values("idindividu", "mail")
         for indv in existing_individus:
             if indv["mail"] and indv["mail"].lower() == mail.lower():
-                # TODO: Send mail "vous aviez déjà un compte, voici pour rappel votre identifiant.
-                # Si vous ne vous souvenez plus du mot-de-passe utilisez la fonctionnalité mot de passe oublié"
-
-                # Le mail existe déjà, on confirme sur la page que le compte a bien été créé
-                # mais en réalité on envoie juste un mail avec l'identifiant
-                context["inscription_ok"] = True
+                # Le mail existe déjà, on prévient sur la page d'inscription
+                context["mail_exists"] = True
                 return render(self.request, "portail/inscription_famille.html", context)
 
         # From fiche_famille.views.famille_ajouter.Ajouter.Creation_famille

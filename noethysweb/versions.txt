@@ -1,3 +1,6 @@
+Version 1.3.5.5.14 (05/02/2025)
+- Mise à jour du message d'inscription si l'email est déjà utilisé
+
 Version 1.3.5.5.13 (04/02/2025)
 - Not Affichage questions communes pour parents
 

@@ -9,6 +9,11 @@
 {% block contenu_page %}
     {% if inscription_ok %}
         {% blocktrans %}Votre comtpe a bien été créé, vous allez recevoir un mail contenant votre identifiant.{% endblocktrans %}
+    {% elif mail_exists %}
+        <p>{% blocktrans %}Un compte existe déjà avec cette adresse email.<br>
+            Vous pouvez vous{% endblocktrans %}
+            <a href="{% url 'portail_connexion' %}">{% blocktrans %}connecter{% endblocktrans %}</a>.</p>
+        <a class="forgot-password-link" href="{% url 'reset_password' %}">{% blocktrans %}Mot de passe oublié ?{% endblocktrans %}</a>
     {% else %}
         <form method="post">
             {% csrf_token %}
