@@ -32,7 +32,7 @@
                 });
             </script>
 
-            <form method="post" action="{% url 'questionnaires_individus_modif_valid' %}">
+            <form method="post" action="{% url 'questionnaires_individus_modif_valid' categorie=categorie %}">
                 {% csrf_token %}
 
                 {% embed 'core/crud/liste.html' %}
@@ -56,6 +56,7 @@
                                         {% if reponse|safe %}
                                             {{ reponse|safe }}
                                         {% else %}
+                                            <input type="checkbox" name="reponse_{{ reponse.id }}" value="on" {% if reponse.reponse == "True" %}checked{% endif %} />
                                             <input type="text" name="reponse_{{ reponse.id }}" value="{{ reponse.reponse }}" />
                                         {% endif %}
                                     </td>

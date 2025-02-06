@@ -42,7 +42,7 @@ class Liste(Page, liste_questionnaires_base.Liste):
         lignes = []
         categorie_l = self.kwargs.get('categorie', None)
         categorie = categorie_l.split('/')[-1]
-        activite_question1 = QuestionnaireQuestion.objects.get(pk=categorie)
+        activite_question1 = QuestionnaireQuestion.objects.get(idquestion=categorie)
         activite_question = activite_question1.activite
         if activite_question is None:
             activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
@@ -59,7 +59,7 @@ class Liste(Page, liste_questionnaires_base.Liste):
         return CustomDatatable(colonnes=self.colonnes, lignes=lignes)#, filtres=self.Get_filtres())
 
 def traiter_relance(request):
-    """ Vue qui exécute une action lorsqu'on clique sur le bouton 'Ajouter' """
+    """ Vue qui exécute une action lorsqu'on clique sur le bouton 'Relance' """
     categorie_l = request.POST.get('categorie')
     categorie = categorie_l.split('/')[-1]
     url_redirect = reverse_lazy('questionnaires_individus_liste')  # Remplace 'some_redirect_url' par l'URL cible souhaitée

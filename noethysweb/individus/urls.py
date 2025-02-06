@@ -150,8 +150,7 @@ urlpatterns = [
     path('individus/questionnaires/familles/liste/<str:categorie>', liste_questionnaires_familles.Liste.as_view(), name='questionnaires_familles_liste'),
     path('individus/questionnaires/individus/liste', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
     path('individus/questionnaires/individus/modif', liste_questionnaires_individus_modif.Liste.as_view(), name='questionnaires_individus_modif'),
-    path('individus/questionnaires/individus/validation', liste_questionnaires_individus_modif_valid.liste_questionnaires_individus_modif_valid.as_view(), name='questionnaires_individus_modif_valid'),
-
+    path('individus/questionnaires/individus/validation/<str:categorie>', liste_questionnaires_individus_modif_valid.liste_questionnaires_individus_modif_valid.as_view(), name='questionnaires_individus_modif_valid'),
     path('individus/questionnaires/individus/modif/<str:categorie>', liste_questionnaires_individus_modif.Liste.as_view(),name='questionnaires_individus_modif'),
     path('individus/questionnaires/individus/liste/<str:categorie>', liste_questionnaires_individus.Liste.as_view(), name='questionnaires_individus_liste'),
 
