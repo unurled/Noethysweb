@@ -97,7 +97,11 @@ class MyPasswordResetForm(PasswordResetForm):
             return _("Il n'existe pas de compte actif correspondant à cet identifiant.")
 
         if utilisateur.categorie == "famille":
-            if not utilisateur.famille.mail or utilisateur.famille.mail != email:
+            # Vérifie que le mail correspond à un des parents de la famille
+            for rattachement in utilisateur.famille.rattachement_set.filter(individu__statut_not=5).select_related("individu"):
+                if rattachement.individu.mail.lower() == email.lower():
+                    break
+            else:
                 logger.debug("Erreur : Adresse email non valide pour la famille.")
                 return _("Adresse email non valide pour la famille.")
         else:
@@ -113,7 +117,7 @@ class MyPasswordResetForm(PasswordResetForm):
             site_name = domain = domain_override
 
         context = {
-            'email': utilisateur.email if utilisateur.categorie == "utilisateur" else utilisateur.famille.mail,
+            'email': email,
             'domain': domain,
             'site_name': site_name,
             'uid': urlsafe_base64_encode(force_bytes(utilisateur.pk)),
@@ -159,8 +163,7 @@ class MyPasswordResetForm(PasswordResetForm):
         objet = loader.render_to_string(subject_template_name, context).strip()
         body = loader.render_to_string(email_template_name, context)
 
-        to_email = utilisateur.email if utilisateur.categorie == "utilisateur" else utilisateur.famille.mail
-        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[to_email],
+        message = EmailMultiAlternatives(subject=objet, body=body, from_email=adresse_exp.adresse, to=[email],
                                          connection=connection)
 
         if html_email_template_name is not None:

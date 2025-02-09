@@ -51,4 +51,8 @@ class LoginViewUtilisateur(ClassCommuneLogin, LoginView):
         return super(LoginViewUtilisateur, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy("accueil")
+        next_url = self.get_redirect_url()
+        if self.request.user.categorie == "famille":
+            return next_url or reverse_lazy("portail_accueil")
+        # utilisateur
+        return next_url or reverse_lazy("accueil")

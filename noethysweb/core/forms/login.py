@@ -19,9 +19,3 @@ class FormLoginUtilisateur(AuthenticationForm):
         self.fields['password'].widget.attrs['placeholder'] = "Mot de passe"
         self.fields['captcha'].widget.attrs['class'] = "form-control"
         self.fields['captcha'].widget.attrs['placeholder'] = "Recopiez le code de sécurité ci-contre"
-
-    def confirm_login_allowed(self, user):
-        if not user.is_active:
-            raise ValidationError("Ce compte a été désactivé", code='inactive')
-        if user.categorie != "utilisateur":
-            raise ValidationError("Accès non autorisé", code='acces_interdit')

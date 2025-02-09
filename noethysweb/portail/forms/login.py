@@ -25,7 +25,5 @@ class FormLoginFamille(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if not user.is_active:
             raise ValidationError(_("Ce compte a été désactivé"), code='inactive')
-        if user.categorie != "famille":
-            raise ValidationError(_("Accès non autorisé"), code='acces_interdit')
         if user.date_expiration_mdp and user.date_expiration_mdp < datetime.datetime.now():
             raise ValidationError(_("Ce mot de passe a expiré"), code='mdp_expire')

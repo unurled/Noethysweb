@@ -61,9 +61,13 @@ class LoginViewFamille(ClassCommuneLogin, LoginView):
         # Enregistre la connexion dans le log
         logger.debug("Connexion portail de la famille %s" % form.get_user())
         # Enregistre la connexion dans l'historique
-        utils_historique.Ajouter(titre="Connexion au portail", utilisateur=form.get_user(), famille=form.get_user().famille.pk, portail=True)
+        if form.get_user().categorie == "famille":
+            utils_historique.Ajouter(titre="Connexion au portail", utilisateur=form.get_user(), famille=form.get_user().famille.pk, portail=True)
         return super(LoginViewFamille, self).form_valid(form)
 
     def get_success_url(self):
-        next = self.get_redirect_url()
-        return next or reverse_lazy("portail_accueil")
+        next_url = self.get_redirect_url()
+        if self.request.user.categorie == "famille":
+            return next_url or reverse_lazy("portail_accueil")
+        # utilisateur
+        return next_url or reverse_lazy("accueil")
