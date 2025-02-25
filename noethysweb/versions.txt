@@ -1,3 +1,6 @@
+Version 1.3.5.5.17 (25/02/2025)
+- Texte mail inscription
+
 Version 1.3.5.5.16 (09/02/2025)
 - Connexion utilisateur sur le portail
 

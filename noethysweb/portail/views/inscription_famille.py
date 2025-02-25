@@ -91,13 +91,14 @@ class InscriptionFamilleView(ClassCommuneLogin, ContextMixin, View):
         content = (
             """<p align="left">Bonjour,</p>"""
             """<p align="left"></p>"""
-            """<p align="left">Veuillez trouver ci-dessous vos codes d'accès personnels au portail famille :</p>"""
+            """<p align="left">Veuillez trouver ci-dessous vos codes d'accès personnels au portail famille.</p>"""
             """<p align="left"></p>"""
-            """<p align="left">Identifiant : <b>{IDENTIFIANT_INTERNET}<br></b>"""
+            """<p align="left">L'identifiant de connexion est : <b>{IDENTIFIANT_INTERNET}<br></b>"""
             """<p align="left"></p>"""
             """<p align="left">Bonne réception,</p>"""
             """<p align="left"></p>"""
             """<p align="left">L'équipe Sacadoc</p>"""
+            """<p align="left">https://sacadoc.flambeaux.org</p>"""
         )
         mail = Mail.objects.create(
             categorie="portail",
