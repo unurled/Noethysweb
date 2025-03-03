@@ -98,7 +98,7 @@ class MyPasswordResetForm(PasswordResetForm):
 
         if utilisateur.categorie == "famille":
             # Vérifie que le mail correspond à un des parents de la famille
-            for rattachement in utilisateur.famille.rattachement_set.filter(individu__statut_not=5).select_related("individu"):
+            for rattachement in utilisateur.famille.rattachement_set.exclude(individu__statut=5).select_related("individu") :
                 if rattachement.individu.mail.lower() == email.lower():
                     break
             else:
