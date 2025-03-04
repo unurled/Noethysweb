@@ -14,6 +14,7 @@ from core.models import Famille, Reglement, ModeReglement, Emetteur, Payeur, Com
 from core.widgets import DatePickerWidget, Select_avec_commandes
 from fiche_famille.widgets import Selection_emetteur, Selection_mode_reglement, Saisie_ventilation
 from core.utils import utils_preferences, utils_dates
+from django.db.models import Q
 import datetime
 
 
