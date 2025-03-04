@@ -1,6 +1,8 @@
+Version 1.3.5.5.19 (04/03/2025)
+- Selection payeur bis
+
 Version 1.3.5.5.18 (04/03/2025)
 - Selection payeur
--
 
 Version 1.3.5.5.17 (25/02/2025)
 - Texte mail inscription
