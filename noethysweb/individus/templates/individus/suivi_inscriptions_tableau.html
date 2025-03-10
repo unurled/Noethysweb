@@ -2,45 +2,100 @@
 {% load static %}
 {% load embed %}
 
+<!-- Le bouton pour masquer/développer toutes les activités placé au-dessus des titres -->
+<div class="card-tools text-center" style="margin-bottom: 15px;">
+    <button id="toggle-all-activities" class="btn btn-tool" title="Développer toutes les activités" style="background-color: #3c8dbc; color: white; padding: 10px 20px; margin-top: 10px; margin-bottom: 10px; border-radius: 5px; border: none;">
+        Développer les activités
+    </button>
+</div>
 
-<thead>
-    <tr>
-        <th>Activité/Groupe</th>
-        <th>Inscrits</th>
-        <th>Max.</th>
-        <th>Dispo.</th>
-        <th>Attente</th>
-        <th>Refus</th>
-    </tr>
-</thead>
-<tbody>
-    {% for activite in data_suivi_inscriptions %}
-        <tr class="activite">
-            <td>{{ activite.activite.nom }}</td>
-            <td>{{ activite.nbre_inscrits|default:'' }}</td>
-            <td>{{ activite.nbre_max|default:'' }}</td>
-            <td>{{ activite.nbre_dispo|default:'' }}</td>
-            <td>{{ activite.nbre_attente|default:'' }}</td>
-            <td>{{ activite.nbre_refus|default:'' }}</td>
+<table id="table_suivi_inscriptions" class="table table-sm table-bordered noselect">
+    <thead>
+        <tr>
+            <th>Activité/Groupe</th>
+            <th>Inscrits</th>
+            <th>Attente</th>
+            <th>Max.</th>
+            <th>Dispo.</th>
+            <th>Refus</th>
         </tr>
-        {% for groupe in activite.groupes %}
-            <tr>
-                <td>{{ groupe.groupe.nom }}</td>
-                <td>{{ groupe.nbre_inscrits|default:'' }}</td>
-                <td>{{ groupe.nbre_max|default:'' }}</td>
-                <td>{{ groupe.nbre_dispo|default:'' }}</td>
-                <td>{{ groupe.nbre_attente|default:'' }}</td>
-                <td>{{ groupe.nbre_refus|default:'' }}</td>
+    </thead>
+    <tbody>
+        {% for activite in data_suivi_inscriptions %}
+            <tr class="activite">
+                <td>
+                    <button class="toggle-details btn btn-tool" title="Afficher / Masquer les groupes">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    {{ activite.activite.nom }}
+                </td>
+                <td>{{ activite.nbre_inscrits|default:'' }}</td>
+                <td>{{ activite.nbre_attente|default:'' }}</td>
+                <td>{{ activite.nbre_max|default:'' }}</td>
+                <td>{{ activite.nbre_dispo|default:'' }}</td>
+                <td>{{ activite.nbre_refus|default:'' }}</td>
             </tr>
+            {% for groupe in activite.groupes %}
+                <tr class="details" style="display: none;">
+                    <td>{{ groupe.groupe.nom }}</td>
+                    <td>{{ groupe.nbre_inscrits|default:'' }}</td>
+                    <td>{{ groupe.nbre_attente|default:'' }}</td>
+                    <td>{{ groupe.nbre_max|default:'' }}</td>
+                    <td>{{ groupe.nbre_dispo|default:'' }}</td>
+                    <td>{{ groupe.nbre_refus|default:'' }}</td>
+                </tr>
+            {% endfor %}
+        {% empty %}
+            <tr><td colspan="6">Aucune activité</td></tr>
         {% endfor %}
-    {% empty %}
-        Aucune activité
-    {% endfor %}
-
-</tbody>
+    </tbody>
+</table>
 
 <script>
+    $(document).ready(function() {
+        // Cacher les détails des groupes par défaut
+        $(".details").hide();
+
+        // Gérer le clic sur le bouton toggle pour une activité individuelle
+        $(".toggle-details").on("click", function() {
+            var detailsRows = $(this).closest("tr").nextUntil(".activite", ".details");
+            var icon = $(this).find("i");
+
+            // Vérifier si les détails sont visibles
+            if (detailsRows.is(":visible")) {
+                detailsRows.slideUp();  // Cacher les groupes
+                icon.removeClass("fa-minus").addClass("fa-plus");  // Change l'icône en "+"
+                $(this).attr("title", "Afficher les groupes");
+            } else {
+                detailsRows.slideDown();  // Afficher les groupes
+                icon.removeClass("fa-plus").addClass("fa-minus");  // Change l'icône en "-"
+                $(this).attr("title", "Masquer les groupes");
+            }
+        });
+
+        // Gérer le clic sur le bouton "Masquer / Développer toutes les activités"
+        $("#toggle-all-activities").on("click", function() {
+            var icon = $(this).find("i");
+            var allDetailsRows = $(".details");
+            var allActivitesRows = $(".activite");
+
+            // Si toutes les lignes de groupes sont visibles, les masquer
+            if (allDetailsRows.is(":visible")) {
+                allDetailsRows.slideUp();  // Masquer tous les groupes
+                $(this).text("Développer les activités");  // Modifier le texte du bouton
+                $(this).attr("title", "Développer toutes les activités");
+                allActivitesRows.find(".toggle-details i").removeClass("fa-minus").addClass("fa-plus"); // Remettre tous les boutons sur "+"
+            } else {
+                allDetailsRows.slideDown();  // Afficher tous les groupes
+                $(this).text("Réduire les activités");  // Modifier le texte du bouton
+                $(this).attr("title", "Réduire toutes les activités");
+                allActivitesRows.find(".toggle-details i").removeClass("fa-plus").addClass("fa-minus"); // Remettre tous les boutons sur "-"
+            }
+        });
+    });
+
     var activites_inscriptions_json = JSON.parse('{{ activites_inscriptions_json|escapejs }}');
+
 </script>
 
 <style>
@@ -54,5 +109,10 @@
     .dark-mode #table_suivi_inscriptions .activite {
         background-color: #5f5f5f;
     }
-
+    .details {
+        display: none;  /* Cacher les groupes par défaut */
+    }
+    .toggle-details, #toggle-all-activities {
+        cursor: pointer;
+    }
 </style>

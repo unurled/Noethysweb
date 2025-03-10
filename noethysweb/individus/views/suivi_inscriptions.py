@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from core.models import Activite, Inscription, Groupe
+from core.models import Activite, Inscription, Groupe, PortailRenseignement
 from core.views.base import CustomView
 from django.views.generic import TemplateView
 from core.utils import utils_dates, utils_parametres
@@ -99,22 +99,45 @@ def Get_data(parametres={}, filtre=None, request=None):
 
     liste_resultats = []
     for activite in liste_activites:
-        dict_activite = {"activite": activite, "groupes": [], "nbre_max": activite.nbre_inscrits_max, "nbre_inscrits": 0, "nbre_attente": 0, "nbre_refus": 0, "nbre_dispo": 0}
+        dict_activite = {
+            "activite": activite,
+            "groupes": [],
+            "nbre_max": activite.nbre_inscrits_max,
+            "nbre_inscrits": 0,
+            "nbre_attente": 0,  # À calculer pour l'activité
+            "nbre_refus": 0,
+            "nbre_dispo": 0
+        }
+
+        # Calculer le nombre d'attentes pour l'activité
+        portail_renseignement_entries = PortailRenseignement.objects.filter(
+            code="inscrire_activite",
+            activite_id=activite.pk,
+            etat="ATTENTE",
+        )
+        dict_activite["nbre_attente"] = portail_renseignement_entries.count()
+
         for groupe in dict_groupes.get(activite.pk, []):
             nbre_max = groupe.nbre_inscrits_max
             nbre_inscrits = dict_inscriptions.get((activite.pk, "ok", groupe.pk), 0)
-            nbre_attente = dict_inscriptions.get((activite.pk, "attente", groupe.pk), 0)
+
             nbre_refus = dict_inscriptions.get((activite.pk, "refus", groupe.pk), 0)
             nbre_dispo = nbre_max - nbre_inscrits if nbre_max else 0
 
             dict_activite["nbre_inscrits"] += nbre_inscrits
-            dict_activite["nbre_attente"] += nbre_attente
             dict_activite["nbre_refus"] += nbre_refus
+
             if activite.nbre_inscrits_max:
                 dict_activite["nbre_dispo"] = activite.nbre_inscrits_max - dict_activite["nbre_inscrits"]
 
-            dict_activite["groupes"].append({"groupe": groupe, "nbre_max": groupe.nbre_inscrits_max, "nbre_inscrits": nbre_inscrits,
-                                             "nbre_attente": nbre_attente, "nbre_refus": nbre_refus, "nbre_dispo": nbre_dispo})
+            dict_activite["groupes"].append({
+                "groupe": groupe,
+                "nbre_max": groupe.nbre_inscrits_max,
+                "nbre_inscrits": nbre_inscrits,
+                "nbre_refus": nbre_refus,
+                "nbre_dispo": nbre_dispo
+            })
+
         liste_resultats.append(dict_activite)
 
     return liste_resultats
