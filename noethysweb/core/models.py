@@ -1980,7 +1980,7 @@ class Inscription(models.Model):
     tarifs = models.ManyToManyField(Tarif, verbose_name="Tarifs", blank=True, default=1)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
-    statut_choix = [("ok", "Inscription validée"), ("attente", "Inscription en attente"), ("refus", "Inscription refusée")]
+    statut_choix = [("ok", "Inscription validée"), ("refus", "Inscription refusée")]
     statut = models.CharField(verbose_name="Statut", max_length=100, choices=statut_choix, default="ok")
     internet_reservations = models.BooleanField(verbose_name="Autoriser les réservations sur le portail", default=True)
 
