@@ -49,7 +49,7 @@ urlpatterns = [
     path('sondage/conclusion/<str:code>', sondage.View_conclusion.as_view(), name='portail_sondage_conclusion'),
 
     # Ajouter individu
-    path('individu/ajouter/', famille_individu.contact, name='famille_individu'),
+    path('individu/ajouter/', famille_individu.ajout, name='famille_individu'),
     path('parent/ajouter/', famille_parent.contact, name='famille_parent'),
 
     # Renseignements
