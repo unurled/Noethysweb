@@ -38,7 +38,7 @@ class Liste(Page, crud.Liste):
         context['active_checkbox'] = True
         context['totaux'] = json.dumps(["montant",])
         context["boutons_liste"] = [
-             { "label" : "Ajouter", "classe": "btn btn-success", "href": reverse_lazy('ajouter_reglement_familles'), "icone": "fa fa-plus"}
+             { "label" : "Ajouter un règlement", "classe": "btn btn-success", "href": reverse_lazy('ajouter_reglement_familles'), "icone": "fa fa-plus"}
          ]
         return context
 

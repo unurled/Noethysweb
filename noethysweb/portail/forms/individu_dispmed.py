@@ -41,7 +41,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Champs affichables
         self.liste_champs_possibles = [
-            {"titre": _("Allergies contractées"), "champs": ["dispmed"]},
+            {"titre": _("Dispositifs médicaux"), "champs": ["dispmed"]},
             {"titre": _("Données complémentaires"), "champs": ["dispmed_detail"]},
         ]
 

@@ -20,20 +20,21 @@ class Liste(Page, crud.Liste):
     
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
-        context['page_titre'] = "Liste des paiements en ligne"
-        context['box_titre'] = "Liste des paiements en ligne"
+        context['page_titre'] = "Ajouter un règlement"
+        context['box_titre'] = "Sélection de la famille"
+        context['box_introduction'] = "Recherchez et selectionnez la famille pour laquelle vous souhaitez ajouter un règlement. Cliquez ensuite sur le +."
         return context
     
     class datatable_class(MyDatatable):
         famille = columns.TextColumn("Famille", sources=['nom'])
-        actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
+        actions = columns.TextColumn("Ajouter un règlement", sources=None, processor='Get_actions_speciales')
         
         class Meta():
             structure_template = MyDatatable.structure_template
-            columns = ['idfamille','utilisateur', 'famille']
+            columns = ['utilisateur', 'famille']
         
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [
-                self.Create_bouton_ouvrir(url=reverse("famille_reglements_ajouter", kwargs={"idfamille": instance.idfamille}), title="Ajouter un règlement")
+                self.Create_bouton_ajouter(url=reverse("famille_reglements_ajouter", kwargs={"idfamille": instance.idfamille}), title="Ajouter un règlement")
             ]
             return self.Create_boutons_actions(html)
