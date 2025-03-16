@@ -131,7 +131,14 @@ DICT_COLONNES_TARIFS = {
     "ajustement": {"label": "Majoration/Déduction", "largeur": 75, "editeur": "decimal4", "infobulle": "Montant à majorer ou à déduire sur le tarif"},
 }
 
-CATEGORIES_RATTACHEMENT = [(1, "Adulte"), (2, "Enfant"), (3, "Contact")]
+CATEGORIE_RATTACHEMENT_ADULTE = 1
+CATEGORIE_RATTACHEMENT_ENFANT = 2
+CATEGORIE_RATTACHEMENT_CONTACT = 3
+CATEGORIES_RATTACHEMENT = [
+    (CATEGORIE_RATTACHEMENT_ADULTE, "Adulte"),
+    (CATEGORIE_RATTACHEMENT_ENFANT, "Enfant"),
+    (CATEGORIE_RATTACHEMENT_CONTACT, "Contact"),
+]
 
 LISTE_CATEGORIES_QUESTIONNAIRES = [
     ("individu", "Individu"),
@@ -1688,7 +1695,21 @@ class Individu(models.Model):
     type_garde_choix = [(1, "Mère"), (2, "Père"), (3, "Garde alternée"), (4, "Autre personne")]
     type_garde = models.IntegerField(verbose_name=_("Type de garde"), choices=type_garde_choix, blank=True, null=True)
     info_garde = models.TextField(verbose_name=_("Information sur la garde"), blank=True, null=True)
-    resp_flbx_liste = [(0, "Parent"), (1, "Chef/taine"), (2, "Chef/taine de groupe - Directeur/trice"), (3, "Délégué(e) Local"), (4, "Ami(e)"), (5, "Jeunes")]
+
+    STATUT_PARENT = 0
+    STATUT_CHEF = 1
+    STATUT_CG = 2
+    STATUT_DL = 3
+    STATUT_AMI = 4
+    STATUT_JEUNE = 5
+    resp_flbx_liste = [
+        (STATUT_PARENT, "Parent"),
+        (STATUT_CHEF, "Chef/taine"),
+        (STATUT_CG, "Chef/taine de groupe - Directeur/trice"),
+        (STATUT_DL, "Délégué(e) Local"),
+        (STATUT_AMI, "Ami(e)"),
+        (STATUT_JEUNE, "Jeunes"),
+    ]
     statut = models.IntegerField(verbose_name=_("Statut"), choices=resp_flbx_liste, blank=True, null=True, default=0)
     secu = models.CharField(verbose_name="N° de sécurité sociale", max_length=15, blank=True, null=False)
 
@@ -2109,7 +2130,7 @@ class Rattachement(models.Model):
     idrattachement = models.AutoField(verbose_name="ID", db_column='IDrattachement', primary_key=True)
     individu = models.ForeignKey(Individu, verbose_name="Individu", on_delete=models.CASCADE, blank=True, null=True)
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
-    categorie = models.IntegerField(db_column='Catégorie', choices=CATEGORIES_RATTACHEMENT, default=1)
+    categorie = models.IntegerField(db_column='Catégorie', choices=CATEGORIES_RATTACHEMENT, default=CATEGORIE_RATTACHEMENT_ADULTE)
     titulaire = models.BooleanField(verbose_name="Titulaire du dossier", default=False)
     certification_date = models.DateTimeField(verbose_name="Date de certification", blank=True, null=True)
 
@@ -2122,9 +2143,9 @@ class Rattachement(models.Model):
         return "Rattachement ID%d" % self.idrattachement
 
     def Get_profil(self):
-        if self.categorie == 1: return "Responsable" + " titulaire" if self.titulaire else ""
-        if self.categorie == 2: return "Enfant"
-        if self.categorie == 3: return "Contact"
+        if self.categorie == CATEGORIE_RATTACHEMENT_ADULTE: return "Responsable" + " titulaire" if self.titulaire else ""
+        if self.categorie == CATEGORIE_RATTACHEMENT_ENFANT: return "Enfant"
+        if self.categorie == CATEGORIE_RATTACHEMENT_CONTACT: return "Contact"
         return ""
 
 
