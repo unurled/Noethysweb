@@ -1,4 +1,5 @@
 import json
+import logging
 
 from core.models import (
     AdresseMail,
@@ -19,6 +20,8 @@ from outils.utils.utils_email import Envoyer_model_mail
 from portail.forms.inscription import InscriptionFamilleForm
 from portail.views.login import ClassCommuneLogin
 
+logger = logging.getLogger(__name__)
+
 
 class InscriptionFamilleView(ClassCommuneLogin, ContextMixin, View):
     form: InscriptionFamilleForm
@@ -37,6 +40,7 @@ class InscriptionFamilleView(ClassCommuneLogin, ContextMixin, View):
 
     def post(self, request):
         context = self.get_context_data()
+        logger.debug(f"Inscription famille avec {request.POST}")
         if not self.form.is_valid():
             return render(request, "portail/inscription_famille.html", context)
 
@@ -49,6 +53,7 @@ class InscriptionFamilleView(ClassCommuneLogin, ContextMixin, View):
                 # Le mail existe déjà, on prévient sur la page d'inscription
                 context["mail_exists"] = True
                 return render(self.request, "portail/inscription_famille.html", context)
+
 
         # From fiche_famille.views.famille_ajouter.Ajouter.Creation_famille
         famille = Famille.objects.create()

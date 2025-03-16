@@ -50,7 +50,7 @@ urlpatterns = [
 
     # Ajouter individu
     path('individu/ajouter/', famille_individu.ajout, name='famille_individu'),
-    path('parent/ajouter/', famille_parent.contact, name='famille_parent'),
+    path('parent/ajouter/', famille_parent.ajout, name='famille_parent'),
 
     # Renseignements
     path('renseignements', renseignements.View.as_view(), name='portail_renseignements'),
