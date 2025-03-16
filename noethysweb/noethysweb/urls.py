@@ -49,11 +49,12 @@ if settings.DEBUG:
     # Ajoute le répertoire Media
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-    # Ajoute le debugtoolbar
-    import debug_toolbar
-    urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
+    if settings.ENABLE_DEBUG_TOOLBAR:
+        # Ajoute le debugtoolbar
+        import debug_toolbar
+        urlpatterns = [
+            path('__debug__/', include(debug_toolbar.urls)),
+        ] + urlpatterns
 
 
 # Modifie les noms dans l'admin

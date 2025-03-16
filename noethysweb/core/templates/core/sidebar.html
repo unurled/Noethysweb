@@ -48,15 +48,14 @@
 		transition: width .3s ease-in-out;
 	}
 	/* Style du bouton "+" */
-	.nav-item .fa-plus-circle {
-		font-size: 1.2rem;
-		color: #28a745; /* Vert pour indiquer l'ajout */
-		cursor: pointer;
-		margin-left: auto;
-	}
-	.nav-item .fa-plus-circle:hover {
-		color: #218838;
-	}
+    .add-reglement {
+        position: absolute;
+        right: 0.5rem;
+        padding: 4px 6px;
+    }
+    .add-reglement:hover {
+        background-color: rgba(255,255,255,.1);
+    }
 </style>
 
 {% get_item_defaut options_interface "sidebar-no-expand" True as sidebar_no_expand %}
@@ -124,8 +123,7 @@
                         <i class="nav-icon fa fa-file-text"></i>
                         <p class="d-inline">Règlement</p>
                     </a>
-                    <i class="fa fa-plus-circle text-success" title="Ajouter un règlement"
-                       onclick="location.href='{% url 'ajouter_reglement_familles' %}'"></i>
+                    <a href="{% url 'ajouter_reglement_familles' %}" class="add-reglement" title="Ajouter un règlement"><i class="fa fa-plus-circle text-success"></i></a>
                 </li>
 
                 <!-- Signaler un bug -->

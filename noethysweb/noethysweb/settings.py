@@ -92,7 +92,6 @@ INSTALLED_APPS = [
     # Autres librairies
     'datatableview',
     'crispy_forms',
-    'debug_toolbar',
     'django_select2',
     'django_summernote',
     'anymail',
@@ -119,7 +118,6 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -314,3 +312,10 @@ except:
 # Intégration des plugins
 for nom_plugin in PLUGINS:
     INSTALLED_APPS.append("plugins.%s.apps.%s" % (nom_plugin, nom_plugin))
+
+# Activation de la debug_toolbar si debug
+ENABLE_DEBUG_TOOLBAR = False
+if DEBUG:
+    ENABLE_DEBUG_TOOLBAR = True
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    INSTALLED_APPS.append("debug_toolbar")
