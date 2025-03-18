@@ -52,9 +52,11 @@
         position: absolute;
         right: 0.5rem;
         padding: 4px 6px;
+        font-size: 22px;
     }
+
     .add-reglement:hover {
-        background-color: rgba(255,255,255,.1);
+        font-size: 25px;
     }
 </style>
 
@@ -107,24 +109,21 @@
 
                 {% for child in menu_principal.GetChildren %}
                     {% if child.toujours_afficher or child.HasChildren %}
-                        <li class="nav-item" title="{{ child.titre }}">
+                        <li class="nav-item d-flex justify-content-between align-items-center" title="{{ child.titre }}">
                             <a class="nav-link {% if child in breadcrumb %} active{% endif %}"
                                {% if child.code %}href="{% url child.code %}"{% endif %}>
                                 <i class="nav-icon fa fa-{{ child.icone }}"></i>
                                 <p>{{ child.titre }}</p>
                             </a>
+
+                            {% if child.titre == "Règlements" %}
+                                <a href="{% url 'ajouter_reglement_familles' %}" class="add-reglement" title="Ajouter un règlement">
+                                    <i class="fa fa-plus-circle text-success"></i>
+                                </a>
+                            {% endif %}
                         </li>
                     {% endif %}
                 {% endfor %}
-
-                <!-- Règlement avec bouton "+" -->
-                <li class="nav-item d-flex justify-content-between align-items-center">
-                    <a class="nav-link" href="{% url 'liste_reglements' %}">
-                        <i class="nav-icon fa fa-file-text"></i>
-                        <p class="d-inline">Règlement</p>
-                    </a>
-                    <a href="{% url 'ajouter_reglement_familles' %}" class="add-reglement" title="Ajouter un règlement"><i class="fa fa-plus-circle text-success"></i></a>
-                </li>
 
                 <!-- Signaler un bug -->
                 {% if mode_demo %}
