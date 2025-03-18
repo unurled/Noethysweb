@@ -6,6 +6,7 @@ from django.db.models import Q
 
 class Page(crud.Page):
     model = Reglement
+    menu_code = "liste_reglements"
 
 class Liste(Page, crud.Liste):
     model = Famille

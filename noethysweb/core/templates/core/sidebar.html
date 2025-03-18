@@ -47,16 +47,17 @@
 		margin-left: .95rem;
 		transition: width .3s ease-in-out;
 	}
+
 	/* Style du bouton "+" */
     .add-reglement {
         position: absolute;
         right: 0.5rem;
-        padding: 4px 6px;
+        padding: 4px 6px 15px 0px;
         font-size: 22px;
     }
 
     .add-reglement:hover {
-        font-size: 25px;
+        font-size: 28px;
     }
 </style>
 
@@ -118,7 +119,7 @@
 
                             {% if child.titre == "Règlements" %}
                                 <a href="{% url 'ajouter_reglement_familles' %}" class="add-reglement" title="Ajouter un règlement">
-                                    <i class="fa fa-plus-circle text-success"></i>
+                                    <i class="nav-icon fa fa-plus-circle"></i>
                                 </a>
                             {% endif %}
                         </li>
