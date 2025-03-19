@@ -12,7 +12,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier, export_ecritures_cloe
+                                factures_modifier, export_ecritures_cloe, ajouter_deduction_familles
 
 urlpatterns = [
 
@@ -77,6 +77,8 @@ urlpatterns = [
     # Prestations
     path('facturation/liste_prestations', liste_prestations.View.as_view(), name='liste_prestations'),
     path('facturation/liste_deductions', liste_deductions.Liste.as_view(), name='liste_deductions'),
+    path('facturation/ajouter_deduction_familles', ajouter_deduction_familles.Liste.as_view(),name='ajouter_deduction_familles'),
+
     path('facturation/liste_soldes', liste_soldes.View.as_view(), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),

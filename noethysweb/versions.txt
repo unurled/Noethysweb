@@ -4,6 +4,7 @@ Version 1.3.5.5.27 (19/03/2025)
 - Suppression bouton "enregistrer et ajouter" dans les inscriptions
 - Changement statut quand coversion individu
 - Question avec activitée Null pas affichées dans les individus autres que enfant
+- Ajout bouton deduction
 
 Version 1.3.5.5.27 (18/03/2025)
 - Divers

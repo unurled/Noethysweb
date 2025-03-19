@@ -6,7 +6,7 @@
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Deduction
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from core.utils import utils_dates
 
 
@@ -33,6 +33,9 @@ class Liste(Page, crud.Liste):
         context = super(Liste, self).get_context_data(**kwargs)
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
+        context["boutons_liste"] = [
+             { "label" : "Ajouter une déduction", "classe": "btn btn-success", "href": reverse_lazy('ajouter_deduction_familles'), "icone": "fa fa-plus"}
+         ]
         return context
 
     class datatable_class(MyDatatable):
