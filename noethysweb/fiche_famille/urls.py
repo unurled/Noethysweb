@@ -37,7 +37,6 @@ urlpatterns = [
     path('individus/familles/pieces/modifier/<int:idfamille>/<int:pk>', famille_pieces.Modifier.as_view(), name='famille_pieces_modifier'),
     path('individus/familles/pieces/supprimer/<int:idfamille>/<int:pk>', famille_pieces.Supprimer.as_view(), name='famille_pieces_supprimer'),
     path('individus/familles/pieces/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_pieces.Supprimer_plusieurs.as_view(), name='famille_pieces_supprimer_plusieurs'),
-    path('individus/familles/pieces/saisie_rapide/<int:idfamille>/<int:idtype_piece>/<int:idindividu>', famille_pieces.Saisie_rapide.as_view(), name='famille_pieces_saisie_rapide'),
 
     path('individus/familles/locations/liste/<int:idfamille>', famille_locations.Liste.as_view(), name='famille_locations_liste'),
     path('individus/familles/locations/ajouter/<int:idfamille>', famille_locations.Ajouter.as_view(), name='famille_locations_ajouter'),

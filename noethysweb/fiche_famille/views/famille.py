@@ -81,6 +81,15 @@ def Changer_categorie(request):
     # MAJ de la fiche famille
     rattachement.famille.Maj_infos()
 
+    idindividu = rattachement.individu.pk
+    individu = Individu.objects.get(pk=idindividu)
+    if categorie in (1, 3):
+        individu.statut = 0
+    if categorie == 2:
+        individu.statut = 5
+
+    individu.save()
+
     messages.add_message(request, messages.SUCCESS, 'Modification enregistrée')
     return JsonResponse({"success": True})
 

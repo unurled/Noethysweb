@@ -123,7 +123,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Affichage
         self.helper.layout = Layout(
-            Commandes(annuler_url="{{ view.get_success_url }}"),
+            Commandes(annuler_url="{{ view.get_success_url }}", ajouter=False),
             Hidden('individu', value=individu.idindividu) if idindividu else Field("individu"),
             Hidden('famille', value=idfamille) if idfamille else Field("famille"),
             Fieldset("Période de validité",

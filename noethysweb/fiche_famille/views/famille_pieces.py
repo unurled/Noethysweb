@@ -67,7 +67,10 @@ class Liste(Page, crud.Liste):
         structures = self.request.user.structures.all()
         activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
         inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles, famille_id=self.Get_idfamille())
-        individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
+        individus_rattaches = Individu.objects.filter(idindividu__in=Rattachement.objects.filter(categorie=1, famille_id=self.Get_idfamille()).values('individu'))
+        individus_inscrits = Individu.objects.filter(
+            Q(idindividu__in=inscriptions_accessibles.values('individu')) |
+            Q(idindividu__in=Rattachement.objects.filter(categorie=1, famille_id=self.Get_idfamille()).values('individu'))).distinct()
         liste = Piece.objects.select_related('individu', 'type_piece').filter(individu__in=individus_inscrits)
         return liste
 
@@ -88,7 +91,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ['check', 'idpiece', 'date_debut', 'date_fin', 'nom', "auteur","actions"]
+            columns = ['check', 'idpiece', 'date_debut', 'individu', 'nom', "auteur","actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
             }
@@ -175,28 +178,3 @@ class Supprimer(Page, crud.Supprimer):
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
     template_name = "fiche_famille/famille_delete.html"
-
-
-class Saisie_rapide(Page, RedirectView):
-    """ Saisie rapide d'une pièce"""
-    def get_redirect_url(self, *args, **kwargs):
-        type_piece = TypePiece.objects.get(pk=kwargs["idtype_piece"])
-        individu = Individu.objects.get(pk=kwargs["idindividu"])
-        famille = Famille.objects.get(pk=kwargs["idfamille"])
-
-        # Famille
-        if type_piece.public == "famille":
-            individu = None
-
-        # Individu
-        if type_piece.public == "individu" and type_piece.valide_rattachement:
-            famille = None
-
-        # Validité
-        date_debut = datetime.date.today()
-        date_fin = type_piece.Get_date_fin_validite()
-
-        # Enregistrement de la pièce
-        piece = Piece.objects.create(type_piece=type_piece, individu=individu, famille=famille, date_debut=date_debut, date_fin=date_fin, auteur=self.request.user)
-        messages.add_message(self.request, messages.SUCCESS, "La pièce '%s' a été créée avec succès" % piece.Get_nom())
-        return self.request.META['HTTP_REFERER']

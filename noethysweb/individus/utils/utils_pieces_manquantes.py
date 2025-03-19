@@ -45,7 +45,7 @@ def Get_pieces_manquantes(famille=None, date_reference=None, only_invalides=Fals
             if valide:
                 href = None
             else:
-                href = reverse_lazy("famille_pieces_saisie_rapide", kwargs={'idfamille': inscription.famille_id, 'idtype_piece': type_piece.pk, 'idindividu': inscription.individu_id})
+                href = None
 
             # Mémorise la pièce à fournir
             dict_temp = {
@@ -125,25 +125,8 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
             if valide:
                 href = None
             else:
-                href = reverse_lazy("famille_pieces_saisie_rapide", kwargs={'idfamille': inscription.famille_id, 'idtype_piece': type_piece.pk, 'idindividu': inscription.individu_id})
+                href = None
 
-            # Mémorise la pièce à fournir
-            dict_temp = {
-                "label": type_piece.Get_nom(inscription.individu),
-                "valide": valide,
-                "type_piece": type_piece,
-                "titre": "Cliquez ici pour créer immédiatement cette pièce",
-                "href": href,
-            }
-            if type_piece.public == "famille":
-                dict_temp["individu"] = None
-                temp = (type_piece, None, inscription.famille_id)
-            else:
-                dict_temp["individu"] = inscription.individu
-                temp = (type_piece, inscription.individu, inscription.famille_id)
-            if temp not in liste_traitees and not valide:
-                liste_traitees.append(temp)
-                dict_resultats[inscription.famille].append(dict_temp)
 
     # Tri et filtre des résultats
     dict_final = {}
