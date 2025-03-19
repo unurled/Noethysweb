@@ -1,4 +1,4 @@
-Version 1.3.5.5.27 (19/03/2025)
+Version 1.3.5.5.28 (19/03/2025)
 - Lien faux dans pièces manquantes
 - Affichage des pièces des adultes de la famille quoi qu'il arrive
 - Suppression bouton "enregistrer et ajouter" dans les inscriptions
