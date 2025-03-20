@@ -26,7 +26,7 @@ from parametrage.views import organisateur, structures, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
-    modeles_word, releves_bancaires, sondages, types_allergies, types_dispmed
+    modeles_word, releves_bancaires, sondages, types_allergies, types_dispmed, types_deduction
 
 
 urlpatterns = [
@@ -323,6 +323,12 @@ urlpatterns = [
     path('parametrage/types_allergies/ajouter', types_allergies.Ajouter.as_view(), name='types_allergies_ajouter'),
     path('parametrage/types_allergies/modifier/<int:pk>', types_allergies.Modifier.as_view(), name='types_allergies_modifier'),
     path('parametrage/types_allergies/supprimer/<int:pk>', types_allergies.Supprimer.as_view(), name='types_allergies_supprimer'),
+
+    # Types de deduction
+    path('parametrage/types_deduction/liste', types_deduction.Liste.as_view(), name='types_deductions_liste'),
+    path('parametrage/types_deduction/ajouter', types_deduction.Ajouter.as_view(), name='types_deductions_ajouter'),
+    path('parametrage/types_deduction/modifier/<int:pk>', types_deduction.Modifier.as_view(),name='types_deductions_modifier'),
+    path('parametrage/types_deduction/supprimer/<int:pk>', types_deduction.Supprimer.as_view(),name='types_deduction_supprimer'),
 
     # Types dispositifs médicaux
     path('parametrage/types_dispmed/liste', types_dispmed.Liste.as_view(), name='types_dispmed_liste'),

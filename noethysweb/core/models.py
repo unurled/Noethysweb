@@ -767,6 +767,18 @@ class TypeMaladie(models.Model):
     def __str__(self):
         return self.nom
 
+class TypeDeduction(models.Model):
+    idtype_deduction = models.AutoField(verbose_name="ID", db_column='IDtype_deduction', primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+
+    class Meta:
+        db_table = 'types_deductions'
+        verbose_name = "deduction"
+        verbose_name_plural = "deductions"
+
+    def __str__(self):
+        return self.nom
+
 class TypeAllergie(models.Model):
     idtype_allergie = models.AutoField(verbose_name="ID", db_column='IDtype_allergie', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)

@@ -75,6 +75,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_renseignements.Add(code="types_regimes_alimentaires_liste", titre="Types de régimes alimentaires", icone="file-text-o")
     menu_renseignements.Add(code="categories_informations_liste", titre="Catégories PAI et automédication", icone="file-text-o")
     menu_renseignements.Add(code="types_maladies_liste", titre="Types de maladies", icone="file-text-o")
+    menu_renseignements.Add(code="types_deductions_liste", titre="Types de déductions", icone="file-text-o")
     menu_renseignements.Add(code="types_allergies_liste", titre="Types d'allergies", icone="file-text-o")
     menu_renseignements.Add(code="types_dispmed_liste", titre="Types dispositifs médicaux", icone="file-text-o")
     menu_renseignements.Add(code="types_vaccins_liste", titre="Types de vaccins", icone="file-text-o")
