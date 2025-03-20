@@ -1228,6 +1228,7 @@ class Activite(models.Model):
     reattribution_modele_email = models.ForeignKey("ModeleEmail", verbose_name="Modèle d'Email", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez le modèle d'email qui sera utilisé pour notifier les familles par email de la réattribution.")
     num_decla = models.CharField(verbose_name="Numéro de déclaration de l'activité", max_length=200, blank=True, null=True)
     image = models.ImageField(verbose_name="Image de l'activité", upload_to='activite_images/', blank=True, null=True)
+    interne = models.BooleanField(verbose_name="Activité interne", default=True, help_text="Déochez cette case si votre activité n'est pas une activité habituelle de Sacadoc")
     class Meta:
         db_table = 'activites'
         verbose_name = "activité"
