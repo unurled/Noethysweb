@@ -13,13 +13,20 @@ from crispy_forms.bootstrap import Field, PrependedText
 from django_select2.forms import ModelSelect2Widget, Select2Widget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Prestation, Deduction, Rattachement, Inscription, Activite, CategorieTarif, Tarif , TarifLigne
+from core.models import Prestation, Deduction, Rattachement, Inscription, Activite, CategorieTarif, Tarif , TarifLigne, TypeDeduction
 from core.widgets import DatePickerWidget, Formset
 from core.utils import utils_preferences
 from fiche_famille.widgets import Facture_prestation, Consommations_prestation
+from core.widgets import Select_avec_commandes_form
+from django.utils.translation import gettext_lazy as _
+from crispy_forms.layout import Layout
+from crispy_forms.bootstrap import Field
 
 
 class DeductionForm(forms.ModelForm):
+    label = forms.ModelChoiceField(label="Label",
+                    widget=Select_avec_commandes_form(attrs={"url_ajax": "ajax_ajouter_deduction", "textes": {"champ": "Nom de la déduction", "ajouter": "Ajouter un type de déduction"}}),
+                    queryset=TypeDeduction.objects.all().order_by("nom"), required=False)
 
     class Meta:
         model = Deduction
@@ -30,6 +37,7 @@ class DeductionForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_show_labels = False
         self.helper.form_class = "formset_deductions"
+        self.helper.form_method = 'post'
 
     def clean(self):
         # if self.cleaned_data.get('DELETE') == False:

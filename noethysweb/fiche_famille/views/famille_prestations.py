@@ -10,11 +10,17 @@ from django.template import Template, RequestContext
 from django.http import HttpResponse, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Prestation, Tarif, Inscription, Consommation
+from core.models import Famille, Prestation, Tarif, Inscription, Consommation, TypeDeduction
 from fiche_famille.forms.famille_prestations import Formulaire, FORMSET_DEDUCTIONS
 from fiche_famille.views.famille import Onglet
 from core.utils import utils_texte
+from django.utils.translation import gettext as _
 
+
+def Ajouter_deduction(request):
+    nom = request.POST.get("valeur")
+    allergie = TypeDeduction.objects.create(label=nom)
+    return JsonResponse({"id": allergie.pk, "valeur": allergie.nom})
 
 def Supprimer_consommation(request):
     """ Supprime les ou une consommation associée à la prestation """

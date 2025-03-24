@@ -184,5 +184,6 @@ urlpatterns = [
     path('individus/location_get_tarif_location', secure_ajax(famille_locations.Get_tarif_location), name='ajax_get_tarif_location'),
     path('individus/famille_edition_renseignements/generer_pdf', secure_ajax(famille_edition_renseignements.Generer_pdf), name='ajax_famille_edition_renseignements_generer_pdf'),
     path('individus/envoi_recu_auto', secure_ajax(reglement_recu_auto.Envoyer_recu_automatiquement), name='ajax_envoi_recu_auto'),
+    path('individus/ajouter_deduction', secure_ajax(famille_prestations.Ajouter_deduction), name='ajax_ajouter_deduction'),
 
 ]

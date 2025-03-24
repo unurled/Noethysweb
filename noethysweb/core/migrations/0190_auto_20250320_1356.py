@@ -4,6 +4,24 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def add_default_type_deductions(apps, schema_editor):
+    # Récupération du modèle TypeDeduction
+    TypeDeduction = apps.get_model('core', 'TypeDeduction')
+
+    # Ajout des valeurs par défaut
+    default_values = [
+        'Fond d\'aide Mouvement',
+        'Fond d\'aide PEPS',
+        'Subvention église',
+        'Subvention du groupe',
+        'Subvention de la région (état)',
+        'Subvention commune',
+        'Association aide au départ en vacances'
+    ]
+
+    for value in default_values:
+        TypeDeduction.objects.get_or_create(nom=value)
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -47,4 +65,5 @@ class Migration(migrations.Migration):
             name='structure',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.structure', verbose_name='Structure'),
         ),
+        migrations.RunPython(add_default_type_deductions),
     ]
