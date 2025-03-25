@@ -80,7 +80,7 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields["prestations_anterieures"].initial = utils_parametres.Get(nom="prestations_anterieures", categorie="generation_factures", utilisateur=self.request.user, valeur=None)
 
         # Période par défaut: aujourd'hui jusqu'à un an plus tard
-        date_debut = date.today()
+        date_debut = date.today() - timedelta(days=365)
         date_fin = date_debut + timedelta(days=365)
         periode_initial = f"{date_debut};{date_fin}"
         self.fields["periode"].initial = periode_initial
