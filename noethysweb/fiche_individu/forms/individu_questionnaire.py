@@ -11,7 +11,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Submit, HTML, Fieldset, Div, ButtonHolder
 from crispy_forms.bootstrap import Field, InlineRadios
 from core.utils.utils_commandes import Commandes
-from core.models import Individu, QuestionnaireQuestion, QuestionnaireReponse
+from core.models import Individu, QuestionnaireQuestion, QuestionnaireReponse, Inscription, Individu, Activite
 from parametrage.forms import questionnaires
 
 
@@ -29,11 +29,23 @@ class Formulaire(FormulaireBase, forms.Form):
         # Récupération de l'individu depuis le rattachement
         idindividu = Individu.objects.get(pk=self.idindividu)
         statut_individu = idindividu.statut
+        inscriptions = Inscription.objects.filter(individu=idindividu)
+        activite_ids = inscriptions.values_list('activite', flat=True).distinct()
+        activites = Activite.objects.filter(idactivite__in=activite_ids)
 
         if statut_individu != 5:
-            condition_activite = Q(activite__isnull=False)
+            # Si toutes les activités ont 'interne=False', exclure les questions avec 'activite=None'
+            condition_activite = Q(activite__in=activites)
+            condition_activite &= Q(activite__isnull=False)
         else:
-            condition_activite = Q()
+            # Si l'individu a le statut 5, vérifier si toutes les activités ont 'interne=False'
+            if activites.filter(interne=False).count() == len(activites):
+                condition_activite = Q(activite__in=activites)
+                condition_activite &= Q(activite__isnull=False)
+            else:
+                # Si certaines activités ont 'interne=True', autoriser les questions sans activité
+                condition_activite = Q(activite__in=activites)
+                condition_activite |= Q(activite__isnull=True)
 
         condition_structure = (
                 Q(structure__in=self.request.user.structures.all()) &

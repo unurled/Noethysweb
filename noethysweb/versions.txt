@@ -1,5 +1,7 @@
 Version 1.3.5.5.31 (25/03/2025)
 - Intégration google doc dans Aide
+- Modif période facture
+- Intégration champ interne pour les questions (masque les questions communes sans activités)
 
 Version 1.3.5.5.30 (24/03/2025)
 - Beug
