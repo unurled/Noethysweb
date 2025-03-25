@@ -1,3 +1,6 @@
+Version 1.3.5.5.31 (25/03/2025)
+- Intégration google doc dans Aide
+
 Version 1.3.5.5.30 (24/03/2025)
 - Beug
 

@@ -5,10 +5,8 @@
 
 {% block page_titre %}{{ page_titre }}{% endblock page_titre %}
 
-
 {% block styles %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'lib/chartjs/Chart.min.css' %}">
     <style>
     .info-box-text {
         font-weight: bold;
@@ -64,13 +62,27 @@
                         </div>
                     {% endfor %}
                 </div>
+
+                <!-- Intégration du document après les vidéos -->
+                <div class="col-sm-12 ">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item"
+                                        src="https://docs.google.com/document/d/e/2PACX-1vQ0t9wsH5ITiwxHP1wOZibRznC7zuAl4bYYcd9pDRJPz6TXVUXs9XZau1nrAGzoTQMY7LyAm6Y-ZUTr/pub?embedded=true" width="100%" style="height: 120vh; border: none;"
+                                        frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                    </div>
+                </div>
+
+
                 {% endblock contenu_page %}
             </div>
         </section>
 
     </div>
 {% endblock page %}
-
 
 {% block scripts %}
     {{ block.super }}
@@ -84,5 +96,4 @@
             });
         });
     </script>
-
 {% endblock scripts %}
