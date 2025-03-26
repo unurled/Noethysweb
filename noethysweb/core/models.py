@@ -2,28 +2,32 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime, decimal, uuid, os
-from django.db import models
-from django.db.models import Sum
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.files.storage import get_storage_class
-from django.templatetags.static import static
+import datetime
+import decimal
+import os
+import uuid
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
-from django_resized import ResizedImageField
-from django_cryptography.fields import encrypt
+from django.core.files.storage import get_storage_class
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+from django.db.models import Sum
+from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
+from django_cryptography.fields import encrypt
+from django_resized import ResizedImageField
 from multiselectfield import MultiSelectField
+
 from core.data import data_civilites
-from core.data.data_modeles_impressions import CATEGORIES as CATEGORIES_MODELES_IMPRESSIONS
 from core.data.data_modeles_emails import CATEGORIES as CATEGORIES_MODELES_EMAILS
+from core.data.data_modeles_impressions import (
+    CATEGORIES as CATEGORIES_MODELES_IMPRESSIONS,
+)
 from core.data.data_modeles_sms import CATEGORIES as CATEGORIES_MODELES_SMS
 from core.data.data_modeles_word import CATEGORIES as CATEGORIES_MODELES_WORD
+from core.utils import utils_dates, utils_permissions, utils_texte
 from individus.utils.utils_transports import Get_liste_choix_categories
-from core.utils import utils_permissions
-from core.utils import utils_texte, utils_dates
-from django.forms.widgets import CheckboxSelectMultiple
-
 
 CATEGORIES_TRANSPORTS = Get_liste_choix_categories()
 
@@ -330,7 +334,7 @@ class Structure(models.Model):
     fax = models.CharField(verbose_name="Fax", max_length=200, blank=True)
     mail = models.EmailField(verbose_name="Email", max_length=300, blank=True)
     site = models.CharField(verbose_name="Site internet", max_length=200, blank=True)
-    logo = ResizedImageField(verbose_name="Logo", upload_to=get_uuid_path, blank=True, null=True)
+    logo = ResizedImageField(verbose_name="Logo", size=[500, 500], upload_to=get_uuid_path, blank=True, null=True)
     gps = models.CharField(verbose_name="GPS", max_length=200, blank=True, null=True)
     logo_update = models.DateTimeField(verbose_name="Date MAJ Logo", max_length=200, blank=True, null=True)
     adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition", null=True, on_delete=models.PROTECT, help_text="Sélectionnez une des adresses d'expédition d'emails dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
@@ -504,7 +508,7 @@ class CompteBancaire(models.Model):
 class ModeReglement(models.Model):
     idmode = models.AutoField(verbose_name="ID", db_column="IDmode", primary_key=True)
     label = models.CharField(verbose_name="Nom", max_length=200)
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    image = ResizedImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
     numero_choix = [(None, "Aucun"), ("ALPHA", "Alphanumérique"), ("NUM", "Numérique")]
     numero_piece = models.CharField(verbose_name="Numéro de pièce", max_length=100, choices=numero_choix, blank=True, null=True)
     nbre_chiffres = models.IntegerField(verbose_name="Nombre de caractères du numéro", blank=True, null=True)
@@ -532,7 +536,7 @@ class Emetteur(models.Model):
     idemetteur = models.AutoField(verbose_name="ID", db_column='IDemetteur', primary_key=True)
     mode = models.ForeignKey(ModeReglement, verbose_name="Mode de règlement", on_delete=models.PROTECT)
     nom = models.CharField(verbose_name="Nom", max_length=200)
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    image = ResizedImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
 
     class Meta:
         db_table = 'emetteurs'
@@ -1040,7 +1044,7 @@ class CategorieProduit(models.Model):
     idcategorie = models.AutoField(verbose_name="ID", db_column='IDcategorie', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    image = ResizedImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
 
     class Meta:
         db_table = 'produits_categories'
@@ -1056,7 +1060,7 @@ class Produit(models.Model):
     categorie = models.ForeignKey(CategorieProduit, verbose_name="Catégorie", on_delete=models.PROTECT)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    image = ResizedImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
     quantite = models.IntegerField(verbose_name="Quantité", default=1)
     montant = models.DecimalField(verbose_name="Montant", blank=True, null=True, max_digits=10, decimal_places=2, default=0.0)
     couleur = models.CharField(verbose_name="Couleur", max_length=100, default="#3c8dbc")
@@ -1695,7 +1699,7 @@ class Individu(models.Model):
     tel_domicile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone du domicile", default=False)
     tel_mobile_sms = models.BooleanField(verbose_name="Autoriser l'envoi de SMS vers le téléphone portable", default=False)
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
-    photo = models.ImageField(verbose_name=_("Photo"), upload_to=get_uuid_path, blank=True, null=True)
+    photo = ResizedImageField(verbose_name=_("Photo"), upload_to=get_uuid_path, blank=True, null=True)
     listes_diffusion = models.ManyToManyField(ListeDiffusion, blank=True, related_name="individu_listes_diffusion")
     regimes_alimentaires = models.ManyToManyField(RegimeAlimentaire, verbose_name=_("Régimes alimentaires"), related_name="individu_regimes_alimentaires", blank=True)
     maladies = models.ManyToManyField(TypeMaladie, verbose_name=_("Maladies contractées"), related_name="individu_maladies", blank=True)
@@ -3528,7 +3532,7 @@ class Photo(models.Model):
 class ImageArticle(models.Model):
     idimage = models.AutoField(verbose_name="ID", db_column='IDimage', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path)
+    image = ResizedImageField(verbose_name="Image", upload_to=get_uuid_path)
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
@@ -3544,7 +3548,7 @@ class Article(models.Model):
     idarticle = models.AutoField(verbose_name="ID", db_column='IDarticle', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
     texte = models.TextField(verbose_name="Texte")
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
+    image = ResizedImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
     image_article = models.ForeignKey(ImageArticle, verbose_name="Image", blank=True, null=True, on_delete=models.SET_NULL)
     auteur = models.ForeignKey(Utilisateur, verbose_name="Auteur", blank=True, null=True, on_delete=models.CASCADE)
     date_debut = models.DateTimeField(verbose_name="Début de publication", help_text="Saisissez la date de début de publication. Par défaut, la date du jour de la création de l'article.")
@@ -3585,7 +3589,7 @@ class Article(models.Model):
 class ImageFond(models.Model):
     idimage = models.AutoField(verbose_name="ID", db_column='IDimage', primary_key=True)
     titre = models.CharField(verbose_name="Titre", max_length=300)
-    image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path)
+    image = ResizedImageField(verbose_name="Image", size=[2048, 2048], upload_to=get_uuid_path)
 
     class Meta:
         db_table = 'images_fond'
@@ -4163,7 +4167,7 @@ class Collaborateur(models.Model):
     memo = models.TextField(verbose_name="Mémo", blank=True, null=True)
     date_creation = models.DateTimeField(verbose_name="Date de création", auto_now_add=True)
     etat = models.CharField(verbose_name="Etat", max_length=50, blank=True, null=True)
-    photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
+    photo = ResizedImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
     qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications", related_name="collaborateur_qualifications", blank=True)
     groupes = models.ManyToManyField(GroupeCollaborateurs, verbose_name="Groupes associés", related_name="collaborateur_groupes", blank=True)
 

@@ -4,19 +4,33 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
+
+from django.db.models import Q
+from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
-from django.db.models import Q
-from portail.views.base import CustomView
-from portail.utils import utils_approbations
-from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
+
+from core.models import Article, Consommation, Inscription, Lecture, PortailMessage
 from cotisations.utils import utils_cotisations_manquantes
-from core.models import PortailMessage, Article, Inscription, Consommation, Lecture
+from individus.utils import (
+    utils_assurances,
+    utils_pieces_manquantes,
+    utils_vaccinations,
+)
+from portail.utils import utils_approbations
+from portail.views.base import CustomView
 
 
 class Accueil(CustomView, TemplateView):
     template_name = "portail/accueil.html"
     menu_code = "portail_accueil"
+
+    def dispatch(self, request, *args, **kwargs):
+        """Redirect to utilisateur if not famille."""
+        if self.request.user.categorie != "famille":
+            return redirect("accueil")
+        return super().dispatch(request, *args, **kwargs)
+
 
     def get_context_data(self, **kwargs):
         context = super(Accueil, self).get_context_data(**kwargs)

@@ -33,7 +33,7 @@ AXES_FAILURE_LIMIT = 10
 AXES_COOLOFF_TIME = 1
 AXES_LOCKOUT_URL = '/locked'
 AXES_IPWARE_PROXY_COUNT = 1
-AXES_META_PRECEDENCE_ORDER = [
+AXES_IPWARE_META_PRECEDENCE_ORDER = [
     'HTTP_X_FORWARDED_FOR',
     'REMOTE_ADDR'
 ]
@@ -118,6 +118,7 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
+    'noethysweb.log.StoreUidMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -206,10 +207,11 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 SUMMERNOTE_THEME = 'bs4'
 
 # Django-resize
-DJANGORESIZED_DEFAULT_SIZE = [500, 500]
-DJANGORESIZED_DEFAULT_QUALITY = 95
-DJANGORESIZED_DEFAULT_KEEP_META = True
-DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'JPEG': ".jpg", 'PNG': ".png"}
+DJANGORESIZED_DEFAULT_SIZE = [1024, 1024]
+DJANGORESIZED_DEFAULT_QUALITY = 75
+DJANGORESIZED_DEFAULT_KEEP_META = False
+DJANGORESIZED_DEFAULT_FORCE_FORMAT = "WEBP"
+DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'JPEG': ".jpg", 'PNG': ".png", "WEBP": ".webp"}
 DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 
 # Logging
@@ -218,13 +220,16 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'complet': {
-            'format': '[{levelname} {asctime} {module}]  {message}',
+            'format': '[{levelname} {asctime} {module}]  {message} uid={request_uid}',
             'style': '{',
         },
         'simple': {
             'format': '{levelname} {message}',
             'style': '{',
         },
+        'json': {
+            'class': 'noethysweb.log.JsonFormatter'
+        }
     },
     'filters': {
         'require_debug_true': {
@@ -233,21 +238,32 @@ LOGGING = {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
         },
+        'request_uid': {
+            '()': 'noethysweb.log.RequestUIDFilter'
+        },
     },
     'handlers': {
         'console': {
             'level': 'DEBUG',
-            'filters': ['require_debug_true'],
+            'filters': ['require_debug_true', 'request_uid'],
             'class': 'logging.StreamHandler',
             'formatter': 'complet',
         },
         'file': {
             'level': 'DEBUG',
+            'filters': ['request_uid'],
             'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'complet',
             'filename': os.path.join(BASE_DIR, '..', 'debug.log'),
             'backupCount': 10,
             'maxBytes': 20971520, # 20*1024*1024 bytes (20MB)
+        },
+        'json_file': {
+            'level': 'DEBUG',
+            'filters': ['request_uid'],
+            "class": "logging.FileHandler",
+            'filename': os.path.join(BASE_DIR, '..', 'debug_json.log'),
+            'formatter': 'json',
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -257,7 +273,7 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['console', 'file', 'mail_admins'],
+        'handlers': ['console', 'file', 'mail_admins', 'json_file'],
         'level': 'DEBUG',
     },
 }
