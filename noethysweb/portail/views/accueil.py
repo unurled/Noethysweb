@@ -27,7 +27,7 @@ class Accueil(CustomView, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         """Redirect to utilisateur if not famille."""
-        if self.request.user.categorie != "famille":
+        if self.request.user.is_authenticated and self.request.user.categorie != "famille":
             return redirect("accueil")
         return super().dispatch(request, *args, **kwargs)
 
