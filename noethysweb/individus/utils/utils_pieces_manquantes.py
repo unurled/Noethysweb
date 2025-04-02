@@ -72,7 +72,6 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
     """ Retourne les pièces manquantes d'un ensemble de familles inscrites ou présentes """
     if not date_reference:
         date_reference = datetime.date.today()
-
     # Importation des inscriptions
     conditions = Q()
     if activites:
@@ -84,7 +83,7 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
     inscriptions = Inscription.objects.select_related('activite', 'individu', 'famille').prefetch_related('activite__pieces').filter(conditions).distinct()
 
     # Importation des pièces existantes
-    conditions = Q(date_debut__lte=date_reference, date_fin__gte=date_reference)
+    conditions = Q(date_debut__lte=date_reference) & Q(date_fin__gte=date_reference)
     pieces_existantes = Piece.objects.select_related('type_piece').filter(conditions)
 
     dict_pieces = {}
@@ -99,7 +98,6 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
             if key:
                 dict_pieces.setdefault(key, [])
                 dict_pieces[key].append(piece)
-
     liste_traitees = []
     dict_resultats = {}
     for inscription in inscriptions:
@@ -126,8 +124,23 @@ def Get_liste_pieces_manquantes(date_reference=None, activites=None, presents=No
                 href = None
             else:
                 href = None
-
-
+            # Mémorise la pièce à fournir
+            dict_temp = {
+                "label": type_piece.Get_nom(inscription.individu),
+                "valide": valide,
+                "type_piece": type_piece,
+                "titre": "Cliquez ici pour créer immédiatement cette pièce",
+                "href": href,
+            }
+            if type_piece.public == "famille":
+                dict_temp["individu"] = None
+                temp = (type_piece, None, inscription.famille_id)
+            else:
+                dict_temp["individu"] = inscription.individu
+                temp = (type_piece, inscription.individu, inscription.famille_id)
+            if temp not in liste_traitees and not valide:
+                liste_traitees.append(temp)
+                dict_resultats[inscription.famille].append(dict_temp)
     # Tri et filtre des résultats
     dict_final = {}
     for famille, liste_pieces in dict_resultats.items():

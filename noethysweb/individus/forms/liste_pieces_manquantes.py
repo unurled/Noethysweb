@@ -27,8 +27,8 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields['date'].initial = datetime.date.today()
 
         self.helper.layout = Layout(
-            Field('date'),
+            Hidden('date', datetime.date.today()),
             Field('activites'),
-            Field('presents'),
+            Hidden('presents', True),
             Field('masquer_complets'),
         )
