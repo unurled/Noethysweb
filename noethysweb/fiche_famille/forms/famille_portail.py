@@ -53,8 +53,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Création des boutons de commande
         autres_commandes = [HTML("""
-            <a type='button' class='btn btn-default' title="Envoyer les codes par Email" onclick="envoyer(mode='email')"><i class="fa fa-send-o margin-r-5"></i>Envoyer les codes par email</a> 
-            <a type='button' class='btn btn-default' title="Envoyer les codes par SMS" onclick="envoyer(mode='sms')"><i class="fa fa-send-o margin-r-5"></i>Envoyer les codes par SMS</a> 
+            <a type='button' class='btn btn-default' title="Envoyer les codes par Email" onclick="envoyer(mode='email')"><i class="fa fa-send-o margin-r-5"></i>Envoyer les codes par email</a>
+            <a type='button' class='btn btn-default' title="Envoyer les codes par SMS" onclick="envoyer(mode='sms')"><i class="fa fa-send-o margin-r-5"></i>Envoyer les codes par SMS</a>
+            {% if request.user.is_superuser %}<a type='button' class='btn btn-default' href="{{ login_link }}"><i class="fa fa-user-secret margin-r-5"></i>Se connecter</a>{% endif %}
         """)]
         if self.mode == "CONSULTATION":
             commandes = Commandes(modifier_url="famille_portail_modifier", modifier_args="idfamille=idfamille", modifier=True, enregistrer=False, annuler=False, ajouter=False, autres_commandes=autres_commandes)

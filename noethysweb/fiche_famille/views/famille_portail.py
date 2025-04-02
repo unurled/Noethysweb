@@ -51,6 +51,11 @@ class Consulter(Onglet, crud.Modifier):
         context['box_titre'] = "Portail"
         context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
         context['onglet_actif'] = "portail"
+        if self.request.user.is_superuser:
+            from core.views.login import genereate_login_link
+            context["login_link"] = genereate_login_link(
+                self.request, self.object.utilisateur
+            )
         return context
 
     def get_object(self):

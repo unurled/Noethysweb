@@ -15,6 +15,7 @@ urlpatterns = [
     path('accueil_configuration', accueil_configuration.View.as_view(), name='accueil_configuration'),
     path('connexion', login.LoginViewUtilisateur.as_view(), name='connexion'),
     path('deconnexion', auth_views.LogoutView.as_view(next_page='connexion'), name='deconnexion'),
+    path('core/login_as', login.login_as, name='login_as'),
 
     # Recherche
     path('core/rechercher', recherche.View.as_view(), name='rechercher'),
