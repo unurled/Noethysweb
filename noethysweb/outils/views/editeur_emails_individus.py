@@ -5,7 +5,7 @@
 
 from django.urls import reverse_lazy, reverse
 from core.views import crud
-from core.models import Individu, Destinataire, Mail
+from core.models import Individu, Destinataire, Mail, Rattachement
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from outils.views.editeur_emails import Page_destinataires
 
@@ -43,7 +43,19 @@ class Liste(Page_destinataires, crud.Liste):
             ordering = ["nom", "prenom"]
 
         def Get_mail(self, instance, *args, **kwargs):
-            return instance.mail
+            # Vérifie le modèle de l'instance
+            model_name = instance.__class__.__name__
+
+            # Cas pour l'Individu
+            if model_name == "Individu":
+                rattachement = Rattachement.objects.filter(individu=instance).select_related('famille').first()
+                if rattachement and rattachement.famille and rattachement.famille.mail:
+                    return rattachement.famille.mail
+                return ""  # Si pas de rattachement ou d'email
+
+            # Cas généraux pour tout autre modèle (Famille, Collaborateur, Contact, etc.)
+            elif hasattr(instance, "mail"):
+                return getattr(instance, "mail", "")
 
         def Get_rue_resid(self, instance, *args, **kwargs):
             return instance.rue_resid
