@@ -9,7 +9,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, Count
 from django.contrib import messages
 from core.views import crud
-from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Collaborateur, Contact, SignatureEmail
+from core.models import ModeleEmail, Mail, PieceJointe, Destinataire, Famille, Individu, Collaborateur, Contact, SignatureEmail, Rattachement
 from core.utils import utils_texte
 from outils.forms.editeur_emails import Formulaire
 from outils.utils import utils_email
@@ -182,7 +182,7 @@ class Page_destinataires(crud.Page):
         if self.categorie == "famille":
             dict_adresses = {famille.pk: famille.mail for famille in Famille.objects.filter(email_blocage=False)}
         if self.categorie == "individu":
-            dict_adresses = {individu.pk: individu.mail for individu in Individu.objects.all()}
+            dict_adresses = {r.individu.pk: r.famille.mail for r in Rattachement.objects.select_related('famille').filter(individu_id__in=liste_selections)}
         if self.categorie == "collaborateur":
             dict_adresses = {collaborateur.pk: collaborateur.mail for collaborateur in Collaborateur.objects.all()}
         if self.categorie == "contact":
