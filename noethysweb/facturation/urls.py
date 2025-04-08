@@ -12,7 +12,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 rappels_impression, rappels_email, lots_pes, lots_pes_factures, recalculer_prestations, edition_prestations, \
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
-                                factures_modifier, export_ecritures_cloe, ajouter_deduction_familles
+                                factures_modifier, export_ecritures_cloe, ajouter_deduction_familles, edition_deductions
 
 urlpatterns = [
 
@@ -82,6 +82,7 @@ urlpatterns = [
     path('facturation/liste_soldes', liste_soldes.View.as_view(), name='liste_soldes'),
     path('facturation/synthese_prestations', synthese_prestations.View.as_view(), name='synthese_prestations'),
     path('facturation/edition_prestations', edition_prestations.View.as_view(), name='edition_prestations'),
+    path('facturation/edition_deductions', edition_deductions.View.as_view(), name='edition_deductions'),
     path('facturation/recalculer_prestations', recalculer_prestations.View.as_view(), name='recalculer_prestations'),
 
     # Aides
@@ -116,6 +117,7 @@ urlpatterns = [
     path('facturation/lots_prelevements_actions', secure_ajax(lots_prelevements.Actions), name='ajax_lots_prelevements_actions'),
     path('facturation/ajax_recalculer_prestations', secure_ajax(recalculer_prestations.Recalculer), name='ajax_recalculer_prestations'),
     path('facturation/edition_prestations/generer_pdf', secure_ajax(edition_prestations.Generer_pdf), name='ajax_edition_prestations_generer_pdf'),
+    path('facturation/edition_deductions/generer_pdf', secure_ajax(edition_deductions.Generer_pdf), name='ajax_edition_deductions_generer_pdf'),
     path('facturation/modifier_lot_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Modifier_lot_attestations_fiscales), name='ajax_modifier_lot_attestations_fiscales'),
     path('facturation/ajuster_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Ajuster_attestations_fiscales), name='ajax_ajuster_attestations_fiscales'),
     path('facturation/recherche_attestations_fiscales', secure_ajax(attestations_fiscales_generation.Recherche_attestations_fiscales), name='ajax_recherche_attestations_fiscales'),
