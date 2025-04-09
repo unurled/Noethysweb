@@ -207,6 +207,7 @@ def Envoyer_model_mail(idmail=None, request=None):
         # Pause si envoi par lot activé
         if nbre_mails_lot and len(destinataires) > 1:
             if index_lot >= int(nbre_mails_lot):
+                logger.info(f"Pause de {duree_pause} secondes après le lot {index_lot}")
                 time.sleep(int(duree_pause))
                 index_lot = 0
             index_lot += 1
