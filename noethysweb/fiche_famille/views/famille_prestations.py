@@ -15,12 +15,23 @@ from fiche_famille.forms.famille_prestations import Formulaire, FORMSET_DEDUCTIO
 from fiche_famille.views.famille import Onglet
 from core.utils import utils_texte
 from django.utils.translation import gettext as _
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
+def ajouter_type_deduction(request):
+    if request.method == 'POST':
+        nom = request.POST.get('nom_type_deduction', '').strip()
+        if not nom:
+            return JsonResponse({'success': False, 'message': 'Le nom est requis.'})
 
-def Ajouter_deduction(request):
-    nom = request.POST.get("valeur")
-    allergie = TypeDeduction.objects.create(label=nom)
-    return JsonResponse({"id": allergie.pk, "valeur": allergie.nom})
+        # Vérifier si un nom similaire existe déjà (insensible à la casse)
+        if TypeDeduction.objects.filter(nom__iexact=nom).exists():
+            return JsonResponse({'success': False, 'message': 'Ce type de déduction existe déjà.'})
+
+        TypeDeduction.objects.create(nom=nom)
+        return JsonResponse({'success': True, 'message': 'Type de déduction ajouté avec succès.'})
+
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'}, status=405)
 
 def Supprimer_consommation(request):
     """ Supprime les ou une consommation associée à la prestation """

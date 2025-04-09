@@ -308,6 +308,7 @@ CSP_SCRIPT_SRC = (
     "'unsafe-inline'",
     "https://ajax.googleapis.com",
     "https://cdnjs.cloudflare.com",
+    "https://cdn.jsdelivr.net",
 )
 
 CSP_FRAME_SRC = (

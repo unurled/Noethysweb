@@ -74,6 +74,7 @@ urlpatterns = [
     path('individus/familles/prestations/modifier/<int:idfamille>/<int:pk>', famille_prestations.Modifier.as_view(), name='famille_prestations_modifier'),
     path('individus/familles/prestations/supprimer/<int:idfamille>/<int:pk>', famille_prestations.Supprimer.as_view(), name='famille_prestations_supprimer'),
     path('individus/familles/prestations/supprimer_plusieurs/<int:idfamille>/<str:listepk>', famille_prestations.Supprimer_plusieurs.as_view(), name='famille_prestations_supprimer_plusieurs'),
+    path('individus/familles/prestations/ajouter_type_deduction', famille_prestations.ajouter_type_deduction,name='ajouter_type_deduction'),
 
     path('individus/familles/factures/liste/<int:idfamille>', famille_factures.Liste.as_view(), name='famille_factures_liste'),
     path('individus/familles/factures/ajouter/<int:idfamille>', famille_factures.Ajouter.as_view(), name='famille_factures_ajouter'),
@@ -184,6 +185,4 @@ urlpatterns = [
     path('individus/location_get_tarif_location', secure_ajax(famille_locations.Get_tarif_location), name='ajax_get_tarif_location'),
     path('individus/famille_edition_renseignements/generer_pdf', secure_ajax(famille_edition_renseignements.Generer_pdf), name='ajax_famille_edition_renseignements_generer_pdf'),
     path('individus/envoi_recu_auto', secure_ajax(reglement_recu_auto.Envoyer_recu_automatiquement), name='ajax_envoi_recu_auto'),
-    path('individus/ajouter_deduction', secure_ajax(famille_prestations.Ajouter_deduction), name='ajax_ajouter_deduction'),
-
 ]

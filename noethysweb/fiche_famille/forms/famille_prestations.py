@@ -24,9 +24,6 @@ from crispy_forms.bootstrap import Field
 
 
 class DeductionForm(forms.ModelForm):
-    label = forms.ModelChoiceField(label="Label",
-                    widget=Select_avec_commandes_form(attrs={"url_ajax": "ajax_ajouter_deduction", "textes": {"champ": "Nom de la déduction", "ajouter": "Ajouter un type de déduction"}}),
-                    queryset=TypeDeduction.objects.all().order_by("nom"), required=False)
 
     class Meta:
         model = Deduction
@@ -90,6 +87,8 @@ class Formulaire(FormulaireBase, ModelForm):
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
         dependent_fields={"tarif": "tarif"}), queryset=TarifLigne.objects.all(), required=False,
         help_text="Attention, modifier ici la ligne tarifaire ne changera pas automatiquement le montant de la prestation.")
+    nom_type_deduction = forms.CharField(label="Ajouter un type de déduction ", help_text="Merci de vérifier que le nouveau type de déduction n'existe pas et qu'il est compréhensible de tous.", max_length=255, required=True)
+
 
     class Meta:
         model = Prestation
@@ -184,8 +183,19 @@ class Formulaire(FormulaireBase, ModelForm):
                         ),
                         css_class="form-group row"
                     ),
+
                 ),
             ),
+            Fieldset("Déductions paramètres",
+                     Div(
+                         Field('nom_type_deduction', css_class="form-control form-control-sm mb-2",
+                               style="white-space: nowrap;",),  # Champ en haut sur une seule ligne
+                         HTML(
+                             "<button type='button' class='btn btn-sm btn-primary' id='add_type_deduction'>Valider</button>"),
+                         # Bouton centré en dessous
+                         css_class="text-center"  # Centre le bouton sous le champ
+                     ),
+                     ),
             HTML(EXTRA_HTML),
         )
 
@@ -200,6 +210,26 @@ class Formulaire(FormulaireBase, ModelForm):
 
 EXTRA_HTML = """
 <script>
+//script type deduction
+    $(document).ready(function() {
+        $('#add_type_deduction').click(function() {
+            // Soumettre uniquement le champ nom_type_deduction
+            var nom_type_deduction = $('#id_nom_type_deduction').val();
+            if (nom_type_deduction) {
+                $.post("{% url 'ajouter_type_deduction' %}", {
+                    'nom_type_deduction': nom_type_deduction,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                }, function(response) {
+                    // Traiter la réponse du serveur, afficher message succès/erreur
+                    alert(response.message);
+                    location.reload();  // Recharger la page
+                });
+            } else {
+                alert("Veuillez entrer un nom pour le type de déduction.");
+            }
+        });
+    });
+
 
 // Sur sélection de l'individu
 function On_selection_individu() {
