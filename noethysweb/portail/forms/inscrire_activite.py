@@ -42,25 +42,31 @@ class Formulaire_extra(FormulaireBase, forms.Form):
         self.helper.layout = Layout()
 
         # Pour chaque tarif, ajoute un champ avec une case à cocher
-        liste_nom_tarif = NomTarif.objects.filter(activite=activite).order_by("nom").distinct()
+        liste_nom_tarif = NomTarif.objects.filter(activite=activite, visible=True).order_by("nom").distinct()
         for nom_tarif in liste_nom_tarif:
-            tarifs = Tarif.objects.filter(nom_tarif=nom_tarif, activite=activite)
-            field_name = f"tarifs_{nom_tarif.idnom_tarif}"
-            self.fields[field_name] = forms.ModelChoiceField(
-                label=nom_tarif.nom,
-                queryset=tarifs,
-                widget=forms.RadioSelect(),
-                required=False
-            )
-            # Modification du widget pour afficher le label avec description + montant_unique
-            tarif_choices = []
-            for tarif in tarifs:
-                tarif_lignes = TarifLigne.objects.filter(tarif=tarif)
-                montant_unique = tarif_lignes.first().montant_unique if tarif_lignes.exists() else 0
-                montant_formate = f"{montant_unique:,.2f}".replace(',', ' ').replace('.',',')  # Formater avec espace comme séparateur
-                tarif_choices.append((tarif.pk, f"{tarif.description} - {montant_formate}\u00A0€"))
+            tarifs = Tarif.objects.filter(nom_tarif=nom_tarif, activite=activite, visible=True)
 
-            self.fields[field_name].widget.choices = tarif_choices
+            # Vérifie si des tarifs sont associés au nom_tarif
+            if tarifs.exists():
+                field_name = f"tarifs_{nom_tarif.idnom_tarif}"
+                self.fields[field_name] = forms.ModelChoiceField(
+                    label=nom_tarif.nom,
+                    queryset=tarifs,
+                    widget=forms.RadioSelect(),
+                    required=False
+                )
+                # Modification du widget pour afficher le label avec description + montant_unique
+                tarif_choices = []
+                for tarif in tarifs:
+                    tarif_lignes = TarifLigne.objects.filter(tarif=tarif)
+                    montant_unique = tarif_lignes.first().montant_unique if tarif_lignes.exists() else 0
+                    montant_formate = f"{montant_unique:,.2f}".replace(',', ' ').replace('.',
+                                                                                         ',')  # Formater avec espace comme séparateur
+                    tarif_choices.append((tarif.pk, f"{tarif.description} - {montant_formate}\u00A0€"))
+
+                self.fields[field_name].widget.choices = tarif_choices
+            else:
+                continue
 
         liste_groupes = Groupe.objects.filter(activite=activite).order_by("nom")
         self.fields["groupe"].queryset = liste_groupes

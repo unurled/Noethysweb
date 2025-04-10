@@ -19,7 +19,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Individu
-        fields = ["civilite", "nom", "nom_jfille", "prenom", "date_naiss", "cp_naiss", "ville_naiss", "type_sieste", "statut", "secu"]
+        fields = ["civilite", "nom", "nom_jfille", "prenom", "date_naiss", "cp_naiss", "ville_naiss", "type_sieste", "statut", "secu","photo"]
         widgets = {
             'cp_naiss': CodePostal(attrs={"id_ville": "id_ville_naiss"}),
             'ville_naiss': Ville(attrs={"id_codepostal": "id_cp_naiss"}),
@@ -47,6 +47,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "date_naiss": _("Saisissez la date de naissance au format JJ/MM/AAAA."),
             "cp_naiss": _("Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante."),
             "ville_naiss": _("Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante."),
+            "photo": _("Ajoutez une photo de profil à l'individu. Elle servira pour les trombinoscopes"),
         }
 
         # Champs affichables
@@ -55,7 +56,7 @@ class Formulaire(FormulaireBase, ModelForm):
             {"titre": _("Statut dans le Mouvement"), "champs": ["statut"]},
             {"titre": _("Naissance"), "champs": ["date_naiss", "cp_naiss", "ville_naiss"]},
             {"titre": _("Sécurité sociale"), "champs": ["secu"]},
-            {"titre": _("Divers"), "champs": ["type_sieste"]},
+            {"titre": _("Divers"), "champs": ["type_sieste","photo"]},
         ]
 
         # Préparation du layout

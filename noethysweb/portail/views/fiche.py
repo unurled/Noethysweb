@@ -18,6 +18,8 @@ from portail.views.base import CustomView
 from portail.utils import utils_onglets
 from core.views import crud
 from core.models import PortailRenseignement
+from django.core.files.images import ImageFile
+
 
 
 class Onglet(CustomView):
@@ -112,6 +114,10 @@ class Onglet(CustomView):
         # Si document uploadé
         if type(valeur) in (TemporaryUploadedFile, InMemoryUploadedFile, FieldFile):
             valeur = None
+
+        # Si c'est un fichier d'image
+        if isinstance(valeur, ImageFile):
+            valeur = "nouvelle photo"
 
         # Transforme la valeur en json
         return json.dumps(valeur, cls=DjangoJSONEncoder)

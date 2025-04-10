@@ -1470,6 +1470,8 @@ class NomTarif(models.Model):
     idnom_tarif = models.AutoField(verbose_name="ID", db_column='IDnom_tarif', primary_key=True)
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
     nom = models.CharField(verbose_name="Nom", max_length=300)
+    visible = models.BooleanField(verbose_name="Visible sur le portail", default=True)
+
 
     class Meta:
         db_table = 'noms_tarifs'
@@ -1524,6 +1526,7 @@ class Tarif(models.Model):
     penalite = models.CharField(verbose_name="Pénalité", max_length=100, choices=choix_penalite, default=None, blank=True, null=True, help_text="Sélectionnez un type de pénalité financière à appliquer en cas d'absence injustifiée.")
     penalite_pourcentage = models.DecimalField(verbose_name="Pourcentage", max_digits=10, decimal_places=2, default=100, blank=True, null=True, help_text="Saisissez le pourcentage à appliquer.")
     penalite_label = models.CharField(verbose_name="Label de la prestation", max_length=300, blank=True, null=True, help_text="Saisissez le label de la prestation de pénalité. Laissez vide pour utiliser le label par défaut. Mots-clés disponibles : {LABEL_PRESTATION}.")
+    visible = models.BooleanField(verbose_name="Visible sur le portail", default=True)
 
     class Meta:
         db_table = 'tarifs'

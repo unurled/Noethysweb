@@ -40,4 +40,5 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('activite', value=activite.idactivite),
             Field("nom"),
+            Field("visible")
         )

@@ -358,6 +358,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Tab("Généralités",
                     Field("date_debut"),
                     Field("description"),
+                    Field("visible"),
                Tab("Type de tarif",
                    Hidden("type", value="FORFAIT"),
                     ),

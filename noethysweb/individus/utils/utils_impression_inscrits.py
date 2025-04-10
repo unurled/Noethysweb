@@ -137,6 +137,15 @@ class Impression(utils_impression.Impression):
             # Création de la ligne du tableau
             data_tableau.append([Paragraph(valeurs.get(colonne["code"], None) or "", style_defaut) for colonne in self.dict_donnees["colonnes_perso"]])
 
+        def smart_key(cell):
+            text = cell.text.replace(',', '.').strip()
+            try:
+                return (0, float(text))  # Priorité aux nombres
+            except ValueError:
+                return (1, text.lower())  # Ensuite les textes
+
+        data_tableau[1:] = sorted(data_tableau[1:], key=lambda row: smart_key(row[0]))
+
         # Finalisation du tableau
         style = TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),

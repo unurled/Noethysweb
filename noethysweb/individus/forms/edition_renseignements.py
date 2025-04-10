@@ -36,7 +36,6 @@ class Formulaire(FormulaireBase, forms.Form):
                           """<a type='button' class="btn btn-primary margin-r-5" onclick="generer_pdf()" title="Génération du PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Générer le PDF</a>"""),
                       ]),
             Fieldset("Options",
-                Field("tri"),
                 Field("afficher_signature"),
                 Field("mode_condense"),
             ),
