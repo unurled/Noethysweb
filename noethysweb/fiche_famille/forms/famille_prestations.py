@@ -87,7 +87,7 @@ class Formulaire(FormulaireBase, ModelForm):
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
         dependent_fields={"tarif": "tarif"}), queryset=TarifLigne.objects.all(), required=False,
         help_text="Attention, modifier ici la ligne tarifaire ne changera pas automatiquement le montant de la prestation.")
-    nom_type_deduction = forms.CharField(label="Ajouter un type de déduction ", help_text="Merci de vérifier que le nouveau type de déduction n'existe pas et qu'il est compréhensible de tous.", max_length=255, required=True)
+    nom_type_deduction = forms.CharField(label="Ajouter un type de déduction ", help_text="Merci de vérifier que le nouveau type de déduction n'existe pas et qu'il est compréhensible de tous.", max_length=255, required=False)
 
 
     class Meta:
@@ -191,7 +191,7 @@ class Formulaire(FormulaireBase, ModelForm):
                          Field('nom_type_deduction', css_class="form-control form-control-sm mb-2",
                                style="white-space: nowrap;",),  # Champ en haut sur une seule ligne
                          HTML(
-                             "<button type='button' class='btn btn-sm btn-primary' id='add_type_deduction'>Valider</button>"),
+                             "<button type='button' class='btn btn-sm btn-primary' id='add_type_deduction'>Ajouter le type de déduction</button>"),
                          # Bouton centré en dessous
                          css_class="text-center"  # Centre le bouton sous le champ
                      ),
