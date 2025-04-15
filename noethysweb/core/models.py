@@ -2506,7 +2506,7 @@ class Deduction(models.Model):
     famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT)
     date = models.DateField(verbose_name="Date")
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)
-    label = models.ForeignKey(TypeDeduction, verbose_name="Label", on_delete=models.PROTECT, blank=True, null=True, default=1)
+    label = models.ForeignKey(TypeDeduction, verbose_name="Label", on_delete=models.PROTECT, blank=True, null=True)
     aide = models.ForeignKey(Aide, verbose_name="Aide", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
