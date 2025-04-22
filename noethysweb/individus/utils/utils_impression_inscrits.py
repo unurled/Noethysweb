@@ -11,9 +11,10 @@ from reportlab.platypus import Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
-from core.models import Inscription, Ventilation, Prestation, Rattachement, Cotisation
+from core.models import Inscription, Ventilation, Prestation, Rattachement, Cotisation, Tarif, Individu
 from core.utils import utils_texte, utils_impression, utils_questionnaires
-
+import os, uuid
+from django.conf import settings
 
 class Impression(utils_impression.Impression):
     def __init__(self, *args, **kwds):
@@ -43,6 +44,14 @@ class Impression(utils_impression.Impression):
                 dict_parents[rattachement.famille_id].append(rattachement.individu)
             if rattachement.categorie == 2:
                 liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
+        def Rechercher_tarifs(inscription=None):
+            prestations = Prestation.objects.filter(
+                individu=inscription.individu,
+                activite=inscription.activite
+            ).select_related('tarif')
+            labels_tarifs = [p.tarif.description for p in prestations if p.tarif]
+
+            return " | ".join(labels_tarifs)
 
         def Rechercher_tel_parents(inscription=None):
             liste_tel = []
@@ -114,6 +123,8 @@ class Impression(utils_impression.Impression):
                 "date_fin": inscription.date_fin.strftime("%d/%m/%Y") if inscription.date_fin else "",
                 "groupe": inscription.groupe.nom,
                 "categorie_tarif": inscription.categorie_tarif.nom,
+                "tarifs": Rechercher_tarifs(inscription),
+                "ind": inscription.individu.get_statut_display(),
                 "nom": inscription.individu.nom,
                 "prenom": inscription.individu.prenom,
                 "date_naiss": inscription.individu.date_naiss.strftime("%d/%m/%Y") if inscription.individu.date_naiss else "",
@@ -135,7 +146,10 @@ class Impression(utils_impression.Impression):
             valeurs.update({"question_individu_%d" % question["IDquestion"]: question["reponse"] for question in questionnaires_individus.GetDonnees(inscription.individu_id)})
 
             # Création de la ligne du tableau
-            data_tableau.append([Paragraph(valeurs.get(colonne["code"], None) or "", style_defaut) for colonne in self.dict_donnees["colonnes_perso"]])
+            data_tableau.append([
+                Paragraph(str(valeurs.get(colonne["code"], "")), style_defaut)
+                for colonne in self.dict_donnees["colonnes_perso"]
+            ])
 
         def smart_key(cell):
             text = cell.text.replace(',', '.').strip()
