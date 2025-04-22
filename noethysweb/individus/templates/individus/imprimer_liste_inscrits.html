@@ -35,6 +35,30 @@
                 }
             })
         };
+
+        function generer_csv() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_imprimer_liste_inscrits_generer_csv' %}",
+                data: $("#form_parametres").serialize(),
+                dataType: "json",  // Correctement défini
+                success: function(data) {
+                    if (data.url_csv) {
+                        window.location.href = data.url_csv;
+                    } else {
+                        // Si la réponse ne contient pas d'URL CSV, affichez un message d'erreur
+                        toastr.error("Aucune URL CSV trouvée dans la réponse.");
+                    }
+                },
+                error: function(data) {
+                    if (data.responseJSON && data.responseJSON.erreur) {
+                        toastr.error(data.responseJSON.erreur);
+                    } else {
+                        toastr.error("Une erreur inattendue s'est produite.");
+                    }
+                }
+            });
+        }
     </script>
 
 {% endblock contenu_page %}

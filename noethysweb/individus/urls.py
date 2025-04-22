@@ -207,6 +207,7 @@ urlpatterns = [
     path('individus/inscriptions_changer_groupe', secure_ajax(inscriptions_changer_groupe.Appliquer), name='ajax_inscriptions_changer_groupe'),
     path('individus/liste_pieces_manquantes_email', secure_ajax(liste_pieces_manquantes.Envoi_emails), name='ajax_liste_pieces_manquantes_emails'),
     path('individus/imprimer_liste_inscrits/generer_pdf', secure_ajax(imprimer_liste_inscrits.Generer_pdf), name='ajax_imprimer_liste_inscrits_generer_pdf'),
+    path('individus/imprimer_liste_inscrits/generer_csv', secure_ajax(imprimer_liste_inscrits.Generer_csv), name='ajax_imprimer_liste_inscrits_generer_csv'),
     path('individus/famille_attestations/generer_pdf', secure_ajax(famille_attestations.Generer_pdf), name='ajax_famille_attestations_generer_pdf'),
     path('individus/questionnaires/individus/relance/', secure_ajax(liste_questionnaires_individus.traiter_relance), name='ajax_get_relance'),
 ]

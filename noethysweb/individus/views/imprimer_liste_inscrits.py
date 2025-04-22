@@ -5,10 +5,14 @@
 
 import json
 from django.views.generic import TemplateView
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from core.models import Parametre
 from core.views.base import CustomView
 from individus.forms.imprimer_liste_inscrits import Formulaire
+import csv
+import os
+from django.conf import settings
+from individus.utils import utils_impression_inscrits
 
 
 def get_data_profil(donnees=None, request=None):
@@ -23,6 +27,39 @@ def get_data_profil(donnees=None, request=None):
     data.pop("date_situation")
     return data
 
+
+def Generer_csv(request):
+    if request.method == 'POST':
+        form = Formulaire(request.POST, request=request)
+        if form.is_valid():
+            if not form.cleaned_data.get("colonnes_perso"):
+                return JsonResponse({"erreur": "Vous devez créer au moins une colonne."}, status=400)
+
+            try:
+                impression = utils_impression_inscrits.Impression(dict_donnees=form.cleaned_data)
+                impression.Draw()  # Assurez-vous d'appeler cette méthode pour remplir data_tableau
+
+                # Générer le fichier CSV et obtenir son chemin
+                csv_file_path = os.path.join(settings.MEDIA_ROOT, 'inscriptions.csv')
+                with open(csv_file_path, 'w', newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    headers = [col["nom"] for col in form.cleaned_data["colonnes_perso"]]
+                    writer.writerow(headers)
+                    for row in impression.data_tableau[1:]:  # saute la ligne d’en-tête
+                        writer.writerow([
+                            cell.text if hasattr(cell, "text") else cell
+                            for cell in row  # Assurez-vous de parcourir chaque cellule de la ligne
+                        ])
+
+                # Construire l'URL du fichier CSV
+                csv_url = request.build_absolute_uri(settings.MEDIA_URL + 'inscriptions.csv')
+                return JsonResponse({"url_csv": csv_url})
+            except Exception as e:
+                return JsonResponse({"erreur": str(e)}, status=500)
+        else:
+            return JsonResponse({"erreur": "Veuillez compléter les paramètres."}, status=400)
+    else:
+        return JsonResponse({"erreur": "Méthode non autorisée."}, status=405)
 
 def Generer_pdf(request):
     # Récupération des paramètres

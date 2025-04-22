@@ -62,6 +62,8 @@ class Formulaire(FormulaireBase, forms.Form):
                             </button>
                             <div class="dropdown-menu" role="menu">
                                 <a type='button' class="btn" onclick="generer_pdf(telechargement=true)" title="Télécharger le PDF"><i class='fa fa-download margin-r-5'></i> Télécharger le PDF</a>
+                                <a type='button' class="btn" onclick="generer_csv()" title="Télécharger en CSV"><i class='fa fa-download margin-r-5'></i> Télécharger en CSV</a>
+
                             </div>
                         </div>
                     """)

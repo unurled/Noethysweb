@@ -170,4 +170,24 @@ class Impression(utils_impression.Impression):
         # Création du tableau
         tableau = Table(data_tableau, largeurs_colonnes)
         tableau.setStyle(style)
+        self.data_tableau = data_tableau
         self.story.append(tableau)
+
+    def get_csv_response(self):
+        from django.http import HttpResponse
+        import csv
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="inscriptions.csv"'
+        writer = csv.writer(response)
+
+        # Écrire les en-têtes
+        headers = [col["nom"] for col in self.dict_donnees["colonnes_perso"]]
+        writer.writerow(headers)
+
+        # Écrire les lignes de données
+        for row in self.data_tableau[1:]:  # saute la ligne d’en-tête
+            writer.writerow([
+                cell.text if hasattr(cell, "text") else cell  # .text si c’est un Paragraph, sinon la chaîne
+            ])
+
+        return response
