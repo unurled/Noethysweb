@@ -8,7 +8,7 @@ from core.views.base import CustomView
 from django.views.generic import TemplateView
 from core.utils import utils_dates, utils_infos_individus, utils_dictionnaires
 from individus.forms.liste_inscriptions_attente import Formulaire
-from core.models import Inscription, Activite, Groupe
+from core.models import Inscription, Activite, Groupe, PortailRenseignement, Tarif, Prestation
 from django.db.models import Q, Count
 import json
 
@@ -38,6 +38,36 @@ class View(CustomView, TemplateView):
             "resultats": json.dumps(self.Get_resultats(parametres=form.cleaned_data)),
         }
         return self.render_to_response(self.get_context_data(**context))
+    def split_value(self, value):
+            try:
+                parts = json.loads(value).split(';')  # Supposons que les parties sont séparées par des points-virgules
+                if len(parts) < 3:
+                    parts.extend([''] * (3 - len(parts)))  # Ajoutez des chaînes vides si moins de 3 parties
+                return parts[0], parts[1], parts[2]
+            except (json.JSONDecodeError, IndexError):
+                return '', '', ''  # Retourne des chaînes vides en cas d'erreur
+
+    def Rechercher_tarifs(self, inscription=None, liste_tarifs=None):
+        if inscription:
+            prestations = Prestation.objects.filter(
+                individu=inscription.individu,
+                activite=inscription.activite
+            ).select_related('tarif')
+            labels_tarifs = [p.tarif.description for p in prestations if p.tarif]
+            return " | ".join(labels_tarifs)
+
+        elif liste_tarifs:
+            try:
+                liste_ids = json.loads(liste_tarifs)
+
+                # Sécurité : forcer des entiers
+                liste_ids = [int(x) for x in liste_ids if str(x).isdigit()]
+                tarifs = Tarif.objects.filter(pk__in=liste_ids)
+                return " | ".join([t.description for t in tarifs])
+            except Exception as e:
+                print("ERREUR TARIF:", e)
+                return ""
+
 
     def Get_resultats(self, parametres={}):
         if not parametres:
@@ -45,23 +75,52 @@ class View(CustomView, TemplateView):
 
         # Récupération des paramètres
         param_activites = json.loads(parametres["activites"])
-        if param_activites["type"] == "groupes_activites":
-            condition_activites = Q(activite__groupes_activites__in=param_activites["ids"])
-            liste_activites = Activite.objects.filter(groupes_activites__in=param_activites["ids"])
-        if param_activites["type"] == "activites":
-            condition_activites = Q(activite__in=param_activites["ids"])
-            liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
+        condition_activites = Q(activite__in=param_activites["ids"])
+        liste_activites = Activite.objects.filter(pk__in=param_activites["ids"])
 
-        # Importation des inscriptions en attente ou refusées
-        inscriptions = Inscription.objects.select_related('individu', 'activite', 'groupe', 'categorie_tarif').filter(condition_activites, statut=self.etat)
-
+        renseignements = PortailRenseignement.objects.filter(categorie="activites", code="inscrire_activite", etat="ATTENTE", activite__in=liste_activites)
+        # Traitement des résultats
         dictInscriptions = {}
         dictGroupes = {}
+
+        # Pré-traitement des renseignements en attente (simulant des inscriptions en attente)
+        for renseignement in renseignements:
+            part1, part2, part3 = self.split_value(renseignement.nouvelle_valeur)
+            try:
+                IDactivite = int(part1)
+                IDgroupe = int(part2)
+                Tarifs = part3
+            except ValueError:
+                continue
+
+            utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictInscriptions, cles=[IDactivite, IDgroupe],
+                                                     valeur=[])
+            dictTemp = {
+                "IDinscription": renseignement.pk,
+                "IDindividu": renseignement.individu.pk,
+                "nom_individu": renseignement.individu.Get_nom(),
+                "date_inscription": renseignement.date,
+                "IDactivite": IDactivite,
+                "IDgroupe": IDgroupe,
+                "IDfamille": renseignement.famille.pk,
+                "nomCategorie": "Pré-inscription",
+                "libelle_tarifs": self.Rechercher_tarifs(liste_tarifs=part3),
+            }
+            dictInscriptions[IDactivite][IDgroupe].append(dictTemp)
+
+            # Mémorisation du nom de groupe s'il n'est pas déjà connu
+            if IDgroupe not in dictGroupes:
+                groupe = Groupe.objects.filter(pk=IDgroupe).first()
+                if groupe:
+                    dictGroupes[IDgroupe] = groupe.nom
+
+        inscriptions = Inscription.objects.select_related('individu', 'activite', 'groupe',).filter(condition_activites, statut=self.etat)
+
         for inscription in inscriptions:
             utils_dictionnaires.DictionnaireImbrique(dictionnaire=dictInscriptions, cles=[inscription.activite_id, inscription.groupe_id], valeur=[])
             dictTemp = {"IDinscription": inscription.pk, "IDindividu": inscription.individu_id, "nom_individu": inscription.individu.Get_nom(),
                         "date_inscription": inscription.date_debut, "IDactivite": inscription.activite_id, "IDgroupe": inscription.groupe_id,
-                        "IDfamille": inscription.famille_id, "nomCategorie": inscription.categorie_tarif.nom}
+                        "IDfamille": inscription.famille_id, "nomCategorie": inscription.categorie_tarif.nom, "libelle_tarifs": self.Rechercher_tarifs(inscription=inscription),}
             dictInscriptions[inscription.activite_id][inscription.groupe_id].append(dictTemp)
 
             # Mémorisation des groupes
@@ -126,45 +185,39 @@ class View(CustomView, TemplateView):
             # Branches Groupes
             listeGroupes = list(dictInscriptions[IDactivite].keys())
             listeGroupes.sort()
+            num = 1
 
             for IDgroupe in listeGroupes:
-                id_groupe = "groupe_%s" % IDgroupe
-                liste_resultats.append({"id": id_groupe, "pid": id_activite, "type": "groupe", "label": dictGroupes[IDgroupe], "date_saisie": "", "categorie_tarif": "", "action": ""})
-
-                # Branches Inscriptions
-                num = 1
                 for dictInscription in dictInscriptions[IDactivite][IDgroupe]:
                     texteIndividu = "%d. %s" % (num, dictInscription["nom_individu"])
 
-                    # Recherche si place dispo
                     nbre_places_dispo = self.RechercheSiPlaceDispo(dictActivites[IDactivite], IDgroupe)
+                    place_dispo = nbre_places_dispo is None or nbre_places_dispo > 0
 
-                    if nbre_places_dispo == None or nbre_places_dispo > 0:
-                        place_dispo = True
-
-                        # Modifie le nombre de places disponibles
-                        if dictActivites[IDactivite]["nbre_places_disponibles"] != None:
+                    # Mise à jour des places restantes
+                    if place_dispo:
+                        if dictActivites[IDactivite]["nbre_places_disponibles"] is not None:
                             dictActivites[IDactivite]["nbre_places_disponibles"] -= 1
-                        if dictActivites[IDactivite]["groupes"][IDgroupe]["nbre_places_disponibles"] != None:
+                        if dictActivites[IDactivite]["groupes"][IDgroupe]["nbre_places_disponibles"] is not None:
                             dictActivites[IDactivite]["groupes"][IDgroupe]["nbre_places_disponibles"] -= 1
-                    else:
-                        place_dispo = False
 
-                    # Image
-                    if place_dispo == True:
-                        label = "<i class='fa fa-check margin-r-5 text-green'></i> %s" % texteIndividu
-                    else:
-                        label = "<i class='fa fa-remove margin-r-5 text-red'></i> %s" % texteIndividu
+                    icone = "fa-check text-green" if place_dispo else "fa-remove text-red"
+                    label = f"<i class='fa {icone} margin-r-5'></i> {texteIndividu}"
 
-                    # URL fiche famille
                     url = reverse("famille_resume", args=[dictInscription["IDfamille"]])
-                    action = "<a type='button' class='btn btn-default btn-sm' href='%s' title='Accéder à la fiche famille'><i class='fa fa-folder-open-o'></i></a>" % url
+                    action = f"<a type='button' class='btn btn-default btn-sm' href='{url}' title='Accéder à la fiche famille'><i class='fa fa-folder-open-o'></i></a>"
 
-                    # Mémorisation
-                    id_inscription = "groupe_%s" % dictInscription["IDinscription"]
-                    liste_resultats.append({"id": id_inscription, "pid": id_groupe, "type": "inscription", "label": label,
-                                            "date_saisie": utils_dates.DateComplete(dictInscription["date_inscription"]),
-                                            "categorie_tarif": dictInscription["nomCategorie"], "action": action})
+                    id_inscription = f"inscription_{dictInscription['IDinscription']}"
+                    liste_resultats.append({
+                        "id": id_inscription,
+                        "pid": id_activite,
+                        "type": "inscription",
+                        "label": label,
+                        "date_saisie": utils_dates.DateComplete(dictInscription["date_inscription"]),
+                        "categorie_tarif": dictInscription["nomCategorie"],
+                        "tarifs": dictInscription["libelle_tarifs"],
+                        "action": action
+                    })
 
                     num += 1
 
