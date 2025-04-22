@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-#  Copyright (c) 2019-2021 Ivan LUCAS.
-#  Noethysweb, application de gestion multi-activités.
-#  Distribué sous licence GNU GPL.
-
 import logging, decimal
 logger = logging.getLogger(__name__)
 logging.getLogger('PIL').setLevel(logging.WARNING)
@@ -19,7 +14,7 @@ from django.conf import settings
 class Impression(utils_impression.Impression):
     def __init__(self, *args, **kwds):
         kwds["taille_page"] = landscape(A4) if kwds["dict_donnees"]["orientation"] == "paysage" else portrait(A4)
-        utils_impression.Impression.__init__(self, *args, **kwds)
+        super().__init__(*args, **kwds)
 
     def Draw(self):
         # Importation des inscriptions
@@ -40,25 +35,23 @@ class Impression(utils_impression.Impression):
         liste_enfants = []
         for rattachement in Rattachement.objects.select_related("individu").all():
             if rattachement.categorie == 1:
-                dict_parents.setdefault(rattachement.famille_id, [])
-                dict_parents[rattachement.famille_id].append(rattachement.individu)
+                dict_parents.setdefault(rattachement.famille_id, []).append(rattachement.individu)
             if rattachement.categorie == 2:
                 liste_enfants.append((rattachement.famille_id, rattachement.individu_id))
+
         def Rechercher_tarifs(inscription=None):
             prestations = Prestation.objects.filter(
                 individu=inscription.individu,
                 activite=inscription.activite
             ).select_related('tarif')
-            labels_tarifs = [p.tarif.description for p in prestations if p.tarif]
-
-            return " | ".join(labels_tarifs)
+            return " | ".join(p.tarif.description for p in prestations if p.tarif)
 
         def Rechercher_tel_parents(inscription=None):
             liste_tel = []
             if (inscription.famille_id, inscription.individu_id) in liste_enfants:
                 for individu in dict_parents.get(inscription.famille_id, []):
                     if individu.tel_mobile and individu != inscription.individu:
-                        liste_tel.append("%s : %s" % (individu.prenom, individu.tel_mobile))
+                        liste_tel.append(f"{individu.prenom} : {individu.tel_mobile}")
             return " | ".join(liste_tel)
 
         def Rechercher_mail_parents(inscription=None):
@@ -66,14 +59,13 @@ class Impression(utils_impression.Impression):
             if (inscription.famille_id, inscription.individu_id) in liste_enfants:
                 for individu in dict_parents.get(inscription.famille_id, []):
                     if individu.mail and individu != inscription.individu:
-                        liste_mail.append("%s : %s" % (individu.prenom, individu.mail))
+                        liste_mail.append(f"{individu.prenom} : {individu.mail}")
             return " | ".join(liste_mail)
 
         # Recherche des cotisations
         dict_cotisations = {}
         for cotisation in Cotisation.objects.filter(date_debut__lte=self.dict_donnees["activite"].date_fin, date_fin__gte=self.dict_donnees["activite"].date_debut).order_by("-date_debut"):
-            dict_cotisations.setdefault(cotisation.famille_id, [])
-            dict_cotisations[cotisation.famille_id].append(cotisation)
+            dict_cotisations.setdefault(cotisation.famille_id, []).append(cotization)
 
         def Rechercher_cotisation(inscription=None):
             for cotisation in dict_cotisations.get(inscription.famille_id, []):
@@ -142,8 +134,8 @@ class Impression(utils_impression.Impression):
             }
 
             # Ajout des réponses des questionnaires
-            valeurs.update({"question_famille_%d" % question["IDquestion"]: question["reponse"] for question in questionnaires_familles.GetDonnees(inscription.famille_id)})
-            valeurs.update({"question_individu_%d" % question["IDquestion"]: question["reponse"] for question in questionnaires_individus.GetDonnees(inscription.individu_id)})
+            valeurs.update({f"question_famille_{question['IDquestion']}": question["reponse"] for question in questionnaires_familles.GetDonnees(inscription.famille_id)})
+            valeurs.update({f"question_individu_{question['IDquestion']}": question["reponse"] for question in questionnaires_individus.GetDonnees(inscription.individu_id)})
 
             # Création de la ligne du tableau
             data_tableau.append([

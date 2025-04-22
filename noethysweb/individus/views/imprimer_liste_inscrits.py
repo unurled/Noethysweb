@@ -45,11 +45,16 @@ def Generer_csv(request):
                     writer = csv.writer(csvfile)
                     headers = [col["nom"] for col in form.cleaned_data["colonnes_perso"]]
                     writer.writerow(headers)
-                    for row in impression.data_tableau[1:]:  # saute la ligne d’en-tête
-                        writer.writerow([
-                            cell.text if hasattr(cell, "text") else cell
-                            for cell in row  # Assurez-vous de parcourir chaque cellule de la ligne
-                        ])
+
+                    # Utilisation d'un générateur pour écrire les lignes
+                    def generate_rows():
+                        for row in impression.data_tableau[1:]:  # saute la ligne d’en-tête
+                            yield [
+                                cell.text if hasattr(cell, "text") else cell
+                                for cell in row
+                            ]
+
+                    writer.writerows(generate_rows())
 
                 # Construire l'URL du fichier CSV
                 csv_url = request.build_absolute_uri(settings.MEDIA_URL + 'inscriptions.csv')
