@@ -44,7 +44,7 @@ class Impression(utils_impression.Impression):
                 individu=inscription.individu,
                 activite=inscription.activite
             ).select_related('tarif')
-            return " | ".join(p.tarif.description for p in prestations if p.tarif)
+            return " | ".join(p.label for p in prestations)
 
         def Rechercher_tel_parents(inscription=None):
             liste_tel = []
