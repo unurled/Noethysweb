@@ -1,3 +1,6 @@
+Version 1.3.5.5.48 (23/04/2025)
+- Problème profil impression
+
 Version 1.3.5.5.47 (23/04/2025)
 - Liste inscriptions en attente intégrant les portail renseignement
 

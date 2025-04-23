@@ -37,8 +37,12 @@ def Modifier_profil_configuration(request):
     # Ajouter un profil
     if action == "ajouter":
         parametre = Parametre.objects.create(categorie=categorie, nom=nom, utilisateur=utilisateur, structure_id=idstructure)
-        Enregistrer(request=request, module=module, idprofil=parametre.pk)
+        erreur = Enregistrer(request=request, module=module, idprofil=parametre.pk)
+        if isinstance(erreur, JsonResponse):  # Si une erreur a été retournée
+            return erreur  # Renvoi de l'erreur au front
+
         return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
+    return JsonResponse({"erreur": "Erreur ! Merci de vérifier les paramètres"}, status=401)
 
     # Modifier un profil
     if action == "modifier":
@@ -48,6 +52,7 @@ def Modifier_profil_configuration(request):
         parametre.structure_id = idstructure
         parametre.save()
         return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
+    return JsonResponse({"erreur": "Erreur ! Merci de vérfier les paramètres"}, status=401)
 
     # Supprimer un profil
     if action == "supprimer":
@@ -59,16 +64,21 @@ def Modifier_profil_configuration(request):
             return JsonResponse({"erreur": "Vous ne pouvez pas supprimer ce profil"}, status=401)
 
     if action == "enregistrer":
-        Enregistrer(request=request, module=module, idprofil=idprofil)
-        return JsonResponse({"action": action})
+        erreur = Enregistrer(request=request, module=module, idprofil=parametre.pk)
+        if isinstance(erreur, JsonResponse):  # Si une erreur a été retournée
+            return erreur  # Renvoi de l'erreur au front
 
-    return JsonResponse({"erreur": "Erreur !"}, status=401)
+        return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
+
+    return JsonResponse({"erreur": "Erreur ! Merci de vérifier les paramètres"}, status=401)
 
 
 def Enregistrer(request=None, module="", idprofil=None):
     """ Mémorise les paramètres du profil """
     donnees = QueryDict(request.POST.get("donnees"))
-
+    activite = donnees.getlist("activite")  # On utilise getlist pour obtenir toutes les valeurs associées
+    if not activite or activite[0].strip() == "":
+        return JsonResponse({"erreur": "Aucune activité sélectionnée."}, status=400)
     # Récupération des paramètres à sauvegarder dans le profil
     module = importlib.import_module(module)
     data = module.get_data_profil(donnees, request=request)
