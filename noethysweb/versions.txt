@@ -1,3 +1,6 @@
+Version 1.3.5.5.49 (23/04/2025)
+- Beug profil impression
+
 Version 1.3.5.5.48 (23/04/2025)
 - Problème profil impression
 

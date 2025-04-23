@@ -42,7 +42,6 @@ def Modifier_profil_configuration(request):
             return erreur  # Renvoi de l'erreur au front
 
         return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
-    return JsonResponse({"erreur": "Erreur ! Merci de vérifier les paramètres"}, status=401)
 
     # Modifier un profil
     if action == "modifier":
@@ -52,7 +51,6 @@ def Modifier_profil_configuration(request):
         parametre.structure_id = idstructure
         parametre.save()
         return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
-    return JsonResponse({"erreur": "Erreur ! Merci de vérfier les paramètres"}, status=401)
 
     # Supprimer un profil
     if action == "supprimer":
@@ -64,14 +62,11 @@ def Modifier_profil_configuration(request):
             return JsonResponse({"erreur": "Vous ne pouvez pas supprimer ce profil"}, status=401)
 
     if action == "enregistrer":
-        erreur = Enregistrer(request=request, module=module, idprofil=parametre.pk)
+        erreur = Enregistrer(request=request, module=module, idprofil=idprofil)
         if isinstance(erreur, JsonResponse):  # Si une erreur a été retournée
             return erreur  # Renvoi de l'erreur au front
 
-        return JsonResponse({"action": action, "id": parametre.pk, "profil_nom": parametre.nom})
-
-    return JsonResponse({"erreur": "Erreur ! Merci de vérifier les paramètres"}, status=401)
-
+        return JsonResponse({"action": action})
 
 def Enregistrer(request=None, module="", idprofil=None):
     """ Mémorise les paramètres du profil """
