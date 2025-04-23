@@ -39,7 +39,7 @@ class Liste_commun():
 
     def Get_condition_structure(self):
         """ Retourne une condition sql pour sélectionner les données associées à une structure ou toutes les structures """
-        condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        condition = Q(structure__in=self.request.user.structures.filter(visible=True)) | Q(structure__isnull=True)
         return condition
 
     def Get_filtres(self, mode=None):

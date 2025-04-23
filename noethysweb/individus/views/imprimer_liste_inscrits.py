@@ -41,7 +41,7 @@ def Generer_csv(request):
 
                 # Générer le fichier CSV et obtenir son chemin
                 csv_file_path = os.path.join(settings.MEDIA_ROOT, 'inscriptions.csv')
-                with open(csv_file_path, 'w', newline='') as csvfile:
+                with open(csv_file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
                     writer = csv.writer(csvfile)
                     headers = [col["nom"] for col in form.cleaned_data["colonnes_perso"]]
                     writer.writerow(headers)
