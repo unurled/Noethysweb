@@ -17,7 +17,7 @@ def Ajouter(titre="", detail="", utilisateur=None, famille=None, individu=None, 
         Historique.objects.create(titre=titre, detail=detail, utilisateur=utilisateur, famille_id=famille, individu_id=individu,
                                   collaborateur_id=collaborateur, objet=objet, idobjet=idobjet, classe=classe, old=old, portail=portail, activite_id=activite)
     except Exception as err:
-        logger.error("Erreur dans ajout historique : %s" % err)
+        logger.error('Erreur dans ajout historique : %s - titre="%s" detail="%s"', err, titre, detail, exc_info=True)
 
 
 def Ajouter_plusieurs(actions=[]):
