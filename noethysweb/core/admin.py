@@ -8,7 +8,8 @@ from core.models import Utilisateur, Structure
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Permission, Group
 from django import forms
-
+from django.utils.html import format_html
+from core.views.login import genereate_login_link
 
 # --------------------------- Groupes d'utilisateurs ----------------------------
 
@@ -52,7 +53,7 @@ class UtilisateurAdmin(UserAdmin):
     form = UserEditForm
 
     # Ajoute la colonne is_active dans la liste des utilisateurs
-    list_display = UserAdmin.list_display + ('is_active',)
+    list_display = UserAdmin.list_display + ('is_active', "login_link")
 
     # Affichage des champs
     fieldsets = (
@@ -66,9 +67,18 @@ class UtilisateurAdmin(UserAdmin):
     )
 
     def get_queryset(self, request):
+        # Stock request for usage in login_link
+        self._request = request
         qs = super().get_queryset(request)
         return qs.filter(categorie="utilisateur")
 
+    @admin.display(description="Connexion")
+    def login_link(self, obj):
+        """Display a login as user link."""
+        if not self._request:
+            return "-"
+        link = genereate_login_link(self._request, obj)
+        return format_html('<a href="{}">Se connecter</a>', link)
 
 class Utilisateur_Utilisateur(Utilisateur):
     class Meta:

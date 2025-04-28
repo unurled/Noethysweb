@@ -1,3 +1,6 @@
+Version 1.3.5.5.52 (29/04/2025)
+- Ajout de l'aperçu des comptes utilisateur dans l'admin pour les superusers
+
 Version 1.3.5.5.52 (25/04/2025)
 - Ajout détail erreur d'ajout d'historique
 
