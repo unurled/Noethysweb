@@ -68,8 +68,8 @@ class Formulaire(FormulaireBase, ModelForm):
         else:
             individu = self.instance.individu
 
-        # Liste les activités liées à la structure actuelle
-        self.fields['activite'].queryset = Activite.objects.filter(structure__in=self.request.user.structures.all()).order_by("-date_fin", "nom")
+        # Liste les activités visibles (permet la modif si pas lié à structure)
+        self.fields['activite'].queryset = Activite.objects.filter(visible=1).order_by("nom")
 
         # Si c'est un ajout avec présélection de l'activité et du groupe
         # (utilisé surtout pour les demandes d'inscription depuis le portail)
@@ -109,7 +109,6 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.instance.idinscription != None:
             self.fields['individu'].disabled = True
             self.fields['famille'].disabled = True
-            self.fields['activite'].disabled = True
 
             # Recherche si consommations existantes
             nbre_conso = Consommation.objects.filter(inscription=self.instance).count()
@@ -190,7 +189,20 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def save(self):
         is_new_instance = self.instance.pk is None
+        ancienne_activite = None
+        if not is_new_instance:
+            # Récupérer l'activité avant modification depuis la base
+            ancienne_activite = Inscription.objects.get(pk=self.instance.pk).activite
+
         instance = super(Formulaire, self).save()
+
+        # Si l'activité a changé, supprimer les prestations associées à l'ancienne activité
+        if ancienne_activite and ancienne_activite != instance.activite:
+            Prestation.objects.filter(
+                individu=instance.individu,
+                famille=instance.famille,
+                activite=ancienne_activite,
+            ).delete()
 
         # Enregistrement des réponses du questionnaire
         for key, valeur in self.cleaned_data.items():

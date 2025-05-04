@@ -9,6 +9,7 @@ from reportlab.lib import colors
 from core.models import Inscription, Ventilation, Prestation, Rattachement, Cotisation, Tarif, Individu
 from core.utils import utils_texte, utils_impression, utils_questionnaires
 import os, uuid
+from core.data import data_civilites
 from django.conf import settings
 
 class Impression(utils_impression.Impression):
@@ -117,6 +118,7 @@ class Impression(utils_impression.Impression):
                 "categorie_tarif": inscription.categorie_tarif.nom,
                 "tarifs": Rechercher_tarifs(inscription),
                 "ind": inscription.individu.get_statut_display(),
+                "genre": data_civilites.GetCiviliteForIndividu(inscription.individu)["sexe"],
                 "nom": inscription.individu.nom,
                 "prenom": inscription.individu.prenom,
                 "date_naiss": inscription.individu.date_naiss.strftime("%d/%m/%Y") if inscription.individu.date_naiss else "",
