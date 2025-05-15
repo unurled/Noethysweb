@@ -1,3 +1,7 @@
+Version 1.3.5.5.55 (15/05/2025)
+- modif liste pièces fournies
+- modif réponses questionnaire
+
 Version 1.3.5.5.54 (04/05/2025)
 - Ajout genre dans impression inscrits
 - Possibilité de modifier l'activité d'une inscription

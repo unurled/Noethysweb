@@ -62,7 +62,7 @@ class Liste(Page, crud.Liste):
             ordering = ["date_debut"]
 
         def format_type_piece(self, instance, *args, **kwargs):
-            result = instance.type_piece.nom if instance.type_piece else instance.titre
+            result = instance.type_piece.nom if instance.type_piece else f"Autre : {instance.titre}"
            #print(f"Formatted type_piece for instance {instance.idpiece}: {result}")
             return result
 

@@ -49,7 +49,10 @@ class Liste(Page, liste_questionnaires_base.Liste):
         else:
             activites_accessibles = Activite.objects.filter(idactivite=activite_question.pk)
         inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
-        individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
+        if activite_question is None:
+            individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'),statut=5)
+        else:
+            individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
         for reponse in QuestionnaireReponse.objects.select_related("question", "individu").filter(Q(question=self.Get_categorie(),individu__in=individus_inscrits) & self.Get_filtres("Q")):
             lignes.append([
                 reponse.individu.nom,
@@ -70,9 +73,7 @@ def traiter_relance(request):
     # Récupération des familles
     activite_question1 = QuestionnaireQuestion.objects.get(pk=categorie)
     activite_question = activite_question1.activite
-    if not activite_question:
-        return JsonResponse({"erreur": "Impossible de relancer pour cette question qui concerne toutes les activités"}, status=401)
-    individu_reponses = QuestionnaireReponse.objects.filter(question=categorie, reponse__isnull=False).values('individu')
+    individu_reponses = QuestionnaireReponse.objects.filter(question=categorie).exclude(reponse__isnull=True).exclude(reponse="").values_list('individu', flat=True)
     famille_reponse = Rattachement.objects.filter(individu__in=individu_reponses).values('famille')
     inscriptions_accessibles = Inscription.objects.filter(activite=activite_question)
     individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
