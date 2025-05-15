@@ -78,12 +78,13 @@ class Liste(Page, crud.Liste):
             titre_document = f"{type_piece} - {individu} {famille}"
 
             # Construction du lien de téléchargement avec l'icône et l'attribut download
-            bouton_telecharger = f'<a href="{document_url}" class="btn btn-primary" download="{titre_document}"><i class="fa fa-download"></i></a>'
-            bouton_ouvrir = f'<a href="{document_url}" class="btn btn-primary" target="_blank"><i class="fa fa-eye"></i></a>'
+            bouton_telecharger = f'<a href="{document_url}" class="btn btn-default btn-xs" download="{titre_document}"><i class="fa fa-download"></i></a>'
+            bouton_ouvrir = f'<a href="{document_url}" class="btn btn-default btn-xs" target="_blank"><i class="fa fa-eye"></i></a>'
 
             html = [
                 bouton_ouvrir,
                 bouton_telecharger,
+                self.Create_bouton_modifier(url=reverse("famille_pieces_modifier", kwargs={"idfamille": instance.famille.pk, "pk": instance.pk})),
             ]
 
             return self.Create_boutons_actions(html)
