@@ -12,13 +12,14 @@ from crispy_forms.layout import Layout, Hidden, HTML
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
-from core.models import Recu, ModeleDocument, ModeleImpression
+from core.models import Recu, ModeleDocument, ModeleImpression, Reglement
 from core.widgets import DatePickerWidget
 
 TEXTE_INTRO_DEFAUT = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour la famille de {FAMILLE} la somme de {MONTANT}."
 
 
 class Formulaire(FormulaireBase, ModelForm):
+    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget(), choices=[], required=True, help_text="Vous pouvez créer un modèle d'impression depuis le menu Paramétrage > Modèles d'impression.")
     date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
     modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
     signataire = forms.CharField(label="Signataire", required=True)
@@ -42,18 +43,34 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-3'
         self.helper.field_class = 'col-md-9'
 
+        # Modèle impression
+        # Charge les modèles disponibles
+        self.fields["modele_impression"].choices = [(0, "Aucun")] + [(modele.pk, modele.nom) for modele in ModeleImpression.objects.filter(categorie="reglement").order_by("nom")]
+        modele_defaut = ModeleImpression.objects.filter(categorie="reglement", defaut=True)
+        idreglement1 = Reglement.objects.get(pk=idreglement)
+        modele_regle = getattr(idreglement1, "modelimp", None)
+        if modele_defaut:
+            self.fields["modele_impression"].initial = modele_defaut.first().pk
+        if modele_regle:
+            print("regle")
+            self.fields["modele_impression"].initial = modele_regle.pk
+        print(modele_regle)
+
         # Utilisateur
         self.fields["utilisateur"].initial = self.request.user
 
         # Date d'édition
         self.fields["date_edition"].initial = datetime.date.today()
 
-        # Numéro
-        self.fields["numero"].initial = 1
+        # Numéro : logique spéciale si création
         if not self.instance.idrecu:
-            dernier_recu = Recu.objects.last()
-            if dernier_recu:
-                self.fields["numero"].initial = dernier_recu.numero + 1
+            recu_existant = Recu.objects.filter(famille_id=idfamille, reglement_id=idreglement).first()
+            if recu_existant:
+                self.fields["numero"].initial = recu_existant.numero
+                self.fields["numero"].disabled = True
+            else:
+                dernier_recu = Recu.objects.order_by("-numero").first()
+                self.fields["numero"].initial = (dernier_recu.numero + 1) if dernier_recu else 1
 
         # Charge le modèle de document par défaut
         modele_defaut = ModeleDocument.objects.filter(categorie="reglement", defaut=True).first()
@@ -72,11 +89,12 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             Commandes(annuler_url="{% url 'famille_reglements_liste' idfamille=idfamille %}", ajouter=False,
                 autres_commandes=[
-                    HTML("""<a type='button' class='btn btn-default' title="Envoyer par Email" onclick="impression_pdf(true, false)" href='#'><i class="fa fa-send-o margin-r-5"></i>Envoyer par email</a> """),
-                    HTML("""<a type='button' class='btn btn-default' title="Aperçu PDF" href='#' onclick="impression_pdf(false, true)"><i class="fa fa-file-pdf-o margin-r-5"></i>Aperçu PDF</a> """),
+                    HTML("""<a type='button' class='btn btn-default' title="Envoyer par Email" onclick="impression_pdf(true)" href='#'><i class="fa fa-send-o margin-r-5"></i>Envoyer par email</a> """),
+                    HTML("""<a type='button' class='btn btn-default' title="Aperçu PDF" href='#' onclick="impression_pdf()"><i class="fa fa-file-pdf-o margin-r-5"></i>Aperçu PDF</a> """),
                 ]),
             Hidden('famille', value=idfamille),
             Hidden('reglement', value=idreglement),
+            Field("modele_impression"),
             Field("date_edition"),
             Field("numero"),
             Field("modele"),
@@ -104,6 +122,7 @@ function impression_pdf(email=false) {
         type: "POST",
         url: "{% url 'ajax_recu_impression_pdf' %}",
         data: {
+            idmodele_impression: $("#id_modele_impression").val(),
             idreglement: $("input:hidden[name='reglement']").val(),
             date_edition: $("#id_date_edition").val(),
             numero: $("#id_numero").val(),
@@ -136,6 +155,7 @@ function On_change_modele_impression() {
         $("#div_id_signataire").hide();
         $("#div_id_intro").hide();
         $("#div_id_afficher_prestations").hide()
+        $("#div_id_modele_impression").hide();
     } else {
         $("#div_id_date_edition").show();
         $("#div_id_numero").show();
