@@ -7,7 +7,7 @@ import json
 from django.shortcuts import render
 from django.contrib import messages
 from django.views.generic import TemplateView
-from core.models import Famille
+from core.models import Famille, Activite
 from core.views.base import CustomView
 from reglements.utils import utils_ventilation
 
@@ -20,7 +20,8 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Ventilation"
         context['box_titre'] = "Corriger la ventilation"
-        dict_anomalies = utils_ventilation.GetAnomaliesVentilation()
+        activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        dict_anomalies = utils_ventilation.GetAnomaliesVentilation(activites_autorisees)
         context['box_introduction'] = "Vous pouvez corriger ici les anomalies de ventilation une par une en cliquant sur le bouton à droite de la liste ou de façon globale en cliquant sur le bouton Ventiler automatiquement.<br><br>"
         if len(dict_anomalies) == 1:
             context['box_introduction'] += "<i class='fa fa-exclamation-triangle text-warning margin-r-5'></i><b>1 anomalie de ventilation a été détectée. Il est recommandé de la corriger dès à présent.</b>"

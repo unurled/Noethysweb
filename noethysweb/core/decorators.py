@@ -8,12 +8,14 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpRespon
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
 from reglements.utils import utils_ventilation
+from core.models import Prestation, Reglement, Ventilation, Inscription, Famille, Activite
 
 
 def Verifie_ventilation(function):
     def _function(request, *args, **kwargs):
         if not request.GET.get("correction_ventilation", None):
-            dict_anomalies = utils_ventilation.GetAnomaliesVentilation()
+            activites_autorisees = Activite.objects.filter(structure__in=request.user.structures.all())
+            dict_anomalies = utils_ventilation.GetAnomaliesVentilation(activites_autorisees)
             if dict_anomalies:
                 return HttpResponseRedirect(reverse_lazy("corriger_ventilation") + "?next=" + request.path)
         return function(request, *args, **kwargs)

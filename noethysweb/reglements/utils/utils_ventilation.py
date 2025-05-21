@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.db.models import Q, Sum
-from core.models import Prestation, Reglement, Ventilation
+from core.models import Prestation, Reglement, Ventilation, Inscription, Famille, Activite
 from facturation.utils import utils_factures
 
 
@@ -18,10 +18,11 @@ def xDecimal(valeur=0.0):
     valeur = valeur.quantize(Decimal('0.01'))
     return valeur
 
-
-def GetAnomaliesVentilation():
+def GetAnomaliesVentilation(activites_autorisees):
     """ Retourne les anomalies de ventilation """
-    reglements = Reglement.objects.values('famille').filter().annotate(total=Sum("montant"))
+    inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
+    individus_inscrits = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+    reglements = Reglement.objects.values('famille').filter(famille__in=individus_inscrits).annotate(total=Sum("montant"))
     prestations = {item["famille"]: item["total"] for item in Prestation.objects.values('famille').filter().annotate(total=Sum("montant"))}
     ventilations = {item["famille"]: item["total"] for item in Ventilation.objects.values('famille').filter().annotate(total=Sum("montant"))}
 

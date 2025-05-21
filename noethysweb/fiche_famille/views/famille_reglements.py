@@ -208,6 +208,21 @@ class ClasseCommune(Page):
         return context_data
 
     def form_valid(self, form):
+        try:
+            liste_ventilations = json.loads(self.request.POST.get("ventilation"))
+            print(liste_ventilations)
+        except Exception:
+            form.add_error(None, "Erreur de lecture de la ventilation.")
+            return self.form_invalid(form)
+
+        # Calcul du total ventilé
+        total_ventilation = sum(Decimal(item["montant"]) for item in liste_ventilations)
+        montant_reglement = form.cleaned_data["montant"]
+
+        if total_ventilation != montant_reglement:
+            form.add_error(None,f"Le total ventilé ({total_ventilation} €) ne correspond pas au montant du règlement ({montant_reglement} €).")
+            return self.form_invalid(form)
+
         # Enregistrement du règlement
         reglement = form.save(commit=True)
 
