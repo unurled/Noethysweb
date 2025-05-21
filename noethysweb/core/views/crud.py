@@ -7,6 +7,7 @@ import logging, json, datetime
 from operator import attrgetter
 logger = logging.getLogger(__name__)
 import dateutil.parser
+from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, TemplateView
 from django.urls import reverse_lazy, reverse
@@ -341,6 +342,18 @@ class Modifier(BaseView, UpdateView):
     template_name = "core/crud/edit.html"
     texte_confirmation = "Modification enregistrée"
     verbe_action = "Modifier"
+    check_protections = True
+    manytomany_associes = []
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.check_protections and hasattr(self, "Check_protections"):
+            objet = self.get_object()
+            protections = self.Check_protections(objet=objet)
+            if protections:
+                texte = utils_texte.Convert_liste_to_texte_virgules(protections)
+                messages.error(request, f"Modification impossible : {texte}")
+                return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         # Affiche un message de réussite
@@ -353,7 +366,7 @@ class Modifier(BaseView, UpdateView):
         if hasattr(self, "Apres_form_valid"):
             self.Apres_form_valid(form=form, instance=form.instance)
 
-        return super(Modifier, self).form_valid(form)
+        return super().form_valid(form)
 
     def Supprimer_defaut_autres_objets(self, form):
         """ Supprime le défaut des autres objects """

@@ -126,6 +126,10 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu.idindividu, rattachement.individu) for rattachement in rattachements]
 
         # Activité
+        if self.instance.pk:
+            for champ in ("date", "categorie", "individu", "label", "activite", "categorie_tarif", "tarif", "quantite", "montant_unitaire", "montant_initial", "tva", "tarif_ligne"):
+                self.fields[champ].disabled = True
+                self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation est générée par l'inscription."
         activites = {inscription.activite_id: inscription.activite.nom for inscription in Inscription.objects.select_related("activite").filter(famille_id=idfamille)}
         self.fields["activite"].choices = [(None, "---------")] + [(idactivite, nom_activite) for idactivite, nom_activite in activites.items()]
 
