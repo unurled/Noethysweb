@@ -156,7 +156,7 @@ WSGI_APPLICATION = 'noethysweb.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'core.backends.EmailModelBackend',
 ]
 
 # Database
