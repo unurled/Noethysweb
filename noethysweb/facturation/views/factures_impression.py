@@ -13,47 +13,71 @@ from core.models import MessageFacture, ModeleImpression
 from facturation.forms.factures_options_impression import Formulaire as Form_parametres
 from facturation.forms.factures_choix_modele import Formulaire as Form_modele
 from facturation.forms.choix_modele_impression import Formulaire as Form_modele_impression
+from django.conf import settings
+from pypdf import PdfReader, PdfWriter
+from tempfile import NamedTemporaryFile
+import os
 
 
 def Impression_pdf(request):
-    # Récupération des factures cochées
     factures_cochees = json.loads(request.POST.get("factures_cochees"))
     if not factures_cochees:
-        return JsonResponse({"erreur": "Veuillez cocher au moins une facture dans la liste"}, status=401)
+        return JsonResponse({"erreur": "Veuillez cocher au moins une facture"}, status=401)
 
-    # Récupération du modèle d'impression
+    # Option d'impression globale (si existe)
     valeurs_form_modele_impression = json.loads(request.POST.get("form_modele_impression"))
     IDmodele_impression = int(valeurs_form_modele_impression.get("modele_impression", 0))
 
     if IDmodele_impression:
-        modele_impression = ModeleImpression.objects.get(pk=IDmodele_impression)
-        dict_options = json.loads(modele_impression.options)
-        dict_options["modele"] = modele_impression.modele_document
+        modele_impression_global = ModeleImpression.objects.get(pk=IDmodele_impression)
+        dict_options_global = json.loads(modele_impression_global.options)
+        dict_options_global["modele"] = modele_impression_global.modele_document
     else:
-        # Récupération du modèle de document
-        valeurs_form_modele = json.loads(request.POST.get("form_modele_document"))
-        form_modele = Form_modele(valeurs_form_modele)
-        if not form_modele.is_valid():
-            return JsonResponse({"erreur": "Veuillez sélectionner un modèle de document"}, status=401)
+        modele_impression_global = None
 
-        # Récupération des options d'impression
-        valeurs_form_parametres = json.loads(request.POST.get("form_parametres"))
-        form_parametres = Form_parametres(valeurs_form_parametres, request=request)
-        if not form_parametres.is_valid():
-            return JsonResponse({"erreur": "Veuillez compléter les options d'impression"}, status=401)
-
-        dict_options = form_parametres.cleaned_data
-        dict_options.update(form_modele.cleaned_data)
-
-    # Création du PDF
     from facturation.utils import utils_facturation
     facturation = utils_facturation.Facturation()
-    resultat = facturation.Impression(liste_factures=factures_cochees, dict_options=dict_options)
-    if not resultat:
-        return JsonResponse({"success": False}, status=401)
-    return JsonResponse({"nom_fichier": resultat["nom_fichier"]})
 
+    writer = PdfWriter()
 
+    # Parcours des factures cochées
+    for idfacture in factures_cochees:
+        facture = Facture.objects.get(pk=idfacture)
+
+        # Récupère le modèle d'impression spécifique à la facture si existant, sinon global
+        if hasattr(facture, "modelimp") and facture.modelimp:
+            texte_modelimp = facture.modelimp
+            modele_impression = ModeleImpression.objects.get(nom=texte_modelimp)
+            dict_options = json.loads(modele_impression.options)
+            dict_options["modele"] = modele_impression.modele_document
+        elif modele_impression_global:
+            dict_options = dict_options_global
+        else:
+            # Ici tu peux définir un fallback ou erreur si pas de modèle
+            return JsonResponse({"erreur": f"Pas de modèle d'impression pour la facture {idfacture}"}, status=401)
+
+        # Génération du PDF individuel pour la facture
+        resultat = facturation.Impression(liste_factures=[idfacture], dict_options=dict_options)
+        if not resultat:
+            return JsonResponse({"erreur": f"Erreur impression facture {idfacture}"}, status=500)
+
+        chemin_pdf_rel = resultat["nom_fichier"]
+
+        # Lecture du PDF généré et ajout au writer
+        reader = PdfReader(chemin_pdf_rel)
+        for page in reader.pages:
+            writer.add_page(page)
+
+        # Optionnel : suppression du PDF individuel après fusion
+        os.remove(chemin_pdf)
+
+    # Sauvegarde du PDF fusionné final
+    with NamedTemporaryFile(delete=False, suffix=".pdf") as output_file:
+        writer.write(output_file)
+        nom_fichier_final = output_file.name
+
+    # Retour du nom de fichier final
+    return JsonResponse({"nom_fichier": nom_fichier_final})
 
 class Page(crud.Page):
     model = Facture
