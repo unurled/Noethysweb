@@ -1233,6 +1233,7 @@ class Activite(models.Model):
     num_decla = models.CharField(verbose_name="Numéro de déclaration de l'activité", max_length=200, blank=True, null=True)
     image = models.ImageField(verbose_name="Image de l'activité", upload_to='activite_images/', blank=True, null=True)
     interne = models.BooleanField(verbose_name="Activité interne", default=True, help_text="Déochez cette case si votre activité n'est pas une activité habituelle de Sacadoc")
+    maitrise = models.BooleanField(verbose_name="Activité avec équipe encadrante", default=True, help_text="Cochez cette case si l'équipe encadrante doit s'inscrire à votre activité")
     class Meta:
         db_table = 'activites'
         verbose_name = "activité"

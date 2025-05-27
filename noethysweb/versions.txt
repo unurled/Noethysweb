@@ -1,4 +1,8 @@
 Version 1.3.5.5.63 (27/05/2025)
+- Ajout champ maitrise dans activité
+- Application champ maitrise pour autoriser l'inscription d'adultes.
+
+Version 1.3.5.5.63 (27/05/2025)
 - Clean modif inscriptions par lot
 - Ajout adresse complète
 - Test beug photo

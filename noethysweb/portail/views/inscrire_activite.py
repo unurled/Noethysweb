@@ -108,12 +108,11 @@ def Valid_form(request):
 
     inscription_famille = Inscription.objects.filter(activite=activite, famille=famille)
 
-    if activite.public == 5 and individu.statut != 5:
-        return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité"}, status=401)
+    if activite.maitrise and individu.statut in [0]:
+        return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité. Si vous êtes responsable dans cette activité, veuillez changer votre statut dans votre fiche (onglet identité)."}, status=401)
 
     if activite.public in [0, 1, 2, 3, 4, 6] and individu.statut not in [0, 1, 2, 3, 4] and not inscription_famille:
         return JsonResponse({"erreur": "Cet individu ne peut pas s'inscrire à cette activité. Un adulte responsable doit être inscrit au préalable."}, status=401)
-
 
     # Enregistrement de la demande
     demande = form.save()
