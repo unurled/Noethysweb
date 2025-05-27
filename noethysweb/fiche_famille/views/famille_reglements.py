@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat
+from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat, Activite
 from core.utils import utils_dates, utils_texte
 from facturation.utils import utils_factures
 from fiche_famille.forms.famille_reglements import Formulaire
@@ -33,7 +33,8 @@ def Get_ventilation(request):
     dict_ventilations_reglement = {x["prestation"]: x["total"] for x in ventilations_reglement}
 
     # Importation des prestations de la famille
-    prestations = Prestation.objects.select_related('individu', 'facture').filter(famille_id=idfamille).order_by("date")
+    activites_autorisees = Activite.objects.filter(structure__in=request.user.structures.all())
+    prestations = Prestation.objects.select_related('individu', 'facture').filter(famille_id=idfamille, activite__in=activites_autorisees).order_by("date")
     liste_prestations = []
     for prestation in prestations:
         ventilation_anterieure = dict_ventilations_anterieures.get(prestation.pk, Decimal(0))
