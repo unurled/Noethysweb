@@ -49,8 +49,6 @@ class Liste(Page, crud.Liste):
         # Liste des activités
         condition = Q()
         liste_activites = [
-                              (None, "--------")
-                          ] + [
                               (
                                   activite.pk,
                                   f"{activite.nom}"

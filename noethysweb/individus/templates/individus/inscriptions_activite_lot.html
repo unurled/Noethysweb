@@ -74,11 +74,11 @@
                         }
 
                         // Construction de l'URL
-                        var url = "{% url 'inscription_button' activite=0 groupe=0 tarif=0 listepk=0 %}";
-                        url = url.replace("0", activite)
-                                 .replace("0", groupe)
-                                 .replace("0", tarifs.join(","))
-                                 .replace("0", listepk.join(","));
+                        var url = "{% url 'inscription_button' activite='__ACTIVITE__' groupe='__GROUPE__' tarif='__TARIFS__' listepk='__PKS__' %}";
+                        url = url.replace("__ACTIVITE__", activite)
+                                 .replace("__GROUPE__", groupe)
+                                 .replace("__TARIFS__", tarifs.join(","))
+                                 .replace("__PKS__", listepk.join(","));
 
                         return url;
                     }
