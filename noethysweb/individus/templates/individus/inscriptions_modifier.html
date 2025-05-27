@@ -64,6 +64,7 @@
                                     datatype: "json",
                                     success: function(data){
                                         toastr.success("Les modifications ont été appliquées avec succès");
+                                        location.reload()
                                     },
                                     error: function(data) {
                                         toastr.error(data.responseJSON.erreur);
