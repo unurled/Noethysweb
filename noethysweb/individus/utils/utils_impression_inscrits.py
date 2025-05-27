@@ -128,6 +128,7 @@ class Impression(utils_impression.Impression):
                 "tel_parents": Rechercher_tel_parents(inscription),
                 "mail_parents": Rechercher_mail_parents(inscription),
                 "individu_ville": inscription.individu.ville_resid,
+                "adresse": " ".join([inscription.individu.rue_resid or "", inscription.individu.cp_resid or "", inscription.individu.ville_resid or ""]),
                 "famille": inscription.famille.nom,
                 "famille_ville": inscription.famille.ville_resid,
                 "num_cotisation": Rechercher_cotisation(inscription),

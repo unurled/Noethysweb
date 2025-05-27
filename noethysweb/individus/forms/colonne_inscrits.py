@@ -21,13 +21,14 @@ LISTE_CHOIX = [
     ("tarifs", "Tarifs sélectionnés", 70),
     ("nom", "Nom de l'individu", 70),
     ("prenom", "Prénom de l'individu", 70),
-    ("genre", "Genre de l'individu", 70),
+    ("genre", "Genre de l'individu", 20),
     ("ind", "Statut de l'individu", 70),
     ("date_naiss", "Date de naissance", 60),
     ("age", "Age", 20),
     ("mail", "Email", 50),
     ("portable", "Tél. mobile", 50),
     ("individu_ville", "Ville de résidence", 20),
+    ("adresse", "Adresse complète", 70),
     ("tel_parents", "Tél parents", 50),
     ("famille", "Nom de la famille", 70),
     ("mail_parents", "Mail parents", 70),
@@ -51,7 +52,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
     donnee = forms.ChoiceField(label="Donnée associée", choices=[(item[0], item[1]) for item in liste_choix], initial="aucun", required=False)
 
-    liste_choix_largeur = [("automatique", "Automatique")] + [(str(x), "%d pixels" % x) for x in range(5, 205, 5)]
+    liste_choix_largeur = [("automatique", "Automatique")] + [(str(x), "%d pixels" % x) for x in range(15, 205, 5)]
     largeur = forms.ChoiceField(label="Largeur de la colonne", choices=liste_choix_largeur, initial="automatique", required=False)
 
     def __init__(self, *args, **kwargs):
