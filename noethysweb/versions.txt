@@ -1,4 +1,4 @@
-Version 1.3.5.5.63 (27/05/2025)
+Version 1.3.5.5.64 (27/05/2025)
 - Ajout champ maitrise dans activité
 - Application champ maitrise pour autoriser l'inscription d'adultes.
 
