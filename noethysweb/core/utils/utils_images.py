@@ -6,6 +6,10 @@
 from PIL import Image
 import json
 
+try:
+    RESAMPLING_FILTER = Image.Resampling.LANCZOS
+except AttributeError:
+    RESAMPLING_FILTER = Image.ANTIALIAS
 
 def Recadrer_image_form(cropper_data=None, image=None):
     """ Enregistre l'image d'un form après cropper """
@@ -13,6 +17,6 @@ def Recadrer_image_form(cropper_data=None, image=None):
     img = Image.open(image)
     img = img.rotate(-cropper_data["rotate"], expand=True)
     img = img.crop((cropper_data["x"], cropper_data["y"], cropper_data["width"] + cropper_data["x"], cropper_data["height"] + cropper_data["y"]))
-    img = img.resize((cropper_data["largeur"], int(cropper_data["largeur"] / cropper_data["ratio"])), Image.ANTIALIAS)
+    img = img.resize((nouvelle_largeur, nouvelle_hauteur), RESAMPLING_FILTER)
     img.save(image.path)
 
