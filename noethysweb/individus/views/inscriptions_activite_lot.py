@@ -56,8 +56,7 @@ class Liste(Page, crud.Liste):
                                   f"{activite.nom}"
                               )
                               for activite in
-                              Activite.objects.filter(self.Get_condition_structure(), condition).order_by("-date_fin",
-                                                                                                          "nom")
+                              Activite.objects.filter(self.Get_condition_structure(), condition).order_by("nom")
                           ]
         context['liste_activites'] = liste_activites
 
@@ -99,7 +98,7 @@ class Liste(Page, crud.Liste):
         return [int(tarif) for tarif in tarifs if tarif.isdigit()]
 
     class datatable_class(MyDatatable):
-        filtres = ["famille__nom", "individu__nom", "individu__prenom"]
+        filtres = ["ipresent:individu", "famille__nom", "individu__nom", "individu__prenom"]
         check = columns.CheckBoxSelectColumn(label="")
         id = columns.TextColumn("ID", sources=["individu__idindividu"])
         famille = columns.TextColumn("Famille", sources=["famille__nom"])
