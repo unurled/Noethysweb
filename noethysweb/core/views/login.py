@@ -105,5 +105,5 @@ def login_as(request):
         "User %s logging-in as %s on ip %s", s["source_user"], target_user, s["ip"]
     )
     s.flush()
-    login(request, target_user, backend="django.contrib.auth.backends.ModelBackend")
+    login(request, target_user, backend="core.backends.EmailModelBackend")
     return redirect("/")
