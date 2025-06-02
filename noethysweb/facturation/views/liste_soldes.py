@@ -9,7 +9,7 @@ from decimal import Decimal
 from django.views.generic import TemplateView
 from django.db.models import Q, Sum
 from core.views.base import CustomView
-from core.models import Famille, Prestation, Reglement, Ventilation, ModeleEmail, Mail, Destinataire, Activite
+from core.models import Famille, Prestation, Reglement, Ventilation, ModeleEmail, Mail, Destinataire, Activite, Inscription
 from facturation.forms.liste_soldes import Formulaire
 from django.urls import reverse_lazy
 from django.http import JsonResponse
@@ -40,35 +40,25 @@ class View(CustomView, TemplateView):
         return self.render_to_response(self.get_context_data(**context))
 
     def Get_resultats(self, parametres={}):
-        # Calcul des soldes
-        familles = Famille.objects.all()
         conditions_prestations = Q(date__lte=parametres["date_situation"])
-        activites= parametres.get("activites", [])
+        activites = parametres.get("activites", [])
         activites_data = json.loads(activites)
         ids_activites = activites_data.get("ids", [])
+        inscriptions_accessibles = Inscription.objects.filter(activite__in=ids_activites)
+        familles = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        print(ids_activites)
         if ids_activites:
             presta = Prestation.objects.filter(activite__in=ids_activites)
-
-        if ids_activites:
             conditions_prestations &= Q(activite__in=ids_activites)
 
         if parametres["uniquement_factures"]:
             conditions_prestations &= Q(facture__isnull=False)
+            conditions_prestations &= Q(activite__in=ids_activites)
 
         dict_prestations = {temp["famille"]: temp["total"] for temp in Prestation.objects.filter(conditions_prestations).values('famille').annotate(total=Sum("montant"))}
 
-        if ids_activites:
-            dict_reglements = {
-                temp["famille"]: temp["total"]
-                for temp in Ventilation.objects.filter(
-                    prestation__in=presta
-                )
-                .values('famille')
-                .annotate(total=Sum("montant"))
-            }
-        else:
             # Si pas d'activités spécifiées, récupérer les ventilations sans ce filtre
-            dict_reglements = {
+        dict_reglements = {
                 temp["famille"]: temp["total"]
                 for temp in Ventilation.objects.filter(prestation__in=Prestation.objects.filter(conditions_prestations))
                 .values('famille')
