@@ -1,3 +1,8 @@
+Version 1.3.5.5.70 (02/06/2025)
+- beug téléchargement pièces
+- beug mail composition famille
+- ajout bouton inscriptions composition famille
+
 Version 1.3.5.5.69 (02/06/2025)
 - beug liste soldes
 
