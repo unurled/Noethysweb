@@ -4,7 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import json
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -219,8 +219,11 @@ class ClasseCommune(Page):
         # Calcul du total ventilé
         total_ventilation = sum(Decimal(item["montant"]) for item in liste_ventilations)
         montant_reglement = form.cleaned_data["montant"]
+        # Arrondir les deux montants à 2 décimales (comme des montants en euros)
+        total_ventilation = total_ventilation.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        montant_reglement = montant_reglement.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        if total_ventilation != montant_reglement:
+        if abs(total_ventilation - montant_reglement) > Decimal("0.01"):
             form.add_error(None,f"Le total ventilé ({total_ventilation} €) ne correspond pas au montant du règlement ({montant_reglement} €).")
             return self.form_invalid(form)
 

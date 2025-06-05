@@ -661,7 +661,7 @@ class Caisse(models.Model):
 class TypePiece(models.Model):
     idtype_piece = models.AutoField(verbose_name="ID", db_column='IDtype_piece', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
-    public_choix = [("individu", "Individu"), ("famille", "Famille")]
+    public_choix = [("individu", "Individu")]
     public = models.CharField(verbose_name="Public", max_length=50, choices=public_choix)
     duree_validite = models.CharField(verbose_name="Durée de validité", max_length=100, blank=True, null=True)
     valide_rattachement = models.BooleanField(verbose_name="Rattachement valide", default=False)

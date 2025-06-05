@@ -46,6 +46,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["validite_mois"].widget.attrs.update({"min": 0})
         self.fields["validite_annees"].widget.attrs.update({"min": 0})
 
+        self.fields['public'].initial = "individu"
+
         # Importe la durée de validité dans les champs libres
         if self.instance.duree_validite == None:
             # Durée illimitée
