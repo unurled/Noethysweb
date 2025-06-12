@@ -8,7 +8,7 @@
     {% embed 'core/box.html' with box_titre=True box_introduction=True %}
         {% block box_theme %}card-outline card-lightblue{% endblock %}
         {% block box_titre %}Commande{% endblock %}
-        {% block box_introduction %}Saisissez une commande, une activité et/ou structure si besoin et cliquez sur Exécuter.{% endblock %}
+        {% block box_introduction %}Saisissez une commande, une activité et/ou structure et/ou un tarif si besoin et cliquez sur Exécuter.{% endblock %}
         {% block box_contenu %}
             Commande
             <form id="form_procedures" method="post">
@@ -20,6 +20,10 @@
                     <div class="col-md-auto">
                         <button type="submit" form="form_procedures" class="btn btn-primary" name="submit" title="Exécuter la commande"><i class="fa fa-bolt margin-r-5"></i> <span class="text-md">Exécuter</span></button>
                     </div>
+                </div>
+                <div class="form-group mt-3" id="bloc_tarifs" style="display: none;">
+                    <label><strong>Tarifs associés</strong></label>
+                    <div id="liste_tarifs"></div>
                 </div>
             </form>
         {% endblock %}
@@ -39,9 +43,43 @@
         {% block box_contenu %}
             Archivage : Permet d'archiver une activité dès qu'elle est terminée. Pour cela il faut taper "Archivage" dans commande et sélectionner l'activité. Ensuite appuyer sur "Exécuter" <br />
             PURGEPORTAIL : Permet de purger les renseignements en attente de validation<br />
+            MAJTARIF : Met à jour le montant des prestations liées au tarif sélectionné<br />
             MSI : Procédure pour le développement. Affectation en masse du statut "jeunes" à des individus de catégorie 2<br />
-            DB : Télécharge la DB
 {% endblock %}
     {% endembed %}
 
 {% endblock contenu_page %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const activiteSelect = document.getElementById("id_activite");
+        const tarifsParActivite = {{ tarifs_par_activite|safe }};
+        const blocTarifs = document.getElementById("bloc_tarifs");
+        const listeTarifs = document.getElementById("liste_tarifs");
+
+        function majTarifs(activiteId) {
+            listeTarifs.innerHTML = "";
+            const tarifs = tarifsParActivite[activiteId];
+            if (!tarifs || tarifs.length === 0) {
+                blocTarifs.style.display = "none";
+                return;
+            }
+
+            tarifs.forEach(([id, desc]) => {
+                const label = document.createElement("label");
+                label.classList.add("d-block");
+                label.innerHTML = `<input type="checkbox" name="tarifs" value="${id}"> ${desc}`;
+                listeTarifs.appendChild(label);
+            });
+
+            blocTarifs.style.display = "block";
+        }
+
+        if (activiteSelect) {
+            majTarifs(activiteSelect.value);  // Initialisation
+            activiteSelect.addEventListener("change", function () {
+                majTarifs(this.value);  // Mise à jour à chaque changement
+            });
+        }
+    });
+</script>

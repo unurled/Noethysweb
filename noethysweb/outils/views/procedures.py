@@ -37,11 +37,13 @@ class View(CustomView, TemplateView):
             "resultat": self.Executer(
                 commande=form.cleaned_data["commande"],
                 activite=form.cleaned_data["activite"],
-                structure=form.cleaned_data["structure"])
+                structure=form.cleaned_data["structure"],
+                tarif=form.cleaned_data.get("tarif")
+            )
         }
         return self.render_to_response(self.get_context_data(**context))
 
-    def Executer(self, commande="", activite=None, structure=None):
+    def Executer(self, commande="", activite=None, structure=None, tarif=None):
         # Analyse de la commande
         if " " in commande:
             texte_fonction = commande.split(" ")[0].strip()
@@ -62,6 +64,7 @@ class View(CustomView, TemplateView):
             variables = {
                 "activite": activite,
                 "structure": structure,
+                "tarif": tarif,
                 "arguments": texte_arguments.split() if texte_arguments else []
             }
 

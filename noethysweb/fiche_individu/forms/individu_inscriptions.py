@@ -248,24 +248,21 @@ class Formulaire(FormulaireBase, ModelForm):
         tarifs_objects = Tarif.objects.filter(description__in=descriptions_tarifs)
         tarifs_selectionnes = tarifs_objects.filter(pk__in=idtarifs_int)
 
-        # Récupérer les tarifs associés aux prestations existantes pour cette inscription
+        # Obtenir les IDs de prestations déjà enregistrées
         tarifs_prestations_existants = Prestation.objects.filter(
             individu=instance.individu,
             famille=instance.famille,
-            activite=instance.activite,
-        ).values_list('tarif', flat=True)
+            activite=instance.activite
+        ).values_list('tarif_id', flat=True)
 
-        # Comparer les tarifs sélectionnés avec ceux des prestations existantes
-        # Supprimer les tarifs en trop
-        for tarif_prestation_existant in tarifs_prestations_existants:
-            if tarif_prestation_existant not in tarifs_selectionnes:
-                # Supprimer les prestations associées au tarif
-                Prestation.objects.filter(
-                    tarif=tarif_prestation_existant,
-                    individu=instance.individu,
-                    famille=instance.famille,
-                    activite=instance.activite,
-                ).delete()
+        ids_tarifs_selectionnes = [tarif.idtarif for tarif in tarifs_selectionnes]
+
+        #suppression prestas en trop
+        Prestation.objects.filter(
+            individu=instance.individu,
+            famille=instance.famille,
+            activite=instance.activite
+        ).exclude(tarif__in=ids_tarifs_selectionnes).delete()
 
         #Validation de la demande portail
         if self.iddemande:
@@ -279,25 +276,25 @@ class Formulaire(FormulaireBase, ModelForm):
 
             # Créer une prestation pour chaque tarif
         for tarif in tarifs_selectionnes:
-                if tarif not in tarifs_prestations_existants:
-                    tarif_ligne = TarifLigne.objects.get(tarif_id=tarif.pk)
-                    montant_unique = tarif_ligne.montant_unique
-                    nouvelle_prestation = Prestation.objects.create(
-                        date=timezone.now().date(),
-                        categorie="consommation",
-                        label=tarif.description,
-                        forfait=1,
-                        montant_initial=montant_unique, #fonctionne pas à chercher dans tarifs_lignes
-                        montant=montant_unique, #fonctionne pas a chercher dans tarifs_lignes
-                        quantite=1,
-                        tva=0,
-                        date_valeur=timezone.now().date(),
-                        activite=instance.activite,
-                        categorie_tarif=instance.categorie_tarif,
-                        famille=instance.famille,
-                        individu=instance.individu,
-                        tarif=tarif
-                    )
+            if tarif.idtarif not in tarifs_prestations_existants:
+                tarif_ligne = TarifLigne.objects.get(tarif_id=tarif.pk)
+                montant_unique = tarif_ligne.montant_unique
+                Prestation.objects.create(
+                    date=timezone.now().date(),
+                    categorie="consommation",
+                    label=tarif.description,
+                    forfait=1,
+                    montant_initial=montant_unique,
+                    montant=montant_unique,
+                    quantite=1,
+                    tva=0,
+                    date_valeur=timezone.now().date(),
+                    activite=instance.activite,
+                    categorie_tarif=instance.categorie_tarif,
+                    famille=instance.famille,
+                    individu=instance.individu,
+                    tarif=tarif
+                )
         if is_new_instance:
             self.envoyer_email_confirmation(instance)
         return instance

@@ -1,4 +1,8 @@
 Version 1.3.5.5.72 (09/06/2025)
+- Ajout procédure MAJTARIF
+- Modif de la modif inscription. beug dans l'analyse des prestas.
+
+Version 1.3.5.5.72 (09/06/2025)
 - Correction recherche après déconnexion
 
 Version 1.3.5.5.71 (02/06/2025)
