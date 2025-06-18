@@ -40,7 +40,7 @@ class Formulaire(FormulaireBase, forms.Form):
     afficher_coupon_reponse = forms.BooleanField(label="Afficher le coupon-réponse", initial=VALEURS_DEFAUT["afficher_coupon_reponse"], required=False)
     afficher_messages = forms.BooleanField(label="Afficher les messages", initial=VALEURS_DEFAUT["afficher_messages"], required=False)
     afficher_codes_barres = forms.BooleanField(label="Afficher les codes-barres", initial=VALEURS_DEFAUT["afficher_codes_barres"], required=False)
-    afficher_reglements = forms.BooleanField(label="Afficher les règlements", initial=VALEURS_DEFAUT["afficher_reglements"], required=False)
+    afficher_reglements = forms.BooleanField(label="Afficher les règlements", initial=True, required=False)
     afficher_avis_prelevements = forms.BooleanField(label="Afficher les avis de prélèvements", initial=VALEURS_DEFAUT["afficher_avis_prelevements"], required=False)
     afficher_qf_dates = forms.BooleanField(label="Afficher les quotients familiaux", initial=VALEURS_DEFAUT["afficher_qf_dates"], required=False)
 
@@ -109,12 +109,12 @@ class Formulaire(FormulaireBase, forms.Form):
              #   Field("afficher_impayes"),
              #   Field("integrer_impayes"),
              #   Field("impayes_factures"),
-             #   Field("afficher_deja_paye"),
-             #   Field("afficher_reste_regler"),
+                Field("afficher_deja_paye"),
+                Field("afficher_reste_regler"),
              #   Field("afficher_coupon_reponse"),
-             #   Field("afficher_messages"),
+                Field("afficher_messages"),
              #   Field("afficher_codes_barres"),
-             #   Field("afficher_reglements"),
+                 Field("afficher_reglements"),
              #   Field("afficher_avis_prelevements"),
              #   Field("afficher_qf_dates"),
             ),
