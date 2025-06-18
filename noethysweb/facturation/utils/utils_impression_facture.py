@@ -428,7 +428,7 @@ class Impression(utils_impression.Impression):
                                         # Déductions
                                         if len(deductions) > 0:
                                             for dictDeduction in deductions :
-                                                listeIntitules.append(Paragraph("<para align='left'><font size=5 color='#939393'>- %.02f %s : %s</font></para>" % (dictDeduction["montant"], utils_preferences.Get_symbole_monnaie(), dictDeduction["label"]), paraStyle))
+                                                listeIntitules.append(Paragraph("<para align='left'><font size=5 color='#939393'>dont - %.02f %s : %s</font></para>" % (dictDeduction["montant"], utils_preferences.Get_symbole_monnaie(), dictDeduction["label"]), paraStyle))
                                                 #listeIntitules.append(Paragraph("<para align='left'><font size=5 color='#939393'>%s</font></para>" % dictDeduction["label"], paraStyle))
                                                 listeMontantsHT.append(Paragraph("&nbsp;", paraStyle))
                                                 listeTVA.append(Paragraph("&nbsp;", paraStyle))
@@ -507,8 +507,9 @@ class Impression(utils_impression.Impression):
                 paraStyle = ParagraphStyle(name="message",
                                           fontName="Helvetica",
                                           fontSize=int(self.dict_options["taille_texte_messages"]),
-                                          leading=int(self.dict_options["taille_texte_messages"]),
+                                          leading=int(self.dict_options["taille_texte_messages"]) + 4,
                                           spaceAfter=2)
+
 
                 # Texte Prestations antérieures
                 texte_prestations_anterieures = self.dict_options["texte_prestations_anterieures"]
@@ -563,19 +564,27 @@ class Impression(utils_impression.Impression):
                             montantReglement = "%.02f %s" % (dictTemp["montant"], utils_preferences.Get_symbole_monnaie())
                             montantVentilation = "%.02f %s" % (dictTemp["ventilation"], utils_preferences.Get_symbole_monnaie())
                             if dictTemp["ventilation"] != dictTemp["montant"] :
-                                texteMontant = u"%s utilisés sur %s" % (montantVentilation, montantReglement)
+                                texteMontant = u"%s provenant d'un règlement de %s" % (montantVentilation, montantReglement)
                             else :
                                 texteMontant = montantReglement
-                                
-                            texte = "%s%s%s de %s (%s)" % (dictTemp["mode"], numero, emetteur, dictTemp["payeur"], texteMontant)
+
+                            texte = u"- %s via %s payé par : %s" % (
+                                texteMontant,
+                                dictTemp["mode"],
+                                dictTemp["payeur"],
+                            )
                             listeTextesReglements.append(texte)
                         
                         if dictValeur["solde"] > Decimal(0) :
-                            intro = "Période partiellement réglée avec"
+                            intro = "<b>Règlements déjà effectués :</b>"
                         else :
-                            intro = "Période réglée en intégralité avec"
-                            
-                        texteReglements = "<b>Règlement : </b> %s %s." % (intro, " + ".join(listeTextesReglements))
+                            intro = "<b>Règlements effectués en intégralité :</b>"
+
+                        texteReglements = "%s<br/>%s" % (
+                            intro,
+                            "<br/>".join(listeTextesReglements)
+                        )
+
                         listeMessages.append(Paragraph(texteReglements, paraStyle))
                                 
                 # Messages
@@ -591,7 +600,7 @@ class Impression(utils_impression.Impression):
                             listeMessages.append(Paragraph(texte, paraStyle))
 
                 if len(listeMessages) > 0:
-                    listeMessages.insert(0, Paragraph("<u>Informations :</u>", paraStyle))
+                    listeMessages.insert(0, Paragraph("", paraStyle))
                 
                 # ------------------ CADRE TOTAUX ------------------------
                 dataTableau = []
@@ -599,9 +608,9 @@ class Impression(utils_impression.Impression):
                 largeursColonnes = [self.taille_cadre[2] - largeurColonneMontantTTC - largeurColonneLabel, largeurColonneLabel, largeurColonneMontantTTC]
 
                 if not self.dict_options["afficher_deja_paye"] and not self.dict_options["afficher_reste_regler"]:
-                    dataTableau.append((listeMessages, "Total :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
+                    dataTableau.append(("", "Total :", "%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
                 else:
-                    dataTableau.append((listeMessages, "Total période :", u"%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
+                    dataTableau.append(("", "Total :", u"%.02f %s" % (dictValeur["total"], utils_preferences.Get_symbole_monnaie())))
 
                     if self.dict_options["afficher_deja_paye"]:
                         dataTableau.append(("", "Montant déjà réglé :", u"%.02f %s" % (dictValeur["ventilation"], utils_preferences.Get_symbole_monnaie())))
@@ -644,6 +653,10 @@ class Impression(utils_impression.Impression):
                 tableau = Table(dataTableau, largeursColonnes)
                 tableau.setStyle(TableStyle(style))
                 self.story.append(tableau)
+                self.story.append(Spacer(1, 12))
+
+                for para in listeMessages:
+                    self.story.append(para)
                 
                 # ------------------------- PRELEVEMENTS --------------------
                 if self.dict_options.get("afficher_avis_prelevements", False) and dictValeur.get("prelevement", False):
