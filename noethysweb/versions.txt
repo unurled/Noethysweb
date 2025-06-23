@@ -1,3 +1,7 @@
+Version 1.3.5.5.76 (24/06/2025)
+- Ajout log d'info sur les blocages ajax
+- Retrait de la tentative de sauvgarde de l'état d'affichage de la sidebar pour les familles (qui échouait avec un warning)
+
 Version 1.3.5.5.75 (18/06/2025)
 - texte facture
 

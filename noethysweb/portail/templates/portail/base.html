@@ -73,26 +73,5 @@
 {% endblock %}
 
 
-<script>
-
-    $(document).ready(function() {
-
-        // Enregistre le masquage du sidebar
-        $(".sidebar-toggle").on('click', function(e) {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'ajax_memorise_option' %}",
-                data: {
-                    nom: "masquer-sidebar",
-                    valeur: !$("body").hasClass("sidebar-collapse"),
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                },
-                datatype: "json",
-            });
-        });
-    });
-
-</script>
-
 </body>
 </html>
