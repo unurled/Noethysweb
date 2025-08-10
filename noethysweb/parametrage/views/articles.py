@@ -24,7 +24,9 @@ class Liste(Page, crud.Liste):
     model = Article
 
     def get_queryset(self):
-        return Article.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
+        if self.request.user.is_staff:
+            return Article.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
+        return Article.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure(), auteur=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
