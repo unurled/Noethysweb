@@ -88,6 +88,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 self.fields[nom].initial = valeur
         # Champs visibles
         visible_fields = [
+            "affichage_solde",
             "afficher_deja_paye",
             "afficher_reste_regler",
             "afficher_reglements",
@@ -112,6 +113,7 @@ class Formulaire(FormulaireBase, forms.Form):
 
             Fieldset("Textes",
                      Field("texte_conclusion"),
+                     Field("affichage_solde"),
                      ),
         )
         # Si mémorisation, on l’ajoute en premier
