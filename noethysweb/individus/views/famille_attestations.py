@@ -98,7 +98,7 @@ def Generer_pdf(request):
         })
 
         # Texte d'introduction fourni
-        texte_introduction = "Je soussigné(e) {SIGNATAIRE}, atteste avoir accueilli {NOMS_INDIVIDUS} sur la période du {DATE_DEBUT} au {DATE_FIN} selon le détail suivant :"
+        texte_introduction = "Je soussigné(e) {SIGNATAIRE}, atteste avoir accueilli {NOMS_INDIVIDUS} selon le détail suivant :"
 
         # Assurez-vous que dict_options contient des données valides pour la fusion
         dict_options = parametres["options_impression"]
