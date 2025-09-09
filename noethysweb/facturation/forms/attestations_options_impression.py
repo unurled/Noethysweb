@@ -6,7 +6,7 @@
 import copy
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.layout import Layout, Fieldset, Hidden
 from crispy_forms.bootstrap import Field
 from core.widgets import ColorPickerWidget
 from core.utils import utils_parametres
@@ -14,16 +14,16 @@ from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    memoriser_parametres = forms.BooleanField(label="Mémoriser les paramètres", initial=False, required=False)
+    memoriser_parametres = forms.BooleanField(label="Mémoriser les paramètres", initial=True, required=False)
 
     affichage_solde = forms.ChoiceField(label="Afficher le solde", choices=[("0", "Actuel"), ("1", "Initial")], initial="actuel", required=False)
     afficher_impayes = forms.BooleanField(label="Afficher le rappel des impayés", initial=True, required=False)
     integrer_impayes = forms.BooleanField(label="Intégrer les impayés au solde", initial=True, required=False)
-    afficher_deja_paye = forms.BooleanField(label="Afficher la case du montant déjà réglé", initial=True, required=False)
-    afficher_reste_regler = forms.BooleanField(label="Afficher la case du solde à régler", initial=True, required=False)
-    afficher_coupon_reponse = forms.BooleanField(label="Afficher le coupon-réponse", initial=True, required=False)
+    afficher_deja_paye = forms.BooleanField(label="Afficher la case du montant déjà réglé", initial=False, required=False)
+    afficher_reste_regler = forms.BooleanField(label="Afficher la case du solde à régler", initial=False, required=False)
+    afficher_coupon_reponse = forms.BooleanField(label="Afficher le coupon-réponse", initial=False, required=False)
     afficher_messages = forms.BooleanField(label="Afficher les messages", initial=True, required=False)
-    afficher_codes_barres = forms.BooleanField(label="Afficher les codes-barres", initial=True, required=False)
+    afficher_codes_barres = forms.BooleanField(label="Afficher les codes-barres", initial=False, required=False)
     afficher_reglements = forms.BooleanField(label="Afficher les règlements", initial=True, required=False)
     afficher_avis_prelevements = forms.BooleanField(label="Afficher les avis de prélèvements", initial=False, required=False)
     afficher_qf_dates = forms.BooleanField(label="Afficher les quotients familiaux", initial=True, required=False)
@@ -60,7 +60,7 @@ class Formulaire(FormulaireBase, forms.Form):
     couleur_bord_introduction = forms.CharField(label="Couleur de bord introduction", required=True, widget=ColorPickerWidget(), initial="#FFFFFF")
     alignement_texte_introduction = forms.ChoiceField(label="Alignement du texte d'introduction", choices=[("0", "Gauche"), ("1", "Centre"), ("2", "Droite")], initial="0", required=True)
 
-    texte_conclusion = forms.CharField(label="Texte de conclusion", initial="", required=False)
+    texte_conclusion = forms.CharField(label="Texte complémentaire", initial="", required=False, help_text="Saisissez du texte complémentaire à ajouter (N° de déclaration, directeur, dates,...)")
     taille_texte_conclusion = forms.IntegerField(label="Taille de texte de conclusion", initial=9, required=True)
     style_texte_conclusion = forms.ChoiceField(label="Style du texte de conclusion", choices=[("0", "Normal"), ("1", "Italique"), ("2", "Gras"), ("3", "Italique + gras")], initial="0", required=True)
     couleur_fond_conclusion = forms.CharField(label="Couleur de fond conclusion", required=True, widget=ColorPickerWidget(), initial="#FFFFFF")
@@ -86,74 +86,41 @@ class Formulaire(FormulaireBase, forms.Form):
             parametres = utils_parametres.Get_categorie(categorie="impression_attestation", utilisateur=self.request.user, parametres=parametres)
             for nom, valeur in parametres.items():
                 self.fields[nom].initial = valeur
+        # Champs visibles
+        visible_fields = [
+            "afficher_deja_paye",
+            "afficher_reste_regler",
+            "afficher_reglements",
+            "texte_conclusion",
+            "memoriser_parametres",
+        ]
 
-        # Affichage
+        # Champs à cacher = tout le reste
+        hidden_fields = [f for f in self.fields if f not in visible_fields]
+
+        # Génération des Hidden
+        layout_fields = [Hidden(f, value=self.fields[f].initial) for f in hidden_fields]
+
+        # Layout principal
         self.helper.layout = Layout(
+            *layout_fields,  # tous les champs cachés
             Fieldset("Eléments à afficher",
-                Field("affichage_solde"),
-                Field("afficher_impayes"),
-                Field("integrer_impayes"),
-                Field("afficher_deja_paye"),
-                Field("afficher_reste_regler"),
-                Field("afficher_coupon_reponse"),
-                Field("afficher_messages"),
-                Field("afficher_codes_barres"),
-                Field("afficher_reglements"),
-                Field("afficher_avis_prelevements"),
-                Field("afficher_qf_dates"),
-            ),
-            Fieldset("Titre",
-                Field("afficher_titre"),
-                Field("texte_titre"),
-                Field("taille_texte_titre"),
-                Field("afficher_periode"),
-                Field("taille_texte_periode"),
-            ),
-            Fieldset("Tableau des prestations",
-                Field("affichage_prestations"),
-                Field("intitules"),
-                Field("couleur_fond_1"),
-                Field("couleur_fond_2"),
-                Field("largeur_colonne_date"),
-                Field("largeur_colonne_montant_ht"),
-                Field("largeur_colonne_montant_tva"),
-                Field("largeur_colonne_montant_ttc"),
-                Field("taille_texte_individu"),
-                Field("taille_texte_activite"),
-                Field("taille_texte_noms_colonnes"),
-                Field("taille_texte_prestation"),
-                Field("taille_texte_messages"),
-                Field("taille_texte_labels_totaux"),
-                Field("taille_texte_montants_totaux"),
-            ),
-            Fieldset("Prestations antérieures",
-                Field("taille_texte_prestations_anterieures"),
-                Field("texte_prestations_anterieures"),
-            ),
-            Fieldset("Texte d'introduction",
-                Field("texte_introduction"),
-                Field("taille_texte_introduction"),
-                Field("style_texte_introduction"),
-                Field("couleur_fond_introduction"),
-                Field("couleur_bord_introduction"),
-                Field("alignement_texte_introduction"),
-            ),
-            Fieldset("Texte de conclusion",
-                Field("texte_conclusion"),
-                Field("taille_texte_conclusion"),
-                Field("style_texte_conclusion"),
-                Field("couleur_fond_conclusion"),
-                Field("couleur_bord_conclusion"),
-                Field("alignement_texte_conclusion"),
-            ),
-        )
+                     Field("afficher_deja_paye"),
+                     Field("afficher_reste_regler"),
+                     Field("afficher_reglements"),
+                     ),
 
+            Fieldset("Textes",
+                     Field("texte_conclusion"),
+                     ),
+        )
+        # Si mémorisation, on l’ajoute en premier
         if self.memorisation:
             self.helper.layout.insert(0,
-                Fieldset("Mémorisation",
-                    Field("memoriser_parametres"),
-                ),
-            )
+                                      Fieldset("Mémorisation",
+                                               Field("memoriser_parametres"),
+                                               ),
+                                      )
 
     def clean(self):
         if self.memorisation and self.cleaned_data["memoriser_parametres"]:

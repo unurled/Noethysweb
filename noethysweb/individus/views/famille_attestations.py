@@ -90,6 +90,7 @@ def Generer_pdf(request):
         dict_attestations[IDfamille].update({
             "{DATE_EDITION}": parametres["date_edition"].strftime('%d/%m/%Y'),
             "{SIGNATAIRE}": str(parametres["signataire"]),
+            "{TEXTE_COMP}": str(parametres["text_comp"]),
             "{NUM_ATTESTATION}": parametres["numero"],
             "{NOMS_INDIVIDUS}": noms_individus,
             "{DATE_DEBUT}": date_debut.strftime('%d/%m/%Y'),

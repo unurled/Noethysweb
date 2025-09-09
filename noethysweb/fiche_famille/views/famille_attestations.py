@@ -58,7 +58,7 @@ def Impression_pdf(request):
     # Fusion du texte d'introduction
     dict_options = parametres["options_impression"]
     dict_attestations[IDfamille]["texte_introduction"] = utils_texte.Fusionner_motscles(dict_options["texte_introduction"], dict_attestations[IDfamille])
-
+    dict_attestations[IDfamille]["texte_conclusion"] = utils_texte.Fusionner_motscles(dict_options.get("texte_conclusion", ""), dict_attestations[IDfamille]    )
     # Renvoie les infos au template pour la sauvegarde
     infos = {
         "total": float(dict_attestations[IDfamille]["total"]),

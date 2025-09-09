@@ -16,6 +16,7 @@ from core.models import Attestation, ModeleDocument, Inscription
 from core.widgets import DatePickerWidget, DateRangePickerWidget, FormIntegreWidget
 from core.utils import utils_dates
 from facturation.forms.attestations_options_impression import Formulaire as Form_options_impression
+from dateutil.relativedelta import relativedelta
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -50,6 +51,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Date d'édition
         self.fields["date_edition"].initial = datetime.date.today()
+        self.fields["periode"].initial = "%s - %s" % (utils_dates.ConvertDateToFR(datetime.date.today() - relativedelta(years=1)), utils_dates.ConvertDateToFR(datetime.date.today()))
 
         # Recherche les inscriptions de la famille
         inscriptions = Inscription.objects.select_related("activite", "activite__structure", "individu").filter(famille_id=idfamille, activite__structure__in=utilisateur.structures.all())
@@ -107,11 +109,12 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("date_edition"),
             Field("individus"),
             Field("activites"),
-            Field("filtre_prestations"),
-            Field("exclusions_prestations"),
+            #Field("filtre_prestations"),
+            #Field("exclusions_prestations"),
             Field("numero"),
             Field("modele"),
             Field("signataire"),
+            Field("texte_comp"),
             Field("options_impression"),
             HTML(EXTRA_HTML),
         )
