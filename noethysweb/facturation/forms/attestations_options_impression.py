@@ -53,7 +53,7 @@ class Formulaire(FormulaireBase, forms.Form):
     taille_texte_prestations_anterieures = forms.IntegerField(label="Taille de texte du commentaire", initial=5, required=True)
     texte_prestations_anterieures = forms.CharField(label="Texte d'information", initial="Des prestations antérieures ont été reportées sur cette attestation.", required=True)
 
-    texte_introduction = forms.CharField(label="Texte d'introduction", initial="Je soussigné(e) {SIGNATAIRE}, atteste avoir accueilli {NOMS_INDIVIDUS} sur la période du {DATE_DEBUT} au {DATE_FIN} selon le détail suivant :", required=False)
+    texte_introduction = forms.CharField(label="Texte d'introduction", initial="Je soussigné(e) {SIGNATAIRE}, atteste avoir accueilli {NOMS_INDIVIDUS} selon le détail suivant :", required=False)
     taille_texte_introduction = forms.IntegerField(label="Taille de texte d'introduction", initial=9, required=True)
     style_texte_introduction = forms.ChoiceField(label="Style du texte d'introduction", choices=[("0", "Normal"), ("1", "Italique"), ("2", "Gras"), ("3", "Italique + gras")], initial="0", required=True)
     couleur_fond_introduction = forms.CharField(label="Couleur de fond introduction", required=True, widget=ColorPickerWidget(), initial="#FFFFFF")
