@@ -4,14 +4,15 @@
 #  Distribué sous licence GNU GPL.
 
 import logging
+import os
 logger = logging.getLogger(__name__)
 from decimal import Decimal
 from operator import itemgetter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak, Image
 from reportlab.platypus.flowables import DocAssign
-from core.models import MessageFacture
+from core.models import MessageFacture, Utilisateur
 from core.utils import utils_dates, utils_impression, utils_preferences
 
 
@@ -34,6 +35,8 @@ def GetDatesListes(listeDates):
 
 class Impression(utils_impression.Impression):
     def __init__(self, *args, **kwds):
+        self.request = kwds.pop("request", None)  # récupère la requête
+        self.utilisateur = self.request.user if self.request else None
         self.mode = kwds.pop("mode", "facture")
         self.messages = MessageFacture.objects.all()
         utils_impression.Impression.__init__(self, *args, **kwds)
@@ -99,7 +102,7 @@ class Impression(utils_impression.Impression):
                     tableau = Table(dataTableau, largeursColonnes)
                     tableau.setStyle(TableStyle(styles))
                     self.story.append(tableau)
-                    self.story.append(Spacer(0, 20))
+                    self.story.append(Spacer(0, 10))
 
                 if self.dict_options["texte_introduction"] != "":
                     paraStyle = ParagraphStyle(name="introduction",
@@ -121,7 +124,7 @@ class Impression(utils_impression.Impression):
                     if self.dict_options["style_texte_introduction"] == "2": texte = "<para><b>%s</b></para>" % texte
                     if self.dict_options["style_texte_introduction"] == "3": texte = "<para><i><b>%s</b></i></para>" % texte
                     self.story.append(Paragraph(texte, paraStyle))
-                    self.story.append(Spacer(0, 20))
+                    self.story.append(Spacer(0, 10))
 
                     
                 couleurFond = self.dict_options["couleur_fond_1"]
@@ -694,23 +697,21 @@ class Impression(utils_impression.Impression):
                     if self.dict_options["style_texte_conclusion"] == "2": texte = "<para><b>%s</b></para>" % texte
                     if self.dict_options["style_texte_conclusion"] == "3": texte = "<para><i><b>%s</b></i></para>" % texte
                     self.story.append(Paragraph(texte, paraStyle))
-                    
-                # Image signature
-                # if self.dict_options["image_signature"] != "" :
-                #     cheminImage = self.dict_options["image_signature"]
-                #     if os.path.isfile(cheminImage) :
-                #         img = Image(cheminImage)
-                #         largeur, hauteur = int(img.drawWidth * 1.0 * self.dict_options["taille_image_signature"] / 100.0), int(img.drawHeight * 1.0 * self.dict_options["taille_image_signature"] / 100.0)
-                #         if largeur > self.taille_cadre[2] or hauteur > self.taille_cadre[3] :
-                #             raise Exception(_(u"L'image de signature est trop grande. Veuillez diminuer sa taille avec le parametre Taille."))
-                #         img.drawWidth, img.drawHeight = largeur, hauteur
-                #         if self.dict_options["alignement_image_signature"] == "0" : img.hAlign = "LEFT"
-                #         if self.dict_options["alignement_image_signature"] == "1" : img.hAlign = "CENTER"
-                #         if self.dict_options["alignement_image_signature"] == "2" : img.hAlign = "RIGHT"
-                #         self.story.append(Spacer(0,20))
-                #         self.story.append(img)
 
-                # Saut de page
+                # Affichage de la signature si le paramètre est True
+                if self.dict_options["afficher_signature"] == True :
+                    if self.utilisateur and self.utilisateur.signature_image:
+                        cheminImage = self.utilisateur.signature_image.path
+                        print(cheminImage)
+                        if os.path.isfile(cheminImage):
+                            img = Image(cheminImage)
+                            ratio = img.drawHeight / img.drawWidth
+                            img.drawWidth = 100
+                            img.drawHeight = 100 * ratio
+                            img.hAlign = "RIGHT"
+                            self.story.append(Spacer(0, 0))
+                            self.story.append(img)
+
                 self.story.append(PageBreak())
 
 

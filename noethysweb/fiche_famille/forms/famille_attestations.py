@@ -114,7 +114,6 @@ class Formulaire(FormulaireBase, ModelForm):
             Field("numero"),
             Field("modele"),
             Field("signataire"),
-            Field("texte_comp"),
             Field("options_impression"),
             HTML(EXTRA_HTML),
         )

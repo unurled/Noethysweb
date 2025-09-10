@@ -8,10 +8,10 @@ from core.models import Structure, Utilisateur
 class FormSignature(forms.ModelForm):
     class Meta:
         model = Utilisateur
-        fields = ['signature']
+        fields = ['signature_image']
         widgets = {
             'signature': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
         }
         labels = {
-            'signature': 'Ajouter / Modifier votre signature',
+            'signature_image': 'Ajouter / Modifier votre signature',
         }

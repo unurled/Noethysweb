@@ -53,7 +53,7 @@ class Formulaire(FormulaireBase, forms.Form):
     taille_texte_prestations_anterieures = forms.IntegerField(label="Taille de texte du commentaire", initial=5, required=True)
     texte_prestations_anterieures = forms.CharField(label="Texte d'information", initial="Des prestations antérieures ont été reportées sur cette attestation.", required=True)
 
-    texte_introduction = forms.CharField(label="Texte d'introduction", initial="Je soussigné(e) {SIGNATAIRE}, atteste avoir accueilli {NOMS_INDIVIDUS} selon le détail suivant :", required=False)
+    texte_introduction = forms.CharField(label="Texte d'introduction", initial="Je soussigné(e) {SIGNATAIRE}, atteste avoir accueilli {NOMS_INDIVIDUS} selon le détail suivant :", required=False, help_text="Champs disponibles : {DATE_EDITION},{SIGNATAIRE},{NOMS_INDIVIDUS},{DATE_DEBUT},{DATE_FIN}")
     taille_texte_introduction = forms.IntegerField(label="Taille de texte d'introduction", initial=9, required=True)
     style_texte_introduction = forms.ChoiceField(label="Style du texte d'introduction", choices=[("0", "Normal"), ("1", "Italique"), ("2", "Gras"), ("3", "Italique + gras")], initial="0", required=True)
     couleur_fond_introduction = forms.CharField(label="Couleur de fond introduction", required=True, widget=ColorPickerWidget(), initial="#FFFFFF")
@@ -67,7 +67,11 @@ class Formulaire(FormulaireBase, forms.Form):
     couleur_bord_conclusion = forms.CharField(label="Couleur de bord conclusion", required=True, widget=ColorPickerWidget(), initial="#FFFFFF")
     alignement_texte_conclusion = forms.ChoiceField(label="Alignement du texte de conclusion", choices=[("0", "Gauche"), ("1", "Centre"), ("2", "Droite")], initial="0", required=True)
 
-
+    afficher_signature = forms.BooleanField(
+        label="Afficher votre signature sur le document",
+        required=False,
+        initial=True,  # par défaut on l'affiche
+    )
     def __init__(self, *args, **kwargs):
         self.memorisation = kwargs.pop("memorisation", True)
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -94,6 +98,8 @@ class Formulaire(FormulaireBase, forms.Form):
             "afficher_reglements",
             "texte_conclusion",
             "memoriser_parametres",
+            "afficher_signature",
+            "texte_introduction",
         ]
 
         # Champs à cacher = tout le reste
@@ -109,11 +115,12 @@ class Formulaire(FormulaireBase, forms.Form):
                      Field("afficher_deja_paye"),
                      Field("afficher_reste_regler"),
                      Field("afficher_reglements"),
+                     Field("afficher_signature"),
                      ),
 
             Fieldset("Textes",
+                     Field("texte_introduction"),
                      Field("texte_conclusion"),
-                     Field("affichage_solde"),
                      ),
         )
         # Si mémorisation, on l’ajoute en premier

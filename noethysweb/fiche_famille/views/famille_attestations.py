@@ -67,9 +67,9 @@ def Impression_pdf(request):
         "individus": ";".join([str(idindividu) for idindividu in dict_attestations[IDfamille]["individus"].keys()]),
         "activites": ";".join([str(idactivite) for idactivite in dict_attestations[IDfamille]["liste_idactivite"]])
     }
-
+    print(dict_options)
     # Création du PDF
-    impression = utils_impression_facture.Impression(dict_donnees=dict_attestations, dict_options=dict_options, IDmodele=parametres["modele"].pk, mode="attestation")
+    impression = utils_impression_facture.Impression(request=request, dict_donnees=dict_attestations, dict_options=dict_options, IDmodele=parametres["modele"].pk, mode="attestation")
     nom_fichier = impression.Get_nom_fichier()
 
     # Récupération des valeurs de fusion
