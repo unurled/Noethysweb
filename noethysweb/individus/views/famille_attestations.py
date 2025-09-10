@@ -129,7 +129,6 @@ def Generer_pdf(request):
             mode="attestation"
         )
         nom_fichier = impression.Get_nom_fichier()
-        print(nom_fichier)
 
         # Récupération des valeurs de fusion
         champs = {motcle: dict_attestations[IDfamille].get(motcle, "") for motcle, label in

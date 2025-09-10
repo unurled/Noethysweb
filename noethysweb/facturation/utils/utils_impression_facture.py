@@ -702,7 +702,6 @@ class Impression(utils_impression.Impression):
                 if self.dict_options["afficher_signature"] == True :
                     if self.utilisateur and self.utilisateur.signature_image:
                         cheminImage = self.utilisateur.signature_image.path
-                        print(cheminImage)
                         if os.path.isfile(cheminImage):
                             img = Image(cheminImage)
                             ratio = img.drawHeight / img.drawWidth
