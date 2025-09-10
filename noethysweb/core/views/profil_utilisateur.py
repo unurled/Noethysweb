@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from django.contrib import messages
 from core.views.base import CustomView
+from core.forms.profil import FormSignature
 
 
 def Purger_filtres_listes(request):
@@ -27,8 +28,23 @@ class View(CustomView, TemplateView):
     compatible_demo = False
 
     def get_context_data(self, **kwargs):
-        context = super(View, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['page_titre'] = "Profil"
         context['box_titre'] = "Profil de l'utilisateur"
         context['box_introduction'] = ""
+
+        # Ajouter le formulaire signature
+        form = FormSignature(instance=self.request.user)
+        context['form_signature'] = form
+
         return context
+
+    def post(self, request, *args, **kwargs):
+        form = FormSignature(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+
+            form.save()
+            messages.success(request, "Votre signature a été enregistrée avec succès.")
+        else:
+            messages.error(request, "Erreur lors de l'enregistrement de la signature.")
+        return self.get(request, *args, **kwargs)

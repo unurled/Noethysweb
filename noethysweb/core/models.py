@@ -372,6 +372,13 @@ class CustomUserManager(UserManager):
     def get(self, *args, **kwargs):
         return super().prefetch_related("structures").get(*args, **kwargs)
 
+def chemin_signature(instance, filename):
+    import os
+    from django.conf import settings
+    dossier = os.path.join(settings.MEDIA_ROOT, 'signatures')
+    os.makedirs(dossier, exist_ok=True)
+    return os.path.join('signatures', filename)
+
 class Utilisateur(AbstractUser):
     categorie = models.CharField(verbose_name="Catégorie", max_length=50, blank=True, null=True, default="utilisateur")
     force_reset_password = models.BooleanField(verbose_name="Force la mise à jour du mot de passe", default=False)
@@ -379,6 +386,7 @@ class Utilisateur(AbstractUser):
     structures = models.ManyToManyField(Structure, verbose_name="Structures", related_name="utilisateur_structures", blank=True)
     adresse_exp = models.ForeignKey(AdresseMail, verbose_name="Adresse d'expédition d'emails", related_name="utilisateur_adresse_exp", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une adresse d'expédition d'emails favorite dans la liste. Il est possible de créer de nouvelles adresses depuis le menu Paramétrage > Adresses d'expédition.")
     signature = models.ForeignKey(SignatureEmail, verbose_name="Signature d'emails", related_name="utilisateur_signature", blank=True, null=True, on_delete=models.PROTECT, help_text="Sélectionnez une signature d'emails favorite dans la liste. Il est possible de créer de nouvelles signatures depuis le menu Paramétrage > Signatures d'emails.")
+    signature = models.FileField(upload_to=chemin_signature, blank=True, null=True)
     objects = CustomUserManager()
 
     class Meta:

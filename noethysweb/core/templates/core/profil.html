@@ -55,4 +55,29 @@
         function get_coches() {return []}
     </script>
 
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}Signature{% endblock %}
+        {% block box_contenu %}
+
+            {% if request.user.signature %}
+                <p>Signature actuelle :</p>
+                <img src="{{ request.user.signature.url }}" alt="Signature" style="max-width: 200px; border:1px solid #ccc; padding:5px;">
+                <br><br>  {# saut de ligne avant le champ #}
+            {% else %}
+                <p>Aucune signature enregistrée</p>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div style="margin-bottom:10px;">
+                    {{ form_signature.signature }}
+                </div>
+                <button type="submit" class="btn btn-primary">Enregistrer/Modifier la signature</button>
+            </form>
+
+        {% endblock %}
+    {% endembed %}
+
+
 {% endblock %}
