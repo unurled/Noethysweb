@@ -699,7 +699,7 @@ class Impression(utils_impression.Impression):
                     self.story.append(Paragraph(texte, paraStyle))
 
                 # Affichage de la signature si le paramètre est True
-                if self.dict_options["afficher_signature"] == True :
+                if self.dict_options.get("afficher_signature"):
                     if self.utilisateur and self.utilisateur.signature_image:
                         cheminImage = self.utilisateur.signature_image.path
                         if os.path.isfile(cheminImage):
