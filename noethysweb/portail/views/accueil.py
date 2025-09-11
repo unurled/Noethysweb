@@ -62,7 +62,7 @@ class Accueil(CustomView, TemplateView):
             context["cotisations_manquantes"] = utils_cotisations_manquantes.Get_cotisations_manquantes(famille=self.request.user.famille, exclure_individus=self.request.user.famille.individus_masques.all())
 
             # Articles
-        conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
+        conditions = Q(structure__visible=True) & Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
         conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) | (Q(public="inscrits") & Q(activites__in=activites)))
         articles = Article.objects.select_related("image_article", "album", "sondage", "auteur").filter(conditions).distinct().order_by("-date_debut")
         selection_articles = []

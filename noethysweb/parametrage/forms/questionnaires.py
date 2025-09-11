@@ -67,7 +67,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        self.fields['activite'].queryset = Activite.objects.filter(visible=True)
+        self.fields['activite'].queryset = Activite.objects.filter(visible=True, structure__in=self.request.user.structures.all())
 
         # Ordre
         if self.instance.ordre == None:

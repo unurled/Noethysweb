@@ -1,0 +1,7 @@
+activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
+individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
+
+famille_inscrite = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+
+self.fields['activite'].queryset = Activite.objects.filter(visible=True, structure__in=self.request.user.structures.all())

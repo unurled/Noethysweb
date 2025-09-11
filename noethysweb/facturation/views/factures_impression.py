@@ -63,8 +63,9 @@ def Impression_pdf(request):
 
         chemin_pdf_rel = resultat["nom_fichier"]
 
-        # Lecture du PDF généré et ajout au writer
-        reader = PdfReader(chemin_pdf_rel)
+        # Construire un chemin absolu
+        chemin_pdf = os.path.join(settings.MEDIA_ROOT, chemin_pdf_rel.lstrip("/"))
+        reader = PdfReader(chemin_pdf)
         for page in reader.pages:
             writer.add_page(page)
 

@@ -12,7 +12,7 @@ from django.db.models import Q, Value
 from django.db.models.functions import Concat
 from django.http import JsonResponse
 from core.views.base import CustomView
-from core.models import Payeur, Rattachement, Collaborateur
+from core.models import Payeur, Rattachement, Collaborateur, Activite, Inscription, Famille
 from core.views.menu import GetMenuPrincipal
 from core.utils import utils_historique
 
@@ -73,7 +73,14 @@ class View(CustomView, TemplateView):
         champs = ("nom_complet", "nom_complet_inverse", "individu__nom", "individu__nom_jfille", "individu__prenom")
         condition = reduce(or_, [Q(**{'{}__icontains'.format(f): texte}) for f in champs], Q())
         queryset = Rattachement.objects.select_related('individu', 'famille').annotate(nom_complet=Concat('individu__nom', Value(' '), 'individu__prenom'), nom_complet_inverse=Concat('individu__prenom', Value(' '), 'individu__nom'))
-        resultats["rattachements"] = queryset.filter(condition).order_by("individu__nom", "individu__prenom")[:50]
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        if self.request.user.is_staff:
+            inscriptions_accessibles = Inscription.objects.all()
+        else :
+            inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
+        famille_inscrite = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
+        condition_structure = Q(famille__in=famille_inscrite)
+        resultats["rattachements"] = queryset.filter(condition & condition_structure).order_by("individu__nom", "individu__prenom")[:50]
 
         # Recherche dans les payeurs
         resultats["payeurs"] = Payeur.objects.select_related('famille').filter(nom__icontains=texte).order_by("nom")[:50]

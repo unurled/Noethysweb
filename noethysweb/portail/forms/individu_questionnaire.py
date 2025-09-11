@@ -34,8 +34,7 @@ class Formulaire(FormulaireBase, forms.Form):
         individu = rattachement.individu
         inscriptions = Inscription.objects.filter(individu=individu)
         activite_ids = inscriptions.values_list('activite', flat=True).distinct()
-        activites = Activite.objects.filter(idactivite__in=activite_ids)
-
+        activites = Activite.objects.filter(idactivite__in=activite_ids, structure__visible=True)
         cat_individu = individu.statut
 
         # Filtrage des questions

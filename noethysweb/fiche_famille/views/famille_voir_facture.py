@@ -26,10 +26,8 @@ def Impression_pdf(request):
     # Trouver l'ID du modèle d'impression correspondant au texte
     modele_impression = ModeleImpression.objects.get(nom=modelimp_text)
     IDmodele_impression = modele_impression.pk
-    print(IDmodele_impression)
 
     if IDmodele_impression:
-        modele_impression = ModeleImpression.objects.get(pk=IDmodele_impression)
         dict_options = json.loads(modele_impression.options)
         dict_options["modele"] = modele_impression.modele_document
     else:

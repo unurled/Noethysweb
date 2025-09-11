@@ -24,14 +24,13 @@ class Formulaire(FormulaireBase, forms.Form):
         self.helper = FormHelper()
         self.helper.form_id = 'individu_questionnaire_form'
         self.helper.form_method = 'post'
-
         # Création des champs
         # Récupération de l'individu depuis le rattachement
         idindividu = Individu.objects.get(pk=self.idindividu)
         statut_individu = idindividu.statut
         inscriptions = Inscription.objects.filter(individu=idindividu)
         activite_ids = inscriptions.values_list('activite', flat=True).distinct()
-        activites = Activite.objects.filter(idactivite__in=activite_ids)
+        activites = Activite.objects.filter(idactivite__in=activite_ids, structure__visible=True)
 
         if statut_individu != 5:
             # Si toutes les activités ont 'interne=False', exclure les questions avec 'activite=None'
@@ -56,7 +55,6 @@ class Formulaire(FormulaireBase, forms.Form):
             nom_controle, ctrl = questionnaires.Get_controle(question)
             if ctrl:
                 self.fields[nom_controle] = ctrl
-
         # Importation des réponses
         for reponse in QuestionnaireReponse.objects.filter(individu_id=self.idindividu):
             key = "question_%d" % reponse.question_id

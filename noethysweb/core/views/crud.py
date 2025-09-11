@@ -39,8 +39,11 @@ class Liste_commun():
     template_name = "core/crud/liste_in_box.html"
 
     def Get_condition_structure(self):
-        """ Retourne une condition sql pour sélectionner les données associées à une structure ou toutes les structures """
-        condition = Q(structure__in=self.request.user.structures.filter(visible=True)) | Q(structure__isnull=True)
+        if self.request.user.is_staff:
+            condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        else:
+            condition = Q(structure__in=self.request.user.structures.filter(visible=True)) | Q(structure__isnull=True)
+
         return condition
 
     def Get_filtres(self, mode=None):
@@ -256,8 +259,11 @@ class BaseView():
         return reverse_lazy(self.url_liste)
 
     def Get_condition_structure(self):
-        """ Retourne une condition sql pour sélectionner les données associées à une structure ou toutes les structures """
-        condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        if self.request.user.is_staff:
+            condition = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        else:
+            condition = Q(structure__in=self.request.user.structures.filter(visible=True)) | Q(structure__isnull=True)
+
         return condition
 
     def save_historique(self, instance=None, titre=None, detail=None, form=None):

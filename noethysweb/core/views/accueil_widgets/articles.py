@@ -27,7 +27,7 @@ class Widget(accueil_widget.Widget):
         structures = self.request.user.structures.all()
 
         # Définissez les conditions pour les articles publiés
-        conditions = Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (
+        conditions = Q(structure__visible=True) & Q(statut="publie") & Q(date_debut__lte=datetime.datetime.now()) & (
             Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.datetime.now()))
         conditions &= (Q(public__in=("toutes", "presents", "presents_groupes")) |
                        (Q(public="inscrits") & Q(activites__structure__in=structures)))

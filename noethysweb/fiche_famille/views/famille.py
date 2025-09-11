@@ -13,7 +13,7 @@ from django.views.generic.detail import DetailView
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Individu, Activite, Structure
+from core.models import Famille, Note, Rattachement, CATEGORIES_RATTACHEMENT, Prestation, Reglement, PortailMessage, Inscription, Individu, Activite, Structure, Ventilation
 from core.utils import utils_texte
 from individus.utils import utils_pieces_manquantes
 from fiche_individu.forms.individu import Formulaire
@@ -113,14 +113,22 @@ class Liste(Page, crud.Liste):
     model = Famille
 
     def get_queryset(self):
-        activites_autorisees = Activite.objects.filter(structure__in=self.request.user.structures.all())
-        inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_autorisees)
-        incriptions_inaccessibles = Inscription.objects.exclude(activite__in=activites_autorisees)
-        individus_inscrits = Individu.objects.filter(
-            Q (idindividu__in=inscriptions_accessibles.values('individu')) |
-            ~Q (idindividu__in=Inscription.objects.values_list('individu', flat=True))
-        ).exclude(idindividu__in=incriptions_inaccessibles.values('individu'))
-        return Famille.objects.filter(idfamille__in=individus_inscrits).filter(self.Get_filtres("Q"))
+        # Activités autorisées selon la condition de structure
+        activites_autorisees = Activite.objects.filter(
+            self.Get_condition_structure()  # on passe le Q complet
+        )
+
+        # Inscriptions sur ces activités
+        inscriptions_accessibles = Inscription.objects.filter(
+            activite__in=activites_autorisees
+        )
+
+        # Familles correspondantes, avec filtres additionnels
+        return (
+            Famille.objects
+            .filter(idfamille__in=inscriptions_accessibles.values_list("famille_id", flat=True))
+            .filter(self.Get_filtres("Q"))
+        )
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -225,8 +233,10 @@ class Resume(Onglet, DetailView):
         context['notes'] = Note.objects.filter(conditions, famille_id=idfamille).order_by("date_saisie")
 
         # Calcul du solde
-        total_prestations = Prestation.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))
-        total_reglements = Reglement.objects.values('famille_id').filter(famille_id=idfamille).aggregate(total=Sum("montant"))
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        prestations_famille = Prestation.objects.filter(famille_id=idfamille, activite__in=activites_accessibles)
+        total_prestations = Prestation.objects.filter(famille_id=idfamille, activite__in=activites_accessibles).aggregate(total=Sum("montant"))
+        total_reglements = Ventilation.objects.filter(prestation__in=prestations_famille).aggregate(total=Sum("montant"))
         total_du = total_prestations["total"] if total_prestations["total"] else Decimal(0)
         total_regle = total_reglements["total"] if total_reglements["total"] else Decimal(0)
         context['solde'] = total_du - total_regle
