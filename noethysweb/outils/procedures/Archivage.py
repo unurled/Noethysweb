@@ -34,6 +34,11 @@ class Procedure(BaseProcedure):
                 activites=activite
             ).update(structure=12, statut='non_publie')
 
+            # Questionnaires
+            questionnaires_modifiés = QuestionnaireQuestion.objects.filter(
+                activites=activite
+            ).update(structure=12)
+
             # Signature email
             sign_modifies = SignatureEmail.objects.filter(
                 structure__in=structures
