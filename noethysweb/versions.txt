@@ -1,3 +1,6 @@
+Version 1.3.5.5.85 (15/09/2025)
+- Modif interne activité
+
 Version 1.3.5.5.84 (11/09/2025)
 - beug filtre activité dans certains menus
 - Beug facture
