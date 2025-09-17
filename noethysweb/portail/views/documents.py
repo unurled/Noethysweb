@@ -39,7 +39,7 @@ class View(CustomView, TemplateView):
 
         # Importation des documents à télécharger
         liste_documents = []
-        documents = PortailDocument.objects.filter(Q(activites__in=activites)).order_by("titre").distinct()
+        documents = PortailDocument.objects.filter(Q(activites__in=activites), activites__visible=True).order_by("titre").distinct()
         for document in documents:
             liste_documents.append({
                 "titre": document.titre,

@@ -1,3 +1,8 @@
+Version 1.3.5.5.86 (17/09/2025)
+- Visible documents mise à disp si act. visible
+- procédure activité invisible si structure pas visible
+- procédure pour supprimer les familles sans connexion et sans prestation
+
 Version 1.3.5.5.85 (15/09/2025)
 - Modif interne activité
 
