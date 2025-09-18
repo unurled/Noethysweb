@@ -136,6 +136,20 @@
                             <td>
                                 <img src="{{ rattachement.individu.Get_photo }}" alt="user-avatar" class="img-circle img-fluid table-avatar" style="max-height: 80px">
                                 <span class="ml-2"><strong>{{ rattachement.individu.Get_nom }}</strong></span>
+                                {# infos rapide #}
+                                {# pas d'allergies #}
+                                {%if rattachement.individu.allergies2|length == 0 %}
+                                    <span class="badge badge-primary" title="Allergies">Pas d'allergies</span>
+                                {% else %}
+                                {% endif %}
+                                {% if rattachement.individu.traitements|length == 0 %} 
+                                <span class="badge badge-primary" title="traitements">Pas de traitements</span>
+                                {% else %}
+                                {% endif %}
+                                {%if rattachement.individu.dispmed2|length == 0 %}
+                                    <span class="badge badge-primary" title="Dispositifs médicaux">Pas de dispositifs médicaux</span>
+                                {% else %}
+                                {% endif %}
                             </td>
                             <td>
                                 {% if rattachement.categorie == 1 %}{% blocktrans %}Fiche représentant{% endblocktrans %}{% endif %}

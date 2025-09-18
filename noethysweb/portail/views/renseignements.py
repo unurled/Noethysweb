@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.utils.translation import gettext as _
 from core.views import crud
-from core.models import Consentement, Rattachement, Inscription, Famille
+from core.models import Consentement, Rattachement, Inscription, Famille, Information
 from individus.utils import utils_vaccinations, utils_assurances
 from portail.views.base import CustomView
 from portail.forms.approbations import Formulaire
@@ -29,7 +29,17 @@ class View(CustomView, crud.Modifier):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = _("Renseignements")
         context['rattachements'] = Rattachement.objects.prefetch_related('individu').filter(famille=self.request.user.famille, individu__deces=False).order_by("individu__nom", "individu__prenom")
-
+        # Ajout des traitements, alergies et dispenses à chaque individu
+        for rattachement in context['rattachements']:
+            individu = rattachement.individu
+            
+            # get traitements
+            individu.traitements = Information.objects.filter(individu=individu).order_by("intitule")
+            
+            individu.allergies2 = individu.allergies.all()
+            
+            individu.dispmed2 = individu.dispmed.all()
+            
         #Recherche ID famille
         idfamille = self.request.user.famille
         familleid = Famille.objects.filter(nom=idfamille).values('idfamille').first()
