@@ -3,7 +3,11 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import json
 import logging
+import os
+import shutil
+from pathlib import Path
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
@@ -11,13 +15,13 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponseRedirect
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Attestation
+from core.models import Attestation, Attestationdoc, Famille, Activite, Individu
 from core.utils import utils_dates, utils_texte, utils_preferences
 from core.data import data_modeles_emails
 from fiche_famille.forms.famille_attestations import Formulaire as Form_parametres
 from fiche_famille.views.famille import Onglet
 from facturation.utils import utils_facturation, utils_impression_facture
-
+from django.conf import settings
 
 def Impression_pdf(request):
     # Récupération des données
@@ -73,6 +77,33 @@ def Impression_pdf(request):
 
     # Récupération des valeurs de fusion
     champs = {motcle: dict_attestations[IDfamille].get(motcle, "") for motcle, label in data_modeles_emails.Get_mots_cles("attestation_presence")}
+
+    chemin_source = Path(settings.MEDIA_ROOT) / nom_fichier.lstrip('/')
+
+    # Répertoire de destination
+    dossier_attestations = Path(settings.MEDIA_ROOT) / 'attestations_presence'
+
+    # Assurez-vous que le répertoire de destination existe
+    dossier_attestations.mkdir(parents=True, exist_ok=True)
+
+    # Nom du fichier dans le répertoire de destination
+    nom_fichier1 = f"Attestation-{parametres['numero']}-{parametres['date_edition']}.pdf"
+    chemin_destination = dossier_attestations / nom_fichier1
+
+    # Copier le fichier
+    shutil.copy(chemin_source, chemin_destination)
+    famille_obj = Famille.objects.get(pk=IDfamille)
+    activite_obj = Activite.objects.get(pk=activites[0])
+    individu_obj = Individu.objects.get(pk=individus[0])
+    print(f"Fichier copié de {chemin_source} à {chemin_destination}")
+    # Enregistrer l'attestation dans Attestationdoc
+    Attestationdoc.objects.update_or_create(
+        famille=famille_obj,
+        activites=activite_obj,
+        individus=individu_obj,
+        defaults={'fichier': "attestations_presence/" + nom_fichier1}
+    )
+
     return JsonResponse({"infos": infos, "nom_fichier": nom_fichier, "categorie": "attestation_presence", "label_fichier": "Attestation de présence", "champs": champs, "idfamille": IDfamille})
 
 
