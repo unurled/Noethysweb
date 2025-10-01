@@ -62,7 +62,7 @@ def Update():
         return False
 
     # Téléchargement du zip
-    nom_fichier = "Noethysweb-%s.zip" % version_online_txt
+    nom_fichier = "Sacadoc-%s.zip" % version_online_txt
     if not os.path.isdir(settings.MEDIA_ROOT):
         os.mkdir(settings.MEDIA_ROOT)
     rep_temp = settings.MEDIA_ROOT + "/temp"
@@ -84,13 +84,13 @@ def Update():
     liste_fichiers = zfile.namelist()
 
     # Remplacement des fichiers
-    prefixe = "Noethysweb-%s/noethysweb/" % version_online_txt
+    prefixe = "Sacadoc-%s/noethysweb/" % version_online_txt
     chemin_dest = os.path.join(settings.BASE_DIR, "")
 
     logger.debug("Installation des nouveaux fichiers...")
     for i in liste_fichiers:
         d = i.replace(prefixe, "")
-        if len(d) > 1 and not d.startswith("Noethysweb-%s" % version_online_txt):
+        if len(d) > 1 and not d.startswith("Sacadoc-%s" % version_online_txt):
             if i.endswith('/'):
                 try:
                     os.makedirs(os.path.join(chemin_dest, d))
