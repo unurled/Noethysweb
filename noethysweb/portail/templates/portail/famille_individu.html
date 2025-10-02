@@ -1,74 +1,98 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un individu</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            margin-top: 20px;
-            text-align: center; /* Centrer le contenu du formulaire */
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="date"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Ajouter un nouvel enfant</h1>
-        <form method="post">
-            {% csrf_token %}
-            <label for="id_nom">Nom :</label>
-            {{ form.nom }}
-            <label for="id_prenom">Prénom :</label>
-            {{ form.prenom }}
-            <label for="id_prenom">Date de naissance (JJ/MM/AAAA) :</label>
-            {{ form.date_naiss }}
-            <button type="submit">Ajouter un enfant</button>
-        </form>
-    </div>
-</body>
+    <head>
+        {% block meta %}
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta charset="utf-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta name="description" content="Noethysweb" />
+            {% comment %}
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+            {% endcomment %}
+        {% endblock meta %}
+        <link rel="shortcut icon" href="{% static 'images/icone.png' %}" />
+        <title>Noethysweb |
+            {% block page_titre %}{% endblock %}
+        </title>
+        {% block styles %}
+            {% include 'core/styles.html' %}
+        {% endblock %}
+        {% block scripts %}
+            {% include 'core/scripts.html' %}
+        {% endblock %}
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+            }
+            .container {
+                max-width: 500px;
+                margin: 50px auto;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+            form {
+                margin-top: 20px;
+                text-align: center; /* Centrer le contenu du formulaire */
+            }
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+            input[type="text"],
+            input[type="email"],
+            input[type="date"] {
+                width: 100%;
+                padding: 8px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            button {
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Ajouter un nouvel enfant</h1>
+            <form method="post">
+                {% csrf_token %}
+                <label for="id_nom" class="font-weight-bold">Nom :</label>
+                {{ form.nom }}
+                <label for="id_prenom" class="font-weight-bold">Prénom :</label>
+                {{ form.prenom }}
+                <label for="id_prenom" class="font-weight-bold">Date de naissance (JJ/MM/AAAA) :</label>
+                {{ form.date_naiss }}
+                <label for="id_cp_naiss" class="font-weight-bold">Code postal :</label>
+                {{ form.cp_naiss }}
+                <label for="id_ville_naiss" class="font-weight-bold">Ville :</label>
+                {{ form.ville_naiss }}
+                <button type="submit" class="font-weight-bold">Ajouter un enfant</button>
+            </form>
+        </div>
+    </body>
 </html>
