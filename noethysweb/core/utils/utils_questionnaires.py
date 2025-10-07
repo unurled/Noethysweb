@@ -116,7 +116,7 @@ class Questionnaires():
         if categorie:
             condition &= Q(categorie=categorie)
         else:
-            condition = Q()
+            condition &= Q()
         liste_questions = QuestionnaireQuestion.objects.filter(condition).order_by("ordre")
         liste_resultats = []
         try:
