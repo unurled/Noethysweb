@@ -109,10 +109,12 @@ class Questionnaires():
             texteReponse = utils_dates.ConvertDateToFR(reponse) or ""
         return texteReponse
 
-    def GetQuestions(self, categorie="individu", avec_filtre=True):
+    def GetQuestions(self, categorie="individu", avec_filtre=True, structure=None):
         """ Type = None (tout) ou 'individu' ou 'famille' """
         condition = Q(structure__visible=True)
 
+        if structure:
+            condition &= Q(structure__in=structure)
         if categorie:
             condition &= Q(categorie=categorie)
         else:
@@ -132,7 +134,8 @@ class Questionnaires():
     def GetReponses(self, categorie="individu", filtre=None):
         """ Récupération des réponses des questionnaires """
         # Filtre sur les réponses
-        filtres_reponses = Q(question__categorie=categorie)
+        filtres_reponses = Q(question__categorie=categorie) & Q(question__structure__visible=True)
+
 
         if filtre:
             filtres_reponses &= filtre
@@ -166,9 +169,9 @@ class Questionnaires():
 class ChampsEtReponses():
     """ Retourne une donnée de type "{QUESTION_24}" = valeur """
     """ Option : filtres_reponses = Q(collaborateur_is__in=(1, 2, 3)) """
-    def __init__(self, categorie="individu", filtre_reponses=None):
+    def __init__(self, categorie="individu", filtre_reponses=None, structure=None):
         questionnaires = Questionnaires()
-        self.listeQuestions = questionnaires.GetQuestions(categorie=categorie)
+        self.listeQuestions = questionnaires.GetQuestions(categorie=categorie, structure=structure)
         self.dictReponses = questionnaires.GetReponses(categorie=categorie, filtre=filtre_reponses)
 
     def GetDonnees(self, ID, formatStr=True):

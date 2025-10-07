@@ -13,7 +13,7 @@ from reportlab.platypus import Paragraph, Table, TableStyle, PageBreak
 from reportlab.platypus.flowables import Image
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
-from core.models import Lien, Rattachement, ContactUrgence, Information, Assurance, Organisateur, Scolarite
+from core.models import Lien, Rattachement, ContactUrgence, Information, Assurance, Organisateur, Scolarite, Activite, Inscription, Structure
 from core.data.data_liens import DICT_TYPES_LIENS
 from core.data import data_civilites
 from core.utils import utils_dates, utils_impression, utils_questionnaires
@@ -69,9 +69,15 @@ class Impression(utils_impression.Impression):
         dict_vaccinations = utils_vaccinations.Get_tous_vaccins()
 
         # Importation des questionnaires
+        individus_inscrits=[r.individu for r in rattachements]
+        inscriptions_accessibles = Inscription.objects.filter(individu__in=individus_inscrits)
+        activites_accessibles = Activite.objects.filter(idactivite__in=inscriptions_accessibles.values('activite'))
+        structures_accessibles = Structure.objects.filter(idstructure__in=activites_accessibles.values('structure'))
+
         questionnaires_individus = utils_questionnaires.ChampsEtReponses(
             categorie="individu",
-            filtre_reponses=(Q(individu__in=[r.individu for r in rattachements]) & Q(reponse__isnull=False) & ~Q(
+            structure=structures_accessibles,
+            filtre_reponses=(Q(individu__in=individus_inscrits) & Q(reponse__isnull=False) & ~Q(
                 reponse="")))
         questionnaires_familles = utils_questionnaires.ChampsEtReponses(
             categorie="famille",

@@ -1,7 +1,30 @@
 activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+activites_accessibles = Activite.objects.filter(self.Get_condition_structure())
+
 inscriptions_accessibles = Inscription.objects.filter(activite__in=activites_accessibles)
 individus_inscrits = Individu.objects.filter(idindividu__in=inscriptions_accessibles.values('individu'))
 
 famille_inscrite = Famille.objects.filter(idfamille__in=inscriptions_accessibles.values('famille'))
 
 self.fields['activite'].queryset = Activite.objects.filter(visible=True, structure__in=self.request.user.structures.all())
+
+
+        # Calcul du solde
+        activites_accessibles = Activite.objects.filter(structure__in=self.request.user.structures.all())
+        prestations_famille = Prestation.objects.filter(famille_id=idfamille, activite__in=activites_accessibles)
+        total_prestations = Prestation.objects.filter(famille_id=idfamille, activite__in=activites_accessibles).aggregate(total=Sum("montant"))
+        total_reglements = Ventilation.objects.filter(prestation__in=prestations_famille).aggregate(total=Sum("montant"))
+
+
+#Filtre en fonction du staff (normalement plus besoin si Get.conditions…)
+        if self.request.user.is_staff:
+            return Article.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure())
+        return Article.objects.filter(self.Get_filtres("Q"), self.Get_condition_structure(), auteur=self.request.user)
+
+
+#Partir de l'individu et trouver la structure
+
+        individus_inscrits=[r.individu for r in rattachements]
+        inscriptions_accessibles = Inscription.objects.filter(individu__in=individus_inscrits)
+        activites_accessibles = Activite.objects.filter(idactivite__in=inscriptions_accessibles.values('activite'))
+        structures_accessibles = Structure.objects.filter(idstructure__in=activites_accessibles.values('structure'))
