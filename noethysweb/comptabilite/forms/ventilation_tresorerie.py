@@ -6,7 +6,7 @@
 from django import forms
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout
+from crispy_forms.layout import Layout, Hidden
 from crispy_forms.bootstrap import Field, PrependedText
 from core.models import ComptaVentilation, ComptaAnalytique, ComptaCategorie
 from core.widgets import DatePickerWidget
@@ -16,7 +16,7 @@ from core.utils import utils_parametres, utils_preferences
 class Formulaire(forms.ModelForm):
     idventilation = forms.CharField(widget=forms.HiddenInput(), required=False)
     index = forms.CharField(widget=forms.HiddenInput(), required=False)
-
+    date_budget = forms.DateField(widget=forms.HiddenInput(), required=False)
     class Meta:
         model = ComptaVentilation
         exclude = ["operation",]
@@ -54,7 +54,7 @@ class Formulaire(forms.ModelForm):
             Field("idventilation"),
             Field("index"),
             Field("date_budget"),
-            Field("analytique"),
+            Hidden("analytique",value=analytique_defaut),
             Field("categorie"),
             PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
         )

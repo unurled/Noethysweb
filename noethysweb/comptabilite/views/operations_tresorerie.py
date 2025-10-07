@@ -83,9 +83,9 @@ class Page(crud.Page):
         context['liste_categories'] = [(item.pk, item.nom) for item in CompteBancaire.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).order_by("nom")]
         if context['liste_categories']:
             context['boutons_liste'] = [
-                {"label": "Ajouter un débit", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter_debit, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
-                {"label": "Ajouter un crédit", "classe": "btn btn-default", "href": reverse_lazy(self.url_ajouter_credit, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
-                {"label": "Ajouter un virement", "classe": "btn btn-default", "href": reverse_lazy("virements_ajouter"), "icone": "fa fa-plus"}, ]
+                {"label": "Ajouter une dépense", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter_debit, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
+                {"label": "Ajouter une recette", "classe": "btn btn-default", "href": reverse_lazy(self.url_ajouter_credit, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
+                {"label": "Ajouter un virement interne", "classe": "btn btn-default", "href": reverse_lazy("virements_ajouter"), "icone": "fa fa-plus"}, ]
         else:
             context['box_introduction'] = "Vous pouvez saisir ici des opérations de trésorerie.<br><b>Vous devez avoir enregistré au moins un compte bancaire avant de pouvoir ajouter des opérations !</b>"
         return context
@@ -121,33 +121,53 @@ class Page(crud.Page):
         return reverse_lazy(url, kwargs={'categorie': self.Get_categorie()})
 
     def form_valid(self, form):
-        # Récupération de la ventilation
         ventilations = json.loads(form.cleaned_data.get("ventilation", "[]"))
 
-        # Vérifie que la ventilation est égale au montant du règlement
-        montant_ventilation = sum([decimal.Decimal(ventilation["montant"]) for ventilation in ventilations])
-        if montant_ventilation != form.cleaned_data["montant"]:
-            messages.add_message(self.request, messages.ERROR, "La ventilation ne correspond pas au montant de l'opération")
-            return self.render_to_response(self.get_context_data(form=form))
+        # Si aucune ventilation, créer une ventilation unique
+        if not ventilations:
+            categorie_rapide = form.cleaned_data.get("categorie_rapide")
+            montant = form.cleaned_data.get("montant")
+            analytique_defaut = 1
+            ventilations = [{
+                "idventilation": None,
+                "date_budget": str(datetime.date.today()),
+                "analytique": analytique_defaut,
+                "categorie": categorie_rapide.pk if categorie_rapide else None,
+                "montant": str(montant),
+                "libelle": ""
+            }]
+            form.cleaned_data["ventilation"] = json.dumps(ventilations)
 
-        # Sauvegarde
+        # Vérifie que la ventilation correspond au montant
+        montant_ventilation = sum([decimal.Decimal(v["montant"]) for v in ventilations])
+        if montant_ventilation != decimal.Decimal(form.cleaned_data["montant"]):
+            messages.error(self.request, "La ventilation ne correspond pas au montant de l'opération")
+            return self.form_invalid(form)  # <- Important : retourne un HttpResponse
+
+        # Sauvegarde de l'objet
         self.object = form.save()
 
-        # Récupération des ventilations existantes
-        ventilations_existantes = list(ComptaVentilation.objects.filter(operation=self.object))
-
         # Sauvegarde des ventilations
-        for ventilation in ventilations:
-            idventilation = ventilation["idventilation"] if ventilation["idventilation"] else None
-            ComptaVentilation.objects.update_or_create(pk=idventilation, defaults={"operation": self.object,
-                "date_budget": utils_dates.ConvertDateENGtoDate(ventilation["date_budget"]), "analytique_id": ventilation["analytique"],
-                "categorie_id": ventilation["categorie"], "montant": decimal.Decimal(ventilation["montant"])})
+        ventilations_existantes = list(ComptaVentilation.objects.filter(operation=self.object))
+        for v in ventilations:
+            idventilation = v["idventilation"] if v["idventilation"] else None
+            ComptaVentilation.objects.update_or_create(
+                pk=idventilation,
+                defaults={
+                    "operation": self.object,
+                    "date_budget": utils_dates.ConvertDateENGtoDate(v["date_budget"]),
+                    "analytique_id": v["analytique"],
+                    "categorie_id": v["categorie"],
+                    "montant": decimal.Decimal(v["montant"]),
+                }
+            )
 
         # Suppression des ventilations supprimées
-        for ventilation in ventilations_existantes:
-            if ventilation.pk not in [int(v["idventilation"]) for v in ventilations if v["idventilation"]]:
-                ventilation.delete()
+        for v in ventilations_existantes:
+            if v.pk not in [int(vv["idventilation"]) for vv in ventilations if vv["idventilation"]]:
+                v.delete()
 
+        # Retourne toujours HttpResponse
         return super().form_valid(form)
 
 
@@ -180,14 +200,13 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idoperation", "type", "date", "libelle", "mode", "releve", "num_piece", "debit", "credit", "montant"]
-        tiers = columns.TextColumn("Tiers", sources=["tiers__nom"])
         debit = columns.TextColumn("Débit", sources=["montant"], processor="Get_montant_debit")
         credit = columns.TextColumn("Crédit", sources=["montant"], processor="Get_montant_credit")
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idoperation", "date", "libelle", "tiers", "mode", "num_piece", "releve", "debit", "credit", "actions"]
+            columns = ["date", "num_piece", "libelle", "mode", "debit", "credit", "actions"]
             ordering = ["date"]
             processors = {
                 "date": helpers.format_date('%d/%m/%Y'),

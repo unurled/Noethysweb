@@ -49,8 +49,8 @@ class Formulaire(FormulaireBase, ModelForm):
                 PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
             ),
             Fieldset("Options",
-                Field("releve_debit"),
-                Field("releve_credit"),
+            #     Field("releve_debit"),
+            #     Field("releve_credit"),
                 Field("observations"),
             ),
         )

@@ -19,7 +19,12 @@ from comptabilite.widgets import Ventilation_operation
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    ventilation = forms.CharField(label="Ventilation", required=True, widget=Ventilation_operation(attrs={}))
+    ventilation = forms.CharField(label="        ", required=False, widget=Ventilation_operation(attrs={}))
+    categorie_rapide = forms.ModelChoiceField(
+        queryset=ComptaCategorie.objects.none(),
+        required=False,
+        label="Catégorie"
+    )
 
     class Meta:
         model = ComptaOperation
@@ -62,6 +67,10 @@ class Formulaire(FormulaireBase, ModelForm):
         ventilations = ComptaVentilation.objects.select_related("analytique", "categorie").filter(operation=self.instance if self.instance else 0)
         self.fields["ventilation"].initial = json.dumps([{"idventilation": v.pk, "date_budget": str(v.date_budget), "analytique": v.analytique_id, "categorie": v.categorie_id, "montant": str(v.montant)} for v in ventilations])
 
+        self.fields["categorie_rapide"].queryset = ComptaCategorie.objects.filter(
+            Q(type=type) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+        ).order_by("nom")
+
         # Affichage
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
@@ -69,25 +78,40 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden("type", value=type),
             Fieldset("Généralités",
                 Field("date"),
-                Field("libelle"),
-                Field("tiers"),
-                Field("mode"),
                 Field("num_piece"),
+                Field("libelle"),
+                # Field("tiers"),
+                Field("mode"),
+
                 PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
             ),
-            Fieldset("Ventilation",
+            Fieldset("Ventilation unique",
+                     Field("categorie_rapide"),
+            ),
+            Fieldset("Ventilation multiple",
                 Field("ventilation"),
             ),
-            Fieldset("Options",
-                Field("releve"),
-                Field("ref_piece"),
-                Field("observations"),
-            ),
+            # Fieldset("Options",
+            #     Field("releve"),
+            #     Field("ref_piece"),
+            #     Field("observations"),
+            # ),
         )
 
     def clean(self):
-        if not self.cleaned_data["montant"]:
+        montant = self.cleaned_data.get("montant")
+        if not montant:
             self.add_error("montant", "Vous devez saisir un montant.")
-            return
+
+        ventilation_data = self.cleaned_data.get("ventilation")
+        categorie_rapide = self.cleaned_data.get("categorie_rapide")
+
+        # Vérification : soit ventilation complète, soit catégorie rapide + montant
+        if not ventilation_data and not categorie_rapide:
+            self.add_error(None, "Vous devez saisir une ventilation complète ou choisir une catégorie rapide.")
+
+        # Si catégorie rapide sélectionnée mais pas de montant, erreur
+        if categorie_rapide and not montant:
+            self.add_error(None, "Vous devez saisir un montant pour la catégorie rapide.")
 
         return self.cleaned_data

@@ -4,8 +4,8 @@
 <table class="table table-bordered">
     <thead>
         <tr class="text-center">
-            <th>Date budget</th>
-            <th>Analytique</th>
+<!--            <th>Date budget</th>-->
+<!--            <th>Analytique</th>-->
             <th>Catégorie</th>
             <th>Montant</th>
             <th style="width: 90px;">Actions</th>
@@ -51,8 +51,8 @@
         $.each(valeurs, function (index, dict_ventilation) {
             var colonnes = [];
             colonnes.push("<input name='ventilation' value='" + JSON.stringify(dict_ventilation) + "' hidden>");
-            colonnes.push("<td>" + dict_ventilation["date_budget"].split('-').reverse().join('/') + "</td>");
-            colonnes.push("<td>" + dict_analytiques[dict_ventilation["analytique"]] + "</td>");
+<!--            colonnes.push("<td>" + dict_ventilation["date_budget"].split('-').reverse().join('/') + "</td>");-->
+<!--            colonnes.push("<td>" + dict_analytiques[dict_ventilation["analytique"]] + "</td>");-->
             colonnes.push("<td>" + dict_categories[dict_ventilation["categorie"]] + "</td>");
             colonnes.push("<td>" + parseFloat(dict_ventilation["montant"]).toFixed(2) + "</td>");
             html += "<tr class='text-center'>" + colonnes.join() + "<td>";
