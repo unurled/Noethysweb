@@ -111,8 +111,10 @@ class Questionnaires():
 
     def GetQuestions(self, categorie="individu", avec_filtre=True):
         """ Type = None (tout) ou 'individu' ou 'famille' """
+        condition = Q(structure__visible=True)
+
         if categorie:
-            condition = Q(categorie=categorie)
+            condition &= Q(categorie=categorie)
         else:
             condition = Q()
         liste_questions = QuestionnaireQuestion.objects.filter(condition).order_by("ordre")
