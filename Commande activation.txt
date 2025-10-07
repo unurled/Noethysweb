@@ -7,3 +7,6 @@ python manage.py runserver
 
 .\NOETHYS\Scripts\deactivate.bat
 systemctl reload noethysweb.service
+
+
+ctrl + shift + /

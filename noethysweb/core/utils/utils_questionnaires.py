@@ -131,11 +131,13 @@ class Questionnaires():
             pass
         return liste_resultats
 
-    def GetReponses(self, categorie="individu", filtre=None):
+    def GetReponses(self, categorie="individu", filtre=None, structure=None):
         """ Récupération des réponses des questionnaires """
         # Filtre sur les réponses
         filtres_reponses = Q(question__categorie=categorie) & Q(question__structure__visible=True)
 
+        if structure:
+            filtres_reponses &= Q(question__structure__in=structure)
 
         if filtre:
             filtres_reponses &= filtre
@@ -172,16 +174,12 @@ class ChampsEtReponses():
     def __init__(self, categorie="individu", filtre_reponses=None, structure=None):
         questionnaires = Questionnaires()
         self.listeQuestions = questionnaires.GetQuestions(categorie=categorie, structure=structure)
-        self.dictReponses = questionnaires.GetReponses(categorie=categorie, filtre=filtre_reponses)
+        self.dictReponses = questionnaires.GetReponses(categorie=categorie, filtre=filtre_reponses, structure=structure)
 
     def GetDonnees(self, ID, formatStr=True):
         listeDonnees = []
         for dictQuestion in self.listeQuestions:
-            reponse = GetReponse(self.dictReponses, dictQuestion["IDquestion"], ID)
-
-            # Vérification si la réponse est vide ou null
-            if not reponse:
-                continue  # Si la réponse est vide ou None, passer à la prochaine question
+            reponse = self.dictReponses.get(dictQuestion["IDquestion"], {}).get(ID, "")
 
             if formatStr:
                 reponse = FormateStr(reponse)
