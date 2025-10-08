@@ -26,6 +26,11 @@ class Formulaire(FormulaireBase, ModelForm):
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 1}), required=False)
     date_differe = forms.DateField(label="Encaissement différé", required=False, widget=DatePickerWidget())
     ventilation = forms.CharField(label="Ventilation", widget=Saisie_ventilation(), required=False)
+    compte = forms.ModelChoiceFieldCompte(
+        queryset=CompteBancaire.objects.all(),
+        required=True,
+        label="Compte bancaire"
+    )
 
     class Meta:
         model = Reglement
@@ -41,6 +46,8 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        self.fields['compte'].queryset = CompteBancaire.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).order_by("nom")
 
         self.fields['modelimp'].queryset = ModeleImpression.objects.filter(categorie='reglement')
         if self.fields['modelimp'].queryset.exists():
@@ -104,6 +111,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field('emetteur'),
                 Field('numero_piece'),
                 PrependedText('montant', utils_preferences.Get_symbole_monnaie()),
+                Field('compte')
             ),
             Fieldset('Ventilation',
                      Field('ventilation'),

@@ -80,7 +80,7 @@ class Page(crud.Page):
             context["box_titre"] += " au crédit"
         context["categorie"] = self.Get_categorie()
         context['label_categorie'] = "Compte"
-        context['liste_categories'] = [(item.pk, item.nom) for item in CompteBancaire.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).order_by("nom")]
+        context['liste_categories'] = [(item.pk, f"{item.nom} ({item.structure.nom if item.structure else 'Sans structure'})") for item in CompteBancaire.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).order_by("nom")]
         if context['liste_categories']:
             context['boutons_liste'] = [
                 {"label": "Ajouter une dépense", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter_debit, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},

@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat, Activite
+from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat, Activite, ComptaOperation, ComptaVentilation
 from core.utils import utils_dates, utils_texte
 from facturation.utils import utils_factures
 from fiche_famille.forms.famille_reglements import Formulaire
@@ -253,9 +253,37 @@ class ClasseCommune(Page):
         # Recalcule le solde des factures associées
         utils_factures.Maj_solde_actuel(liste_idprestation=liste_ID_prestations + liste_IDtraitees)
 
+        # --- Ajout de l'enregistrement comptable --- 
+        compte_form = form.cleaned_data["compte"]
+        if not compte_form:
+            compte_form = CompteBancaire.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).first()
+
+        # Met à jour ou crée l'opération comptable liée à ce règlement
+        compta_op, created = ComptaOperation.objects.update_or_create(
+            num_piece=str(reglement.pk),  # critère unique : 1 opération par règlement
+            defaults={
+                "type": "credit",  # ou "debit" selon ton cas
+                "date": reglement.date,
+                "libelle": f"Règlement famille {reglement.famille}",
+                "mode": reglement.mode,
+                "compte": compte_form,
+                "montant": reglement.montant,
+            }
+        )
+
+        # --- Crée ou met à jour les ventilations comptables ---
+        for item in liste_ventilations:
+            prestation = Prestation.objects.get(pk=item["idprestation"])
+            ComptaVentilation.objects.update_or_create(
+                operation=compta_op,
+                defaults={
+                    "categorie_id": 1,  # à adapter selon ta DB
+                    "analytique_id": 1,  # idem
+                    "montant": reglement.montant,
+                    "date_budget": reglement.date,
+                }
+            )
         return super().form_valid(form)
-
-
 
 class Ajouter(ClasseCommune, crud.Ajouter):
     form_class = Formulaire
