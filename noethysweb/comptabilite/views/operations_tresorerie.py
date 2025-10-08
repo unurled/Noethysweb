@@ -395,9 +395,7 @@ class Liste(Page, crud.Liste):
             solde_jour=Sum(Case(When(comptaoperation__type="credit", comptaoperation__date__lte=datetime.date.today(), then=F("comptaoperation__montant")), output_field=DecimalField(), default=0)) - Sum(Case(When(comptaoperation__type="debit", comptaoperation__date__lte=datetime.date.today(), then=F("comptaoperation__montant")), output_field=DecimalField(), default=0)),
         )
 
-        context['box_conclusion'] = "<center>Solde du jour : <b>%s</b> &nbsp; &nbsp; Solde pointé : <b>%s</b> &nbsp; &nbsp; Solde final : <b>%s</b></center>" % (
-            utils_texte.Formate_montant(stats["solde_jour"]),
-            utils_texte.Formate_montant(stats["solde_pointe"]),
+        context['box_conclusion'] = "<center> Solde : <b>%s</b></center>" % (
             utils_texte.Formate_montant(stats["solde_final"])
         )
         return context

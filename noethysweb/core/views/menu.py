@@ -51,17 +51,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_modeles.Add(code="modeles_prelevements_liste", titre="Modèles de prélèvements", icone="file-text-o")
     menu_modeles.Add(code="modeles_aides_liste", titre="Modèles d'aides", icone="file-text-o")
 
-    # Comptabilité
-    menu_comptabilite = menu_parametrage.Add(titre="Comptabilité")
-    menu_comptabilite.Add(code="comptes_bancaires_liste", titre="Comptes bancaires", icone="file-text-o")
-    menu_comptabilite.Add(code="modes_reglements_liste", titre="Modes de règlements", icone="file-text-o")
-    menu_comptabilite.Add(code="emetteurs_liste", titre="Emetteurs de règlements", icone="file-text-o")
-    menu_comptabilite.Add(code="postes_analytiques_liste", titre="Postes analytiques", icone="file-text-o")
-    menu_comptabilite.Add(code="comptes_comptables_liste", titre="Comptes comptables", icone="file-text-o")
-    menu_comptabilite.Add(code="categories_comptables_liste", titre="Catégories comptables", icone="file-text-o")
-    menu_comptabilite.Add(code="tiers_liste", titre="Tiers", icone="file-text-o")
-    menu_comptabilite.Add(code="budgets_liste", titre="Budgets", icone="file-text-o")
-    menu_comptabilite.Add(code="releves_bancaires_liste", titre="Relevés bancaires", icone="file-text-o")
+
 
     # Renseignements
     menu_renseignements = menu_parametrage.Add(titre="Renseignements")
@@ -470,11 +460,24 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite_analyse = menu_comptabilite.Add(titre="Analyse")
     menu_comptabilite_analyse.Add(code="suivi_tresorerie", titre="Suivi de la trésorerie", icone="file-text-o")
     menu_comptabilite_analyse.Add(code="suivi_budget", titre="Suivi du budget", icone="file-text-o")
+    menu_comptabilite_analyse.Add(code="suivi_compta", titre="Bilan financier", icone="file-text-o")
+
 
     # Outils
     menu_comptabilite_outils = menu_comptabilite.Add(titre="Outils")
     menu_comptabilite_outils.Add(code="rapprochements_liste", titre="Rapprochement bancaire", icone="file-text-o")
 
+    # Paramétrage
+    menu_comptabilite_parametrage = menu_comptabilite.Add(titre="Paramétrage")
+    menu_comptabilite_parametrage.Add(code="comptes_bancaires_liste", titre="Comptes bancaires", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="modes_reglements_liste", titre="Modes de règlements", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="emetteurs_liste", titre="Emetteurs de règlements", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="postes_analytiques_liste", titre="Postes analytiques", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="comptes_comptables_liste", titre="Comptes comptables", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="categories_comptables_liste", titre="Catégories comptables", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="tiers_liste", titre="Tiers", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="budgets_liste", titre="Budgets", icone="file-text-o")
+    menu_comptabilite_parametrage.Add(code="releves_bancaires_liste", titre="Relevés bancaires", icone="file-text-o")
 
     # ------------------------------------ Collaborateurs ------------------------------------
     menu_collaborateurs = menu.Add(code="collaborateurs_toc", titre="Collaborateurs", icone="users")

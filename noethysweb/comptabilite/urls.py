@@ -7,7 +7,7 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from comptabilite.views import operations_tresorerie, operations_budgetaires, liste_comptes, liste_virements, suivi_budget, suivi_tresorerie, \
-                                rapprochements, rapprochements_selection
+                                rapprochements, rapprochements_selection, suivi_compta
 
 
 urlpatterns = [
@@ -42,6 +42,7 @@ urlpatterns = [
 
     # Analyse
     path('comptabilite/suivi_budget', suivi_budget.View.as_view(), name='suivi_budget'),
+    path('comptabilite/suivi_compta', suivi_compta.View.as_view(), name='suivi_compta'),
     path('comptabilite/suivi_tresorerie', suivi_tresorerie.View.as_view(), name='suivi_tresorerie'),
     path('comptabilite/suivi_tresorerie/<int:categorie>', suivi_tresorerie.View.as_view(), name='suivi_tresorerie'),
 
