@@ -9,7 +9,7 @@ from django.forms import ModelForm
 from django.db.models import Q
 from core.forms.base import FormulaireBase
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Fieldset
+from crispy_forms.layout import Layout, Hidden, Fieldset, Div
 from crispy_forms.bootstrap import Field, PrependedText
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
@@ -17,6 +17,64 @@ from core.models import ComptaOperation, ComptaTiers, ComptaVentilation, ComptaA
 from core.widgets import DatePickerWidget, Select_avec_commandes_advanced
 from comptabilite.widgets import Ventilation_operation
 
+
+from django.forms.models import inlineformset_factory, BaseInlineFormSet
+from core.forms.select2 import Select2MultipleWidget
+from core.forms.base import FormulaireBase
+from core.utils.utils_commandes import Commandes
+from core.utils import utils_preferences
+from core.models import ComptaBudget, ComptaAnalytique, ComptaCategorieBudget, ComptaCategorie
+from core.widgets import DatePickerWidget, Formset
+
+class CategorieForm(FormulaireBase, ModelForm):
+    class Meta:
+        model = ComptaOperation
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        self.types = kwargs.pop("type", None)
+        super().__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+
+        # Catégories
+        condition_structure =Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        condition_type = Q(type=self.types) if self.types else Q()
+        self.fields["categorie"].queryset = ComptaCategorie.objects.filter(condition_type & condition_structure).order_by("nom")
+        self.fields["categorie"].label_from_instance = self.label_from_instance
+
+        self.helper.layout = Layout(
+            Field("categorie"),
+            PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
+        )
+
+    @staticmethod
+    def label_from_instance(instance):
+        return "%s" % (instance.nom)
+
+    def clean(self):
+        return self.cleaned_data
+
+
+class BaseCategorieFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super(BaseCategorieFormSet, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        for form in self.forms:
+            if not self._should_delete_form(form):
+                # Vérification de la validité de la ligne
+                if not form.is_valid() or len(form.cleaned_data) == 0:
+                    for field, erreur in form.errors.as_data().items():
+                        message = erreur[0].message
+                        form.add_error(field, message)
+                        return
+
+
+FORMSET_CATEGORIES = inlineformset_factory(ComptaOperation, ComptaVentilation, form=CategorieForm, fk_name="operation", formset=BaseCategorieFormSet,
+                                            fields=["categorie", "montant"], extra=1, min_num=0,
+                                            can_delete=True, validate_max=True, can_order=False)
 
 class Formulaire(FormulaireBase, ModelForm):
     ventilation = forms.CharField(label="        ", required=False, widget=Ventilation_operation(attrs={}))
@@ -37,6 +95,7 @@ class Formulaire(FormulaireBase, ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.formset_categories = kwargs.pop("formset_categories", None)
         idcompte = kwargs.pop("categorie")
         type = kwargs.pop("type")
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -85,11 +144,11 @@ class Formulaire(FormulaireBase, ModelForm):
 
                 PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
             ),
-            Fieldset("Ventilation unique",
-                     Field("categorie_rapide"),
-            ),
-            Fieldset("Ventilation multiple",
-                Field("ventilation"),
+            Fieldset("Ventilation",
+                Div(
+                    Formset("formset_categories"),
+                    style="margin-bottom:20px;"
+                ),
             ),
             # Fieldset("Options",
             #     Field("releve"),
@@ -99,19 +158,22 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
     def clean(self):
-        montant = self.cleaned_data.get("montant")
+        cleaned_data = super().clean()
+        montant = cleaned_data.get("montant")
+
+        # --- Vérifie que le montant est renseigné ---
         if not montant:
             self.add_error("montant", "Vous devez saisir un montant.")
+            return cleaned_data  # inutile de continuer si pas de montant
 
-        ventilation_data = self.cleaned_data.get("ventilation")
-        categorie_rapide = self.cleaned_data.get("categorie_rapide")
+            # Formset invalide
+            if not formset.is_valid():
+                raise forms.ValidationError("Certaines lignes du formset sont invalides.")
 
-        # Vérification : soit ventilation complète, soit catégorie rapide + montant
-        if not ventilation_data and not categorie_rapide:
-            self.add_error(None, "Vous devez saisir une ventilation complète ou choisir une catégorie rapide.")
-
-        # Si catégorie rapide sélectionnée mais pas de montant, erreur
-        if categorie_rapide and not montant:
-            self.add_error(None, "Vous devez saisir un montant pour la catégorie rapide.")
-
-        return self.cleaned_data
+            # Récupère les montants des lignes valides
+            for f in formset.forms:
+                data = f.cleaned_data
+                if data and not data.get("DELETE", False):
+                    v_montant = data.get("montant") or 0
+                    ventilations.append(v_montant)
+        return cleaned_data

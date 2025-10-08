@@ -13,10 +13,18 @@ from django.template.context_processors import csrf
 from crispy_forms.utils import render_crispy_form
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import ComptaOperation, CompteBancaire, ComptaVentilation
+from core.models import ComptaOperation, CompteBancaire, ComptaVentilation, ComptaCategorie
 from core.utils import utils_dates, utils_parametres, utils_texte
-from comptabilite.forms.operations_tresorerie import Formulaire
+from comptabilite.forms.operations_tresorerie import Formulaire, FORMSET_CATEGORIES
 from comptabilite.forms.ventilation_tresorerie import Formulaire as Formulaire_ventilation
+from django.forms.models import inlineformset_factory, BaseInlineFormSet
+from core.forms.base import FormulaireBase
+from django.forms import ModelForm
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Hidden, Fieldset, Div
+from crispy_forms.bootstrap import Field, PrependedText
+from core.utils import utils_preferences
+
 
 
 def Get_form_ventilation(request):
@@ -59,6 +67,58 @@ def Get_form_ventilation(request):
     return JsonResponse({"valeur": dict_retour, "index": form.cleaned_data["index"]})
 
 
+
+
+class CategorieForm(FormulaireBase, ModelForm):
+    class Meta:
+        model = ComptaOperation
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        self.types = kwargs.pop("type", None)
+        super().__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+
+        # Catégories
+        condition_structure =Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+        condition_type = Q(type=self.types) if self.types else Q()
+        self.fields["categorie"].queryset = ComptaCategorie.objects.filter(condition_type & condition_structure).order_by("nom")
+        self.fields["categorie"].label_from_instance = self.label_from_instance
+
+        self.helper.layout = Layout(
+            Field("categorie"),
+            PrependedText("montant", utils_preferences.Get_symbole_monnaie()),
+        )
+
+    @staticmethod
+    def label_from_instance(instance):
+        return "%s" % (instance.nom)
+
+    def clean(self):
+        return self.cleaned_data
+
+
+class BaseCategorieFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super(BaseCategorieFormSet, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        for form in self.forms:
+            if not self._should_delete_form(form):
+                # Vérification de la validité de la ligne
+                if not form.is_valid() or len(form.cleaned_data) == 0:
+                    for field, erreur in form.errors.as_data().items():
+                        message = erreur[0].message
+                        form.add_error(field, message)
+                        return
+
+
+FORMSET_CATEGORIES = inlineformset_factory(ComptaOperation, ComptaVentilation, form=CategorieForm, fk_name="operation", formset=BaseCategorieFormSet,
+                                            fields=["categorie", "montant"], extra=1, min_num=0,
+                                            can_delete=True, validate_max=True, can_order=False)
+
 class Page(crud.Page):
     model = ComptaOperation
     url_liste = "operations_tresorerie_liste"
@@ -74,13 +134,65 @@ class Page(crud.Page):
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """
         context = super(Page, self).get_context_data(**kwargs)
+
+        # Ajuste le titre selon le type
         if getattr(self, "type", None) == "debit":
             context["box_titre"] += " au débit"
-        if getattr(self, "type", None) == "credit":
+        elif getattr(self, "type", None) == "credit":
             context["box_titre"] += " au crédit"
+
+        # Catégorie et liste des comptes bancaires
         context["categorie"] = self.Get_categorie()
         context['label_categorie'] = "Compte"
-        context['liste_categories'] = [(item.pk, f"{item.nom} ({item.structure.nom if item.structure else 'Sans structure'})") for item in CompteBancaire.objects.filter(Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)).order_by("nom")]
+        context['liste_categories'] = [
+            (item.pk, f"{item.nom} ({item.structure.nom if item.structure else 'Sans structure'})")
+            for item in CompteBancaire.objects.filter(
+                Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
+            ).order_by("nom")
+        ]
+
+        instance = getattr(self, 'object', None)
+
+        # --- Récupération des ventilations existantes ---
+        ventilations = ComptaVentilation.objects.filter(
+            operation=instance) if instance else ComptaVentilation.objects.none()
+        extra_lines = 0 if ventilations.exists() else 1
+
+        # --- Création dynamique du formset ---
+        FORMSET_CATEGORIES_DYN = inlineformset_factory(
+            ComptaOperation,
+            ComptaVentilation,
+            form=CategorieForm,
+            fk_name="operation",
+            formset=BaseCategorieFormSet,
+            fields=["categorie", "montant"],
+            extra=extra_lines,
+            min_num=0,
+            can_delete=True,
+            validate_max=True,
+            can_order=False,
+        )
+
+        # Détermination du type à passer au formulaire
+        type_for_form = getattr(instance, "type", None) or getattr(self, "type", None)
+
+        if self.request.method == "POST":
+            formset_categories = FORMSET_CATEGORIES_DYN(
+                self.request.POST,
+                instance=instance,
+                form_kwargs={"request": self.request, "type": type_for_form}
+            )
+        else:
+            # Préremplissage des ventilations
+            initial_data = [{"categorie": vent.categorie, "montant": vent.montant} for vent in ventilations]
+            formset_categories = FORMSET_CATEGORIES_DYN(
+                instance=instance,
+                initial=initial_data,
+                form_kwargs={"request": self.request, "type": type_for_form}
+            )
+
+        context["formset_categories"] = formset_categories
+
         if context['liste_categories']:
             context['boutons_liste'] = [
                 {"label": "Ajouter une dépense", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter_debit, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
@@ -121,54 +233,146 @@ class Page(crud.Page):
         return reverse_lazy(url, kwargs={'categorie': self.Get_categorie()})
 
     def form_valid(self, form):
-        ventilations = json.loads(form.cleaned_data.get("ventilation", "[]"))
+        from decimal import Decimal
+        import datetime
+        from core.utils import utils_dates
 
-        # Si aucune ventilation, créer une ventilation unique
-        if not ventilations:
-            categorie_rapide = form.cleaned_data.get("categorie_rapide")
-            montant = form.cleaned_data.get("montant")
-            analytique_defaut = 1
-            ventilations = [{
-                "idventilation": None,
-                "date_budget": str(datetime.date.today()),
-                "analytique": analytique_defaut,
-                "categorie": categorie_rapide.pk if categorie_rapide else None,
-                "montant": str(montant),
-                "libelle": ""
-            }]
-            form.cleaned_data["ventilation"] = json.dumps(ventilations)
+        # --- Création du formset lié à l'opération (instance existante ou nouvelle) ---
+        formset_categories = FORMSET_CATEGORIES(
+            self.request.POST or None,
+            instance=self.object,
+            form_kwargs={
+                "request": self.request,
+                "type": getattr(self.object, "type", None)
+            }
+        )
+        form.formset_categories = formset_categories
 
-        # Vérifie que la ventilation correspond au montant
-        montant_ventilation = sum([decimal.Decimal(v["montant"]) for v in ventilations])
-        if montant_ventilation != decimal.Decimal(form.cleaned_data["montant"]):
-            messages.error(self.request, "La ventilation ne correspond pas au montant de l'opération")
-            return self.form_invalid(form)  # <- Important : retourne un HttpResponse
-
-        # Sauvegarde de l'objet
-        self.object = form.save()
-
-        # Sauvegarde des ventilations
-        ventilations_existantes = list(ComptaVentilation.objects.filter(operation=self.object))
-        for v in ventilations:
-            idventilation = v["idventilation"] if v["idventilation"] else None
-            ComptaVentilation.objects.update_or_create(
-                pk=idventilation,
-                defaults={
-                    "operation": self.object,
-                    "date_budget": utils_dates.ConvertDateENGtoDate(v["date_budget"]),
-                    "analytique_id": v["analytique"],
-                    "categorie_id": v["categorie"],
-                    "montant": decimal.Decimal(v["montant"]),
-                }
+        # --- Validation du formulaire et du formset ---
+        if not (form.is_valid() and formset_categories.is_valid()):
+            return self.render_to_response(
+                self.get_context_data(form=form, formset_categories=formset_categories)
             )
 
-        # Suppression des ventilations supprimées
-        for v in ventilations_existantes:
-            if v.pk not in [int(vv["idventilation"]) for vv in ventilations if vv["idventilation"]]:
-                v.delete()
+        # --- Extraction et préparation des données du formset ---
+        ventilations_data = []
+        for f in formset_categories.forms:
+            data = f.cleaned_data
+            if data and not data.get("DELETE", False):
+                ventilations_data.append({
+                    "categorie_id": data.get("categorie").pk if data.get("categorie") else None,
+                    "montant": Decimal(data.get("montant") or 0),
+                    "date_budget": str(datetime.date.today()),
+                    "analytique": 1,
+                    "libelle": ""
+                })
 
-        # Retourne toujours HttpResponse
+        # --- Vérification des montants ---
+        total_montant = form.cleaned_data.get("montant") or Decimal(0)
+        montant_ventilation = sum([v["montant"] for v in ventilations_data])
+        if total_montant != montant_ventilation:
+            form.add_error(
+                None,
+                f"La somme des catégories ({montant_ventilation}) ne correspond pas au montant total ({total_montant})."
+            )
+            return self.form_invalid(form)
+
+        # --- Vérification des doublons de catégorie ---
+        categories_ids = [v["categorie_id"] for v in ventilations_data]
+        duplicates = set([x for x in categories_ids if categories_ids.count(x) > 1])
+        if duplicates:
+            noms = [str(ComptaCategorie.objects.get(pk=c).nom) for c in duplicates]
+            form.add_error(None, f"Vous ne pouvez pas saisir deux fois la même catégorie : {', '.join(noms)}.")
+            return self.form_invalid(form)
+
+        # --- Sauvegarde du formulaire principal ---
+        self.object = form.save()
+
+        # --- Récupération des ventilations existantes liées à cette opération ---
+        ventilations_existantes = {
+            v.categorie_id: v
+            for v in ComptaVentilation.objects.filter(operation=self.object)
+        }
+
+        # --- Création ou mise à jour des ventilations ---
+        categories_formset = set()
+        for v in ventilations_data:
+            categories_formset.add(v["categorie_id"])
+            if v["categorie_id"] in ventilations_existantes:
+                # Mise à jour de la ventilation existante
+                vent = ventilations_existantes[v["categorie_id"]]
+                vent.date_budget = utils_dates.ConvertDateENGtoDate(v["date_budget"])
+                vent.analytique_id = v["analytique"]
+                vent.montant = v["montant"]
+                vent.libelle = v["libelle"]
+                vent.save()
+            else:
+                # Création d'une nouvelle ventilation
+                ComptaVentilation.objects.create(
+                    operation=self.object,
+                    categorie_id=v["categorie_id"],
+                    date_budget=utils_dates.ConvertDateENGtoDate(v["date_budget"]),
+                    analytique_id=v["analytique"],
+                    montant=v["montant"],
+                    libelle=v["libelle"],
+                )
+
+        # --- Suppression des ventilations supprimées ---
+        for cat_id, vent in ventilations_existantes.items():
+            if cat_id not in categories_formset:
+                vent.delete()
+
         return super().form_valid(form)
+
+    # def form_valid(self, form):
+    #     ventilations = json.loads(form.cleaned_data.get("ventilation", "[]"))
+    #
+    #     # Si aucune ventilation, créer une ventilation unique
+    #     if not ventilations:
+    #         categorie_rapide = form.cleaned_data.get("categorie_rapide")
+    #         montant = form.cleaned_data.get("montant")
+    #         analytique_defaut = 1
+    #         ventilations = [{
+    #             "idventilation": None,
+    #             "date_budget": str(datetime.date.today()),
+    #             "analytique": analytique_defaut,
+    #             "categorie": categorie_rapide.pk if categorie_rapide else None,
+    #             "montant": str(montant),
+    #             "libelle": ""
+    #         }]
+    #         form.cleaned_data["ventilation"] = json.dumps(ventilations)
+    #
+    #     # Vérifie que la ventilation correspond au montant
+    #     montant_ventilation = sum([decimal.Decimal(v["montant"]) for v in ventilations])
+    #     if montant_ventilation != decimal.Decimal(form.cleaned_data["montant"]):
+    #         messages.error(self.request, "La ventilation ne correspond pas au montant de l'opération")
+    #         return self.form_invalid(form)  # <- Important : retourne un HttpResponse
+    #
+    #     # Sauvegarde de l'objet
+    #     self.object = form.save()
+    #
+    #     # Sauvegarde des ventilations
+    #     ventilations_existantes = list(ComptaVentilation.objects.filter(operation=self.object))
+    #     for v in ventilations:
+    #         idventilation = v["idventilation"] if v["idventilation"] else None
+    #         ComptaVentilation.objects.update_or_create(
+    #             pk=idventilation,
+    #             defaults={
+    #                 "operation": self.object,
+    #                 "date_budget": utils_dates.ConvertDateENGtoDate(v["date_budget"]),
+    #                 "analytique_id": v["analytique"],
+    #                 "categorie_id": v["categorie"],
+    #                 "montant": decimal.Decimal(v["montant"]),
+    #             }
+    #         )
+    #
+    #     # Suppression des ventilations supprimées
+    #     for v in ventilations_existantes:
+    #         if v.pk not in [int(vv["idventilation"]) for vv in ventilations if vv["idventilation"]]:
+    #             v.delete()
+    #
+    #     # Retourne toujours HttpResponse
+    #     return super().form_valid(form)
 
 
 class Liste(Page, crud.Liste):
