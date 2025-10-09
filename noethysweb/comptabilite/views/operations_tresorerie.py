@@ -324,57 +324,6 @@ class Page(crud.Page):
 
         return super().form_valid(form)
 
-    # def form_valid(self, form):
-    #     ventilations = json.loads(form.cleaned_data.get("ventilation", "[]"))
-    #
-    #     # Si aucune ventilation, créer une ventilation unique
-    #     if not ventilations:
-    #         categorie_rapide = form.cleaned_data.get("categorie_rapide")
-    #         montant = form.cleaned_data.get("montant")
-    #         analytique_defaut = 1
-    #         ventilations = [{
-    #             "idventilation": None,
-    #             "date_budget": str(datetime.date.today()),
-    #             "analytique": analytique_defaut,
-    #             "categorie": categorie_rapide.pk if categorie_rapide else None,
-    #             "montant": str(montant),
-    #             "libelle": ""
-    #         }]
-    #         form.cleaned_data["ventilation"] = json.dumps(ventilations)
-    #
-    #     # Vérifie que la ventilation correspond au montant
-    #     montant_ventilation = sum([decimal.Decimal(v["montant"]) for v in ventilations])
-    #     if montant_ventilation != decimal.Decimal(form.cleaned_data["montant"]):
-    #         messages.error(self.request, "La ventilation ne correspond pas au montant de l'opération")
-    #         return self.form_invalid(form)  # <- Important : retourne un HttpResponse
-    #
-    #     # Sauvegarde de l'objet
-    #     self.object = form.save()
-    #
-    #     # Sauvegarde des ventilations
-    #     ventilations_existantes = list(ComptaVentilation.objects.filter(operation=self.object))
-    #     for v in ventilations:
-    #         idventilation = v["idventilation"] if v["idventilation"] else None
-    #         ComptaVentilation.objects.update_or_create(
-    #             pk=idventilation,
-    #             defaults={
-    #                 "operation": self.object,
-    #                 "date_budget": utils_dates.ConvertDateENGtoDate(v["date_budget"]),
-    #                 "analytique_id": v["analytique"],
-    #                 "categorie_id": v["categorie"],
-    #                 "montant": decimal.Decimal(v["montant"]),
-    #             }
-    #         )
-    #
-    #     # Suppression des ventilations supprimées
-    #     for v in ventilations_existantes:
-    #         if v.pk not in [int(vv["idventilation"]) for vv in ventilations if vv["idventilation"]]:
-    #             v.delete()
-    #
-    #     # Retourne toujours HttpResponse
-    #     return super().form_valid(form)
-
-
 class Liste(Page, crud.Liste):
     model = ComptaOperation
     template_name = "core/crud/liste_avec_categorie.html"

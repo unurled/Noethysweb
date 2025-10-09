@@ -67,7 +67,7 @@ FORMSET_CATEGORIES = inlineformset_factory(ComptaBudget, ComptaCategorieBudget, 
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    compte = forms.ModelMultipleChoiceField(label="Comptes bancaires liés", widget=Select2MultipleWidget(), queryset=CompteBancaire.objects.all(), required=False)
+    compte = forms.ModelMultipleChoiceFieldCompte(label="Comptes bancaires liés", widget=Select2MultipleWidget(), queryset=CompteBancaire.objects.all(), required=False)
     structure = forms.ModelChoiceField(label="Structure", queryset=Structure.objects.none(), required=False, help_text="Sélectionnez une structure dans la liste proposée.")
 
     class Meta:

@@ -13,7 +13,7 @@ from crispy_forms.bootstrap import Field, PrependedText
 from core.widgets import DatePickerWidget
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
-from core.models import ComptaVirement
+from core.models import ComptaVirement, CompteBancaire
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -34,6 +34,13 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
+
+        for champ in ("compte_debit", "compte_credit"):
+            if champ in self.fields:
+                self.fields[champ].queryset = CompteBancaire.objects.all()
+                self.fields[champ].label_from_instance = lambda obj: (
+                    f"{obj.nom} ({obj.structure.nom if obj.structure else 'Aucune structure'})"
+                )
 
         # Date
         if not self.instance.pk:

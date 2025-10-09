@@ -122,6 +122,11 @@
                                     <i class="nav-icon fa fa-plus-circle"></i>
                                 </a>
                             {% endif %}
+                            {% if child.titre == "Comptabilité" %}
+                                <a href="{% url 'operations_tresorerie_liste' %}" class="add-reglement" title="Ajouter une opération">
+                                    <i class="nav-icon fa fa-plus-circle"></i>
+                                </a>
+                            {% endif %}
                         </li>
                     {% endif %}
                 {% endfor %}

@@ -14,7 +14,7 @@ from core.models import ComptaBudget, CompteBancaire
 from core.forms.base import FormulaireBase
 
 class Formulaire(FormulaireBase, forms.Form):
-    comptes = forms.ModelMultipleChoiceField(
+    comptes = forms.ModelMultipleChoiceFieldCompte(
         label="Comptes bancaires",
         queryset=CompteBancaire.objects.all(),
         widget=Select2MultipleWidget(),
