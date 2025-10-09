@@ -22,7 +22,6 @@ class Widget_budget(ModelSelect2Widget):
 
 class Formulaire(FormulaireBase, forms.Form):
     budget = forms.ModelChoiceField(label="Budget", widget=Widget_budget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=ComptaBudget.objects.none(), required=True)
-    afficher_categories_non_budgetees = forms.BooleanField(label="Inclure les catégories non budgétées", initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
@@ -35,5 +34,4 @@ class Formulaire(FormulaireBase, forms.Form):
 
         self.helper.layout = Layout(
             Field("budget"),
-            Field("afficher_categories_non_budgetees"),
         )

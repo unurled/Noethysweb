@@ -32,31 +32,33 @@ class View(CustomView, TemplateView):
         liste_lignes = self.Get_resultats(parametres=form.cleaned_data)
         context = {
             "form_parametres": form,
-            "afficher_categories_non_budgetees": form.cleaned_data["afficher_categories_non_budgetees"],
             "liste_lignes": json.dumps(liste_lignes),
         }
         return self.render_to_response(self.get_context_data(**context))
 
     def Get_resultats(self, parametres={}):
         budget = parametres["budget"]
-        afficher_categories_non_budgetees = parametres["afficher_categories_non_budgetees"]
+
+        comptes = budget.compte.all()
+        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
 
         # Importation des catégories
-        dict_categories = {categorie.pk: categorie for categorie in ComptaCategorie.objects.all()}
+        dict_categories = {categorie.pk: categorie for categorie in ComptaCategorie.objects.filter(condition_structure)}
 
         # Importation des ventilations
-        condition = Q(analytique__in=budget.analytiques.all(), date_budget__range=[budget.date_debut, budget.date_fin])
+        condition = Q(operation__compte__in=comptes)
         ventilations_tresorerie = Counter({ventilation["categorie"]: ventilation["total"] for ventilation in ComptaVentilation.objects.values("categorie").filter(condition).annotate(total=Sum("montant"))})
-        ventilations_budgetaires = Counter({ventilation["categorie"]: ventilation["total"] for ventilation in ComptaOperationBudgetaire.objects.values("categorie").filter(condition).annotate(total=Sum("montant"))})
-        dict_realise = {dict_categories[idcategorie]: montant for idcategorie, montant in dict(ventilations_tresorerie + ventilations_budgetaires).items()}
+        dict_realise = {dict_categories[idcategorie]: montant for idcategorie, montant in dict(ventilations_tresorerie).items()}
 
         # Importation des catégories budgétaires
         categories_budget = list(ComptaCategorieBudget.objects.select_related("categorie").filter(budget=budget))
         dict_budgete = {categorie_budget.categorie: categorie_budget.montant for categorie_budget in categories_budget}
 
-        # Création des lignes de catégories
-        categories = {**dict_budgete, **dict_realise}.keys() if afficher_categories_non_budgetees else dict_budgete.keys()
-        categories = sorted(categories, key=lambda x: (x.type, x.nom))
+        # Liste complète des catégories concernées (union des deux ensembles)
+        categories = sorted(
+            {**dict_budgete, **dict_realise}.keys(),
+            key=lambda x: (x.type, x.nom)
+        )
 
         # Création des lignes
         lignes = []
