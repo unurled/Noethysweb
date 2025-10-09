@@ -14,7 +14,7 @@ from core.forms.select2 import Select2MultipleWidget
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils import utils_preferences
-from core.models import ComptaBudget, ComptaAnalytique, ComptaCategorieBudget, ComptaCategorie
+from core.models import ComptaBudget, ComptaAnalytique, ComptaCategorieBudget, ComptaCategorie, CompteBancaire, Structure
 from core.widgets import DatePickerWidget, Formset
 
 
@@ -67,7 +67,8 @@ FORMSET_CATEGORIES = inlineformset_factory(ComptaBudget, ComptaCategorieBudget, 
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    analytiques = forms.ModelMultipleChoiceField(label="Postes analytiques", widget=Select2MultipleWidget(), queryset=ComptaAnalytique.objects.all(), required=True)
+    compte = forms.ModelMultipleChoiceField(label="Comptes bancaires liés", widget=Select2MultipleWidget(), queryset=CompteBancaire.objects.all(), required=False)
+    structure = forms.ModelChoiceField(label="Structure", queryset=Structure.objects.none(), required=False, help_text="Sélectionnez une structure dans la liste proposée.")
 
     class Meta:
         model = ComptaBudget
@@ -80,6 +81,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
+        self.request = kwargs.pop('request', None)
         self.helper = FormHelper()
         self.helper.form_id = "budgets_form"
         self.helper.form_method = 'post'
@@ -88,9 +90,14 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.label_class = 'col-md-2'
         self.helper.field_class = 'col-md-10'
 
-        # Analytiques
-        condition_structure = Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True)
-        self.fields["analytiques"].queryset = ComptaAnalytique.objects.filter(condition_structure).order_by("nom")
+
+        if self.request:
+            self.fields["structure"].queryset = Structure.objects.filter(
+                Q(idstructure__in=self.request.user.structures.all()) & Q(visible=True)
+            ).order_by("nom")
+
+            # Filtrage des comptes liés à la structure (ou visibles)
+            self.fields["compte"].queryset = CompteBancaire.objects.filter(structure__in=self.request.user.structures.all()).order_by("nom")
 
         # Affichage
         self.helper.layout = Layout(
@@ -98,7 +105,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Généralités",
                 Field("nom"),
                 Field("observations"),
-                Field("analytiques"),
+                Field("compte"),
             ),
             Fieldset("Période",
                 Field("date_debut"),

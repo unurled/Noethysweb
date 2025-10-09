@@ -4064,8 +4064,8 @@ class ComptaBudget(models.Model):
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin")
-    analytiques = models.ManyToManyField(ComptaAnalytique, verbose_name="Poste analytiques", related_name="postes_analytiques")
     structure = models.ForeignKey(Structure, verbose_name="Structure", on_delete=models.PROTECT, blank=True, null=True)
+    compte = models.ManyToManyField(CompteBancaire, verbose_name="Compte bancaire")
 
     class Meta:
         db_table = "compta_budgets"

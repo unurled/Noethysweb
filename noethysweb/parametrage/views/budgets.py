@@ -26,28 +26,43 @@ class Page(crud.Page):
 
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
-        if hasattr(self, "object"):
-            form_kwargs={"request": self.request}
-            context["formset_categories"] = FORMSET_CATEGORIES(self.request.POST, instance=self.object, form_kwargs={"request": self.request}) if self.request.POST else FORMSET_CATEGORIES(instance=self.object, form_kwargs={"request": self.request})
+        # Vérifier que self.object existe ET qu'il a un pk (pour modification uniquement)
+        if hasattr(self, "object") and self.object and hasattr(self.object, 'pk') and self.object.pk:
+            context["formset_categories"] = FORMSET_CATEGORIES(
+                self.request.POST if self.request.POST else None,
+                instance=self.object,
+                form_kwargs={"request": self.request}
+            )
+        else:
+            # Pour la création, pas d'instance
+            context["formset_categories"] = FORMSET_CATEGORIES(
+                self.request.POST if self.request.POST else None,
+                form_kwargs={"request": self.request}
+            )
         return context
 
     def form_valid(self, form):
-        formset_categories = FORMSET_CATEGORIES(self.request.POST, instance=self.object, form_kwargs={"request": self.request})
+        # Sauvegarder d'abord l'objet principal pour avoir un pk
+        self.object = form.save()
+
+        # Ensuite traiter le formset avec l'instance sauvegardée
+        formset_categories = FORMSET_CATEGORIES(
+            self.request.POST,
+            instance=self.object,
+            form_kwargs={"request": self.request}
+        )
+
         if not formset_categories.is_valid():
             return self.render_to_response(self.get_context_data(form=form))
 
-        # Sauvegarde
-        self.object = form.save()
-
         # Sauvegarde des catégories
-        if formset_categories.is_valid():
-            for formline in formset_categories.forms:
-                if formline.cleaned_data.get('DELETE') and form.instance.pk and formline.instance.pk:
-                    formline.instance.delete()
-                if formline.cleaned_data and not formline.cleaned_data.get('DELETE'):
-                    instance = formline.save(commit=False)
-                    instance.budget = self.object
-                    instance.save()
+        for formline in formset_categories.forms:
+            if formline.cleaned_data.get('DELETE') and formline.instance.pk:
+                formline.instance.delete()
+            elif formline.cleaned_data and not formline.cleaned_data.get('DELETE'):
+                instance = formline.save(commit=False)
+                instance.budget = self.object
+                instance.save()
 
         return super().form_valid(form)
 
