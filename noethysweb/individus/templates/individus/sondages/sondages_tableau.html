@@ -17,6 +17,11 @@
 {% endblock scripts %}
 
 {% block contenu_reponses %}
+    <div class="mb-3 text-end">
+      <a href="{{ export_csv_url }}" class="btn btn-outline-secondary">
+        <i class="fa fa-download"></i> Exporter les réponses en CSV
+      </a>
+    </div>
     {% if lignes|length > 2 %}
         <div style="overflow-x:auto; white-space: nowrap;margin-bottom: 10px;">
             <div class="spread" id="tableau"></div>

@@ -11,6 +11,10 @@ from django.utils.safestring import mark_safe
 from core.views.base import CustomView
 from core.models import Sondage, SondageRepondant, SondageQuestion, SondageReponse, SondagePage
 from portail.forms.sondage import Formulaire
+import csv
+from django.http import HttpResponse
+from django.utils.encoding import smart_str
+
 
 
 class Element():
@@ -80,6 +84,47 @@ class Tableau(Base):
     template_name = "individus/sondages/sondages_tableau.html"
     type_affichage = "tableau"
 
+    def get(self, request, *args, **kwargs):
+        # Si le paramètre ?export=csv est présent, on déclenche l’export
+        if request.GET.get("export") == "csv":
+            return self.export_csv()
+        return super().get(request, *args, **kwargs)
+
+    def export_csv(self):
+        idsondage = self.Get_idsondage()
+
+        # Création de la réponse HTTP avec BOM UTF-8 (important pour Excel)
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response['Content-Disposition'] = f'attachment; filename="sondage_{idsondage}_reponses.csv"'
+        response.write(u'\ufeff'.encode('utf8'))  # ✅ BOM UTF-8 pour Excel
+
+        writer = csv.writer(response, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        # Colonnes
+        questions = SondageQuestion.objects.filter(page__sondage_id=idsondage).order_by("page__ordre", "ordre")
+        entetes = ["Création", "Modification", "Famille", "Individu"] + [q.label for q in questions]
+        writer.writerow([smart_str(e) for e in entetes])
+
+        # Réponses
+        dict_reponses = {
+            (r.repondant_id, r.question_id): r.Get_reponse_fr()
+            for r in SondageReponse.objects.select_related("question").filter(question__page__sondage_id=idsondage)
+        }
+
+        for repondant in SondageRepondant.objects.select_related("famille", "individu").filter(sondage_id=idsondage):
+            ligne = [
+                repondant.date_creation.strftime("%d/%m/%Y %H:%M"),
+                repondant.date_modification.strftime("%d/%m/%Y %H:%M") if repondant.date_modification else "",
+                smart_str(repondant.famille.nom),
+                smart_str(repondant.individu.Get_nom() if repondant.individu else ""),
+            ]
+            for question in questions:
+                valeur = dict_reponses.get((repondant.pk, question.pk), "")
+                ligne.append(smart_str(valeur))
+            writer.writerow(ligne)
+
+        return response
+
     def get_context_data(self, **kwargs):
         context = super(Tableau, self).get_context_data(**kwargs)
 
@@ -93,7 +138,6 @@ class Tableau(Base):
         questions = SondageQuestion.objects.filter(page__sondage_id=self.Get_idsondage()).order_by("page__ordre", "ordre")
         for question in questions:
             colonnes.append({"code": "question_%d" % question.pk, "label": question.label})
-
         context["colonnes"] = colonnes
 
         # Création des lignes
@@ -110,7 +154,12 @@ class Tableau(Base):
                 ligne.append(dict_reponses.get((repondant.pk, question.pk), ""))
             lignes.append(ligne)
         context["lignes"] = mark_safe(json.dumps(lignes))
+
+        # URL d’export CSV
+        context["export_csv_url"] = self.request.path + "?export=csv"
+
         return context
+
 
 
 class Resume(Base):
