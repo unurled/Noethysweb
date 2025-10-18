@@ -30,6 +30,7 @@ class Formulaire(FormulaireBase, forms.Form):
         # Importation des renseignements en attente de validation
         renseignements = PortailRenseignement.objects.filter(categorie="individu_questionnaire", famille=rattachement.famille, individu=rattachement.individu, etat="ATTENTE", validation_auto=False).order_by("date")
         dict_renseignements = {renseignement.code: json.loads(renseignement.nouvelle_valeur) for renseignement in renseignements}
+
         # Récupération des inscriptions et des activités associées
         individu = rattachement.individu
         inscriptions = Inscription.objects.filter(individu=individu)
@@ -47,7 +48,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 questions_filter &= ~Q(activite=None)
             else:
                 # Si au moins une activité a interne=True, afficher les questions avec activite=None
-                questions_filter |= Q(activite=None)
+                questions_filter &= Q(activite=None)
 
 
         questions = QuestionnaireQuestion.objects.filter(

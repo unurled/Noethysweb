@@ -1,3 +1,6 @@
+Version 1.3.5.5.95 (18/10/2025)
+- problème affichage questionnaire
+
 Version 1.3.5.5.94 (08/10/2025)
 - création op lors d'un reglement
 - clean ajout op compta

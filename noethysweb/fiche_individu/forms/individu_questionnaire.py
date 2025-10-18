@@ -44,7 +44,7 @@ class Formulaire(FormulaireBase, forms.Form):
             else:
                 # Si certaines activités ont 'interne=True', autoriser les questions sans activité
                 condition_activite = Q(activite__in=activites)
-                condition_activite |= Q(activite__isnull=True)
+                condition_activite &= Q(activite__isnull=True)
 
         condition_structure = (
                 Q(structure__in=self.request.user.structures.all()) &
