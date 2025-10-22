@@ -500,7 +500,10 @@ class CompteBancaire(models.Model):
         verbose_name_plural = "comptes bancaires"
 
     def __str__(self):
-        return self.nom
+        structure_name = "Sans structure"
+        if self.structure:
+            structure_name = self.structure.name
+        return f"{self.nom} {structure_name}"
 
     def delete(self, *args, **kwargs):
         # Supprime l'objet

@@ -26,7 +26,7 @@ class Formulaire(FormulaireBase, ModelForm):
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 1}), required=False)
     date_differe = forms.DateField(label="Encaissement différé", required=False, widget=DatePickerWidget())
     ventilation = forms.CharField(label="Ventilation", widget=Saisie_ventilation(), required=False)
-    compte = forms.ModelChoiceFieldCompte(
+    compte = forms.ModelChoiceField(
         queryset=CompteBancaire.objects.all(),
         required=True,
         label="Compte bancaire"
