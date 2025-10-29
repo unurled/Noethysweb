@@ -1,71 +1,68 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un individu</title>
+{% extends "portail/page.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+{% block page_titre %}Ajouter un parent{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+        fieldset {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
         }
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            margin-top: 20px;
-            text-align: center; /* Centrer le contenu du formulaire */
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
+        fieldset legend {
+            font-size: 1.1em;
             font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: #fff;
+            color: #007bff;
+            width: auto;
+            padding: 0 10px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
+            margin-bottom: 10px;
         }
-        button:hover {
-            background-color: #0056b3;
+        .form-check-label {
+            font-weight: normal;
+        }
+        /* Style pour les select2 (combobox) */
+        .select2-container {
+            width: 100% !important;
+        }
+        .select2-selection {
+            min-height: 38px;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Ajouter un nouveau parent</h1>
-        <form method="post">
-            {% csrf_token %}
-            <label for="id_nom">Nom :</label>
-            {{ form.nom }}
-            <label for="id_prenom">Prénom :</label>
-            {{ form.prenom }}
-            <button type="submit">Ajouter un parent</button>
-        </form>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    {# Lien de retour vers la page des renseignements #}
+    <div class="d-print-none" style="margin-bottom: 10px;">
+        <a id="retour_renseignements" href="{% url 'portail_renseignements' %}"><i class="fa fa-arrow-circle-o-left"></i> {% blocktrans %}Revenir à la page des renseignements{% endblocktrans %}</a>
     </div>
-</body>
-</html>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% embed 'core/box.html' %}
+                {% block box_theme %}card-outline card-lightblue{% endblock %}
+                {% block box_titre %}Ajouter un nouveau parent{% endblock %}
+                {% block box_introduction %}
+                    <p>Renseignez les informations concernant le parent à ajouter à votre famille.</p>
+                    <p class="text-muted"><i class="fa fa-info-circle"></i> Les sections marquées comme "optionnel" peuvent être remplies maintenant ou plus tard dans les renseignements du parent.</p>
+                {% endblock %}
+                {% block box_contenu %}
+                    {% crispy form %}
+                {% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock scripts %}
