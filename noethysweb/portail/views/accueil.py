@@ -17,7 +17,7 @@ from individus.utils import (
     utils_pieces_manquantes,
     utils_vaccinations,
 )
-from portail.utils import utils_approbations
+from portail.utils import utils_approbations, utils_renseignements_manquants
 from portail.views.base import CustomView
 
 
@@ -38,6 +38,12 @@ class Accueil(CustomView, TemplateView):
 
         # Pièces manquantes
         context['nbre_pieces_manquantes'] = len(utils_pieces_manquantes.Get_pieces_manquantes(famille=self.request.user.famille, only_invalides=True, exclure_individus=self.request.user.famille.individus_masques.all()))
+
+        # Renseignements manquants
+        renseignements_manquants = utils_renseignements_manquants.Get_renseignements_manquants(famille=self.request.user.famille)
+        context['nbre_renseignements_manquants'] = renseignements_manquants['nbre']
+        context['premier_rattachement_manquant_id'] = renseignements_manquants['premier_rattachement_id']
+        context['page_cible_renseignements'] = renseignements_manquants['page_cible']
 
         # Messages non lus
         context['nbre_messages_non_lus'] = len(PortailMessage.objects.filter(famille=self.request.user.famille, utilisateur__isnull=False, date_lecture__isnull=True))
