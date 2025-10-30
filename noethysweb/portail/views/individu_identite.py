@@ -36,6 +36,25 @@ class Modifier(Consulter):
         context['box_introduction'] = _("Renseignez les informations concernant l'identité de l'individu et cliquez sur le bouton Enregistrer.")
         if not self.get_dict_onglet_actif().validation_auto:
             context['box_introduction'] += " " + _("Ces informations devront être validées par l'administrateur de l'application.")
+        
+        # Détection des champs manquants pour mise en évidence
+        individu = self.get_individu()
+        champs_manquants = []
+        if not individu.civilite:
+            champs_manquants.append('civilite')
+        if not individu.date_naiss:
+            champs_manquants.append('date_naiss')
+        if not individu.cp_naiss:
+            champs_manquants.append('cp_naiss')
+        if not individu.ville_naiss:
+            champs_manquants.append('ville_naiss')
+        if not individu.nom:
+            champs_manquants.append('nom')
+        if not individu.prenom:
+            champs_manquants.append('prenom')
+
+        context['champs_manquants'] = champs_manquants
+        
         return context
 
     def get_success_url(self):

@@ -37,6 +37,28 @@ class Modifier(Consulter):
         context['box_introduction'] = _("Renseignez les informations concernant les coordonnées de l'individu et cliquez sur le bouton Enregistrer.")
         if not self.get_dict_onglet_actif().validation_auto:
             context['box_introduction'] += " " + _("Ces informations devront être validées par l'administrateur de l'application.")
+        
+        # Détection des champs manquants pour mise en évidence
+        individu = self.get_individu()
+        rattachement = self.get_rattachement()
+        champs_manquants = []
+        
+        # Vérifier si c'est un parent (titulaire ou représentant)
+        if rattachement and (rattachement.titulaire or rattachement.categorie == 1):
+            if not individu.rue_resid:
+                champs_manquants.append('rue_resid')
+            if not individu.cp_resid:
+                champs_manquants.append('cp_resid')
+            if not individu.ville_resid:
+                champs_manquants.append('ville_resid')
+            if not individu.tel_mobile and not individu.tel_domicile:
+                champs_manquants.append('tel_mobile')
+                champs_manquants.append('tel_domicile')
+            if not individu.mail:
+                champs_manquants.append('mail')
+        
+        context['champs_manquants'] = champs_manquants
+        
         return context
 
     def get_success_url(self):

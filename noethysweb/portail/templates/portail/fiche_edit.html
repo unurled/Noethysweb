@@ -15,6 +15,79 @@
             {% endblock %}
         {% endembed %}
     </div>
+
+    {% if champs_manquants %}
+        <script>
+            $(document).ready(function() {
+                // Liste des champs manquants
+                var champs_manquants = [{% for champ in champs_manquants %}'{{ champ }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+                
+                // Style pour les champs manquants
+                var style_champ_manquant = {
+                    'border': '2px solid #dc3545',
+                    'border-radius': '4px',
+                    'box-shadow': '0 0 8px rgba(220, 53, 69, 0.5)'
+                };
+                
+                // Parcourir tous les champs manquants
+                champs_manquants.forEach(function(champ) {
+                    var $field = $('#id_' + champ);
+                    
+                    if ($field.length > 0) {
+                        // Appliquer le style au champ
+                        $field.css(style_champ_manquant);
+                        
+                        // Ajouter une classe pour animation
+                        $field.addClass('champ-manquant');
+                        
+                        // Retirer le style quand l'utilisateur modifie le champ
+                        $field.on('change input', function() {
+                            $(this).css({
+                                'border': '',
+                                'box-shadow': ''
+                            });
+                            $(this).removeClass('champ-manquant');
+                        });
+                    }
+                });
+                
+                // Scroller vers le premier champ manquant et le focus
+                if (champs_manquants.length > 0) {
+                    var premier_champ = $('#id_' + champs_manquants[0]);
+                    if (premier_champ.length > 0) {
+                        // Scroll animé vers le champ
+                        $('html, body').animate({
+                            scrollTop: premier_champ.offset().top - 150
+                        }, 500, function() {
+                            // Focus sur le champ après le scroll
+                            premier_champ.focus();
+                            
+                            // Animation de pulsation pour attirer l'attention
+                            premier_champ.animate({opacity: 0.5}, 200)
+                                        .animate({opacity: 1}, 200)
+                                        .animate({opacity: 0.5}, 200)
+                                        .animate({opacity: 1}, 200);
+                        });
+                    }
+                }
+            });
+        </script>
+        
+        <style>
+            @keyframes pulse-border {
+                0%, 100% {
+                    border-color: #dc3545;
+                }
+                50% {
+                    border-color: #ff6b6b;
+                }
+            }
+            
+            .champ-manquant {
+                animation: pulse-border 2s infinite;
+            }
+        </style>
+    {% endif %}
 {% endblock %}
 
 
