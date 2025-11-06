@@ -468,7 +468,7 @@ def GetMenuPrincipal(organisateur=None, user=None):
     menu_comptabilite_parametrage.Add(code="modes_reglements_liste", titre="Modes de règlements", icone="file-text-o")
     #menu_comptabilite_parametrage.Add(code="emetteurs_liste", titre="Emetteurs de règlements", icone="file-text-o")
     #menu_comptabilite_parametrage.Add(code="postes_analytiques_liste", titre="Postes analytiques", icone="file-text-o")
-    menu_comptabilite_parametrage.Add(code="comptes_comptables_liste", titre="Comptes comptables", icone="file-text-o")
+    #menu_comptabilite_parametrage.Add(code="comptes_comptables_liste", titre="Comptes comptables", icone="file-text-o")
     menu_comptabilite_parametrage.Add(code="categories_comptables_liste", titre="Catégories comptables", icone="file-text-o")
     #menu_comptabilite_parametrage.Add(code="tiers_liste", titre="Tiers", icone="file-text-o")
     menu_comptabilite_parametrage.Add(code="budgets_liste", titre="Budgets", icone="file-text-o")
