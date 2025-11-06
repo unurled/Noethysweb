@@ -36,7 +36,7 @@ class View(CustomView, crud.Modifier):
             # get traitements
             individu.traitements = Information.objects.filter(individu=individu).order_by("intitule")
             
-            individu.allergies2 = individu.allergies.all()
+            individu.allergies2 = individu.allergies.exclude(nom="RAS")
             
             individu.dispmed2 = individu.dispmed.all()
             
