@@ -1,3 +1,6 @@
+Version 1.3.5.5.98 (06/11/2025)
+- bug YT
+
 Version 1.3.5.5.97 (06/11/2025)
 - beug YT
 - Affichage compta
