@@ -314,7 +314,8 @@ CSP_SCRIPT_SRC = (
 CSP_FRAME_SRC = (
     "'self'",
     "https://www.youtube.com",
-    "https://docs.google.com"
+    "https://www.youtube-nocookie.com",
+    "https://docs.google.com",
 )
 
 CSP_FRAME_ANCESTORS = (
