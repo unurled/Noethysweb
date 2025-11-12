@@ -3,6 +3,26 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+
+    <style>
+        .info-box-content-inline {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .info-box-small-text {
+            font-size: 10px;
+            line-height: 1.1;
+            max-width: 120px;
+            display: flex;
+            align-items: flex-end;
+        }
+    </style>
+
+{% endblock styles %}
+
 
 
 {% block detail_famille %}
@@ -52,12 +72,15 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-3" title="{{ hover_message }}">
                 <div class="info-box">
                     <span class="info-box-icon bg-{% if nbre_alertes %}orange{% else %}gray-light{% endif %}"><i class="fa fa-warning"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Alertes</span>
-                        <span class="info-box-number">{{ nbre_alertes }}</span>
+                        <div class="info-box-content-inline">
+                          <span class="info-box-number">{{ nbre_alertes }}</span>
+                          <span class="info-box-small-text">Survolez pour voir les alertes</span>
+                        </div>
                     </div>
                 </div>
             </div>
